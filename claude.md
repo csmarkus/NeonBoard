@@ -43,6 +43,9 @@ src/
 - **Local Dev:** .NET Aspire orchestration
 - **Deployment:** Docker (single container with Angular + API), Dokploy
 
+### Project Files
+- Do not add properties to the project files that are already defined in Directory.Build.Props
+
 ## Domain-Driven Design (DDD) Patterns
 
 ### Aggregates
