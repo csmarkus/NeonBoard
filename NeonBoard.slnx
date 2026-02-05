@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.Props" />
+    <File Path="Directory.Packages.Props" />
+    <File Path="Dockerfile" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/NeonBoard.Api/NeonBoard.Api.csproj" />
+    <Project Path="src/NeonBoard.AppHost/NeonBoard.AppHost.csproj" />
+    <Project Path="src/NeonBoard.Application/NeonBoard.Application.csproj" Id="1094be6c-842a-48ce-afe7-0db0f247b932" />
+    <Project Path="src/NeonBoard.Domain/NeonBoard.Domain.csproj" Id="4c36b3ef-ce90-4d3c-b7f9-ca1048666a04" />
+    <Project Path="src/NeonBoard.Infrastructure/NeonBoard.Infrastructure.csproj" Id="c90cf599-f67f-41e1-ac9d-9f9120c4f649" />
+    <Project Path="src/NeonBoard.ServiceDefaults/NeonBoard.ServiceDefaults.csproj" />
+    <Project Path="src/NeonBoard.UI/NeonBoard.UI.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NeonBoard.IntegrationTests/NeonBoard.IntegrationTests.csproj" Id="3706e4f3-3307-401c-bf92-2ddc4c1b8c7b" />
+    <Project Path="tests/NeonBoard.UnitTests/NeonBoard.UnitTests.csproj" Id="801d508e-ee3c-451d-8d51-c90932524c20" />
+  </Folder>
+</Solution>

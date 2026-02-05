@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>11ab5024-60b2-4da0-ad0e-5b3b8fff1427</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NeonBoard.Api\NeonBoard.Api.csproj" />
+    <ProjectReference Include="..\NeonBoard.ServiceDefaults\NeonBoard.ServiceDefaults.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\NeonBoard.UI\NeonBoard.UI.esproj" />
+  </ItemGroup>
+
+</Project>

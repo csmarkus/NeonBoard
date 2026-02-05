@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <ItemGroup>
+    <ProjectReference Include="..\NeonBoard.Application\NeonBoard.Application.csproj" />
+    <ProjectReference Include="..\NeonBoard.Domain\NeonBoard.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
