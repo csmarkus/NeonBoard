@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NeonBoard.Application;
 using NeonBoard.Infrastructure;
 using NeonBoard.Infrastructure.Persistence;
+using Serilog;
 
 namespace NeonBoard.Api;
 
@@ -10,6 +11,23 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        // Configure Serilog
+        builder.Host.UseSerilog((context, services, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithEnvironmentName()
+            .Enrich.WithProcessId()
+            .Enrich.WithThreadId()
+            .WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
+            .WriteTo.File(
+                path: "logs/neonboard-.log",
+                rollingInterval: RollingInterval.Day,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}"));
+
         builder.AddServiceDefaults();
 
         // Add layer dependencies
@@ -42,6 +60,8 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+
+        app.UseSerilogRequestLogging();
 
         app.Run();
     }
