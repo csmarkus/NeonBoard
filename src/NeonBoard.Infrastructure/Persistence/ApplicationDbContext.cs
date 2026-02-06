@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards;
-using NeonBoard.Domain.Common;
 using NeonBoard.Domain.Projects;
 using NeonBoard.Domain.Users;
 
 namespace NeonBoard.Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext, IUnitOfWork
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -21,22 +21,5 @@ public class ApplicationDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-    }
-
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var domainEvents = ChangeTracker.Entries<Entity>()
-            .Select(e => e.Entity)
-            .SelectMany(e => e.GetDomainEvents())
-            .ToList();
-
-        var result = await base.SaveChangesAsync(cancellationToken);
-
-        foreach (var entity in ChangeTracker.Entries<Entity>().Select(e => e.Entity))
-        {
-            entity.ClearDomainEvents();
-        }
-
-        return result;
     }
 }

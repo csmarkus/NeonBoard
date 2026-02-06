@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using NeonBoard.Application;
+using NeonBoard.Infrastructure;
 using NeonBoard.Infrastructure.Persistence;
 
 namespace NeonBoard.Api;
@@ -10,9 +12,9 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
 
-        var connectionString = builder.Configuration.GetConnectionString("neonboarddb");
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        // Add layer dependencies
+        builder.Services.AddApplication();
+        builder.Services.AddInfrastructure(builder.Configuration);
 
         // Add services to the container.
         builder.Services.AddAuthorization();
