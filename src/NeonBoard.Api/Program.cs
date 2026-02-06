@@ -36,6 +36,18 @@ public class Program
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
+        // Add CORS
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            });
+        });
+
         // Add exception handling
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
@@ -65,7 +77,7 @@ public class Program
 
         app.UseExceptionHandler();
 
-        app.UseHttpsRedirection();
+        app.UseCors();
 
         app.UseAuthorization();
 

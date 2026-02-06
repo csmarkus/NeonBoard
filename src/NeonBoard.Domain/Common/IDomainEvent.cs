@@ -1,5 +1,7 @@
+using MediatR;
+
 namespace NeonBoard.Domain.Common;
 
-public interface IDomainEvent
+public interface IDomainEvent : INotification
 {
 }
