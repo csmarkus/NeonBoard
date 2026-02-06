@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using NeonBoard.Api.Endpoints;
+using NeonBoard.Api.Middleware;
 using NeonBoard.Application;
 using NeonBoard.Infrastructure;
 using NeonBoard.Infrastructure.Persistence;
@@ -34,6 +36,10 @@ public class Program
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
+        // Add exception handling
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+        builder.Services.AddProblemDetails();
+
         // Add services to the container.
         builder.Services.AddAuthorization();
 
@@ -57,11 +63,16 @@ public class Program
             app.MapOpenApi();
         }
 
+        app.UseExceptionHandler();
+
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
 
         app.UseSerilogRequestLogging();
+
+        // Map endpoints
+        app.MapProjectEndpoints();
 
         app.Run();
     }
