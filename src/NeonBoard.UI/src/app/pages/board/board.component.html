@@ -1,0 +1,119 @@
+<div class="h-full bg-void flex">
+  <!-- Sidebar -->
+  <app-sidebar [projectId]="projectId"></app-sidebar>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Header -->
+    <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <h1 class="text-[15px] font-semibold text-primary">{{ projectName }}</h1>
+          <app-badge variant="violet">Sprint 24</app-badge>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <app-input placeholder="Search tasks..." class="w-64"></app-input>
+          <app-button variant="primary" size="sm">New Task</app-button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Board toolbar -->
+    <div class="bg-void px-6 py-3 border-b border-subtle flex items-center gap-4 shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-muted">Filter:</span>
+        <button class="px-2.5 py-1 text-xs text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors">
+          All tasks
+        </button>
+        <button class="px-2.5 py-1 text-xs text-muted hover:text-secondary rounded-md transition-colors">
+          My tasks
+        </button>
+        <button class="px-2.5 py-1 text-xs text-muted hover:text-secondary rounded-md transition-colors">
+          Unassigned
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 ml-auto">
+        <span class="text-xs text-muted">{{ getTotalTaskCount() }} tasks</span>
+      </div>
+    </div>
+
+    <!-- Board columns -->
+    <main class="flex-1 p-6 overflow-x-auto">
+      <div
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        [cdkDropListData]="columns"
+        (cdkDropListDropped)="dropColumn($event)"
+        class="flex gap-6 min-w-max items-start"
+      >
+        <div cdkDropListGroup class="contents">
+          @for (column of columns; track column.id) {
+            <div cdkDrag class="flex flex-col w-72 shrink-0">
+              <!-- Column drag placeholder -->
+              <div *cdkDragPlaceholder class="w-72 h-full min-h-[200px] bg-accent/5 border-2 border-dashed border-accent/20 rounded-lg"></div>
+
+              <!-- Column header (drag handle) -->
+              <div cdkDragHandle class="flex items-center gap-2.5 mb-4 px-0.5 group">
+                <div [class]="'w-2 h-2 rounded-full ' + getAccentClass(column.accent)"></div>
+                <h2 class="text-[13px] font-medium text-primary">{{ column.title }}</h2>
+                <span class="text-xs text-muted tabular-nums">{{ tasksByStatus[column.id].length }}</span>
+                <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-muted">
+                    <circle cx="9" cy="5" r="1.5"/>
+                    <circle cx="9" cy="12" r="1.5"/>
+                    <circle cx="9" cy="19" r="1.5"/>
+                    <circle cx="15" cy="5" r="1.5"/>
+                    <circle cx="15" cy="12" r="1.5"/>
+                    <circle cx="15" cy="19" r="1.5"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Cards container (drop zone) -->
+              <div
+                cdkDropList
+                [id]="column.id"
+                [cdkDropListData]="tasksByStatus[column.id]"
+                [cdkDropListConnectedTo]="columnIds"
+                (cdkDropListDropped)="dropCard($event, column.id)"
+                class="flex flex-col gap-2 min-h-[100px] rounded-lg transition-colors"
+              >
+                @for (task of tasksByStatus[column.id]; track task.id) {
+                  <div cdkDrag [cdkDragData]="task">
+                    <app-card
+                      [title]="task.title"
+                      [description]="task.description"
+                      [status]="task.status"
+                      [tags]="task.tags"
+                      [assignee]="task.assignee"
+                      (cardClick)="selectTask(task)"
+                    ></app-card>
+                  </div>
+                }
+              </div>
+
+              <!-- Add card button -->
+              <button class="mt-2 py-2 w-full text-[13px] text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150">
+                + Add card
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Add column button -->
+        <button class="w-72 shrink-0 py-3 text-[13px] text-muted border border-dashed border-dim rounded-lg hover:border-secondary hover:text-secondary hover:bg-surface/50 transition-colors duration-150">
+          + Add column
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Task detail drawer -->
+  <app-drawer [open]="!!selectedTask" (close)="selectedTask = null">
+    @if (selectedTask) {
+      <app-task-detail [task]="selectedTask"></app-task-detail>
+    }
+  </app-drawer>
+</div>

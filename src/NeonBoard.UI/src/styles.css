@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-void text-primary font-sans antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-void;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-dim/50 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dim;
+  }
+}
+
+@layer components {
+  .status-todo {
+    @apply border-l-2 border-l-status-todo;
+  }
+
+  .status-progress {
+    @apply border-l-2 border-l-status-progress;
+  }
+
+  .status-review {
+    @apply border-l-2 border-l-status-review;
+  }
+
+  .status-done {
+    @apply border-l-2 border-l-status-done;
+  }
+}

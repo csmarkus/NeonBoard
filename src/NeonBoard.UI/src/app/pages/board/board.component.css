@@ -1,0 +1,23 @@
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Style the placeholder to show a dashed outline instead of the card content */
+.cdk-drag-placeholder {
+  background: rgba(34, 211, 238, 0.1) !important;
+  border: 2px dashed rgba(34, 211, 238, 0.3) !important;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+}
+
+.cdk-drag-placeholder * {
+  visibility: hidden;
+}
+
+.cdk-drag-placeholder app-card {
+  opacity: 0;
+}

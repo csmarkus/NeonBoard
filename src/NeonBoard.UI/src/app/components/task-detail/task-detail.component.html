@@ -1,0 +1,92 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div>
+    <div class="flex items-center gap-2 mb-3">
+      <app-badge [variant]="getStatusVariant()">{{ getStatusLabel() }}</app-badge>
+      @if (task.priority) {
+        <span [class]="getPriorityClasses()">{{ task.priority }} priority</span>
+      }
+    </div>
+    <h2 class="text-lg font-semibold text-primary">{{ task.title }}</h2>
+  </div>
+
+  <!-- Meta -->
+  <div class="flex flex-wrap gap-4 text-[13px]">
+    @if (task.assignee) {
+      <div class="flex items-center gap-2">
+        <span class="text-muted">Assignee</span>
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-full bg-surface-elevated flex items-center justify-center">
+            <span class="text-[11px] text-secondary font-medium">
+              {{ task.assignee.charAt(0).toUpperCase() }}
+            </span>
+          </div>
+          <span class="text-primary">{{ task.assignee }}</span>
+        </div>
+      </div>
+    }
+    @if (task.dueDate) {
+      <div class="flex items-center gap-2">
+        <span class="text-muted">Due</span>
+        <span class="text-primary">{{ task.dueDate }}</span>
+      </div>
+    }
+    <div class="flex items-center gap-2">
+      <span class="text-muted">Created</span>
+      <span class="text-secondary">{{ task.createdAt }}</span>
+    </div>
+  </div>
+
+  <!-- Tags -->
+  @if (task.tags.length > 0) {
+    <div class="flex flex-wrap gap-1.5">
+      @for (tag of task.tags; track tag) {
+        <span [class]="getTagClasses(tag)">{{ tag }}</span>
+      }
+    </div>
+  }
+
+  <!-- Description -->
+  @if (task.description) {
+    <div class="pt-4 border-t border-subtle">
+      <h3 class="text-[13px] font-medium text-secondary mb-2">Description</h3>
+      <p class="text-[13px] text-primary whitespace-pre-wrap leading-relaxed">
+        {{ task.description }}
+      </p>
+    </div>
+  }
+
+  <!-- Comments -->
+  @if (task.comments && task.comments.length > 0) {
+    <div class="pt-4 border-t border-subtle">
+      <h3 class="text-[13px] font-medium text-secondary mb-4">
+        Comments ({{ task.comments.length }})
+      </h3>
+      <div class="space-y-4">
+        @for (comment of task.comments; track comment.id) {
+          <div class="flex gap-3">
+            <div class="w-7 h-7 rounded-full bg-surface-elevated flex items-center justify-center shrink-0">
+              <span class="text-[11px] text-secondary font-medium">
+                {{ comment.author.charAt(0).toUpperCase() }}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[13px] font-medium text-primary">{{ comment.author }}</span>
+                <span class="text-xs text-muted">{{ comment.createdAt }}</span>
+              </div>
+              <p class="text-[13px] text-secondary">{{ comment.content }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Actions -->
+  <div class="pt-4 border-t border-subtle flex gap-3">
+    <app-button variant="primary" size="sm">Edit Task</app-button>
+    <app-button variant="secondary" size="sm">Add Comment</app-button>
+    <app-button variant="danger" size="sm" class="ml-auto">Delete</app-button>
+  </div>
+</div>

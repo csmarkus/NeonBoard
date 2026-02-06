@@ -5,8 +5,14 @@ var postgres = builder.AddPostgres("postgres")
 
 var neonboardDb = postgres.AddDatabase("neonboarddb");
 
-builder.AddProject<Projects.NeonBoard_Api>("neonboard-api")
+var api = builder.AddProject<Projects.NeonBoard_Api>("neonboard-api")
     .WithReference(neonboardDb)
     .WaitFor(postgres);
+
+builder.AddNpmApp("neonboard-ui", "../NeonBoard.UI")
+    .WithReference(api)
+    .WithHttpEndpoint(env: "PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
 builder.Build().Run();

@@ -1,0 +1,21 @@
+<!-- Backdrop -->
+<div
+  [class]="backdropClasses"
+  (click)="close.emit()"
+></div>
+
+<!-- Drawer panel -->
+<div [class]="panelClasses">
+  <!-- Close button -->
+  <button
+    (click)="close.emit()"
+    class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-muted hover:text-primary hover:bg-surface-elevated rounded-lg transition-colors"
+  >
+    <fa-icon [icon]="faTimes"></fa-icon>
+  </button>
+
+  <!-- Content -->
+  <div class="h-full overflow-y-auto p-6">
+    <ng-content></ng-content>
+  </div>
+</div>

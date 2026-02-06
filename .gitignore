@@ -348,6 +348,43 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-src/NeonBoard.UI/.vscode/
+# Angular / Node.js specific
+# Compiled output
+**/dist/
+**/tmp/
+**/out-tsc/
+**/bazel-out/
 
+# Angular cache
+**/.angular/cache
+
+# NPM logs
+npm-debug.log
+yarn-error.log
+
+# Angular testing
+**/coverage/
+testem.log
+**/typings/
+**/__screenshots__/
+
+# Vite
+**/.vite/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode (keep some files)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+
+# Serilog logs (API)
+logs/
+
+# Claude
 .claude/

@@ -1,0 +1,143 @@
+<div [class]="sidebarClasses + ' h-full'">
+  <!-- Logo -->
+  <div class="p-4 flex items-center gap-3">
+    <a routerLink="/projects" class="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0 hover:bg-accent/25 transition-colors">
+      <span class="text-accent font-semibold text-sm">N</span>
+    </a>
+    @if (!collapsed) {
+      <span class="text-[15px] font-semibold text-primary">NeonBoard</span>
+    }
+  </div>
+
+  <!-- Main nav -->
+  <nav class="px-3 py-2">
+    @if (!collapsed) {
+      <span class="px-3 text-[11px] font-medium text-muted uppercase tracking-wider">Main</span>
+    }
+    <ul class="mt-2 space-y-1">
+      <li>
+        <a
+          routerLink="/projects"
+          routerLinkActive="active"
+          #projectsLink="routerLinkActive"
+          [class]="getNavItemClasses(projectsLink.isActive)"
+        >
+          <fa-icon [icon]="faFolderOpen" class="w-[18px] text-center"></fa-icon>
+          @if (!collapsed) {
+            <span class="text-[13px]">Projects</span>
+          }
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Project nav (only show when on a project) -->
+  @if (projectId) {
+    <nav class="px-3 py-2 mt-2 flex-1">
+      @if (!collapsed) {
+        <span class="px-3 text-[11px] font-medium text-muted uppercase tracking-wider">Project</span>
+      }
+      <ul class="mt-2 space-y-1">
+        <li>
+          <a
+            [routerLink]="['/board', projectId]"
+            routerLinkActive="active"
+            #boardLink="routerLinkActive"
+            [class]="getNavItemClasses(boardLink.isActive)"
+          >
+            <fa-icon [icon]="faGripVertical" class="w-[18px] text-center"></fa-icon>
+            @if (!collapsed) {
+              <span class="text-[13px]">Board</span>
+            }
+          </a>
+        </li>
+        <li>
+          <button [class]="getNavItemClasses(false)">
+            <fa-icon [icon]="faCog" class="w-[18px] text-center"></fa-icon>
+            @if (!collapsed) {
+              <span class="text-[13px]">Settings</span>
+            }
+          </button>
+        </li>
+      </ul>
+    </nav>
+  }
+
+  <!-- Spacer when no project nav -->
+  @if (!projectId) {
+    <div class="flex-1"></div>
+  }
+
+  <!-- User menu -->
+  <div class="px-3 py-3 border-t border-subtle relative">
+    <button
+      (click)="userMenuOpen = !userMenuOpen"
+      [class]="userButtonClasses"
+    >
+      <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+        <span class="text-[13px] text-accent font-medium">JD</span>
+      </div>
+      @if (!collapsed) {
+        <div class="flex-1 min-w-0 text-left">
+          <div class="text-[13px] text-primary truncate">John Doe</div>
+          <div class="text-[11px] text-muted truncate">john&#64;example.com</div>
+        </div>
+        <fa-icon
+          [icon]="faChevronRight"
+          [class]="'text-muted text-xs transition-transform duration-150 ' + (userMenuOpen ? 'rotate-90' : '')"
+        ></fa-icon>
+      }
+    </button>
+
+    <!-- Popout menu -->
+    @if (userMenuOpen) {
+      <div class="fixed inset-0 z-40" (click)="userMenuOpen = false"></div>
+      <div [class]="userMenuClasses">
+        <div class="px-4 py-3 border-b border-subtle">
+          <div class="text-[13px] font-medium text-primary">John Doe</div>
+          <div class="text-[12px] text-muted">john&#64;example.com</div>
+        </div>
+        <div class="py-1">
+          <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <fa-icon [icon]="faUser" class="w-4"></fa-icon>
+            Profile
+          </button>
+          <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <fa-icon [icon]="faLock" class="w-4"></fa-icon>
+            Account settings
+          </button>
+          <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <fa-icon [icon]="faBell" class="w-4"></fa-icon>
+            Notifications
+          </button>
+          <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <fa-icon [icon]="faQuestionCircle" class="w-4"></fa-icon>
+            Help & support
+          </button>
+        </div>
+        <div class="py-1 border-t border-subtle">
+          <button class="w-full px-4 py-2 text-[13px] text-danger text-left hover:bg-danger/10 transition-colors flex items-center gap-3">
+            <fa-icon [icon]="faSignOutAlt" class="w-4"></fa-icon>
+            Sign out
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Collapse toggle -->
+  <div class="p-3 border-t border-subtle">
+    <button
+      (click)="collapsed = !collapsed"
+      [class]="collapseButtonClasses"
+    >
+      <fa-icon
+        [icon]="faChevronLeft"
+        [class]="'transition-transform duration-200 ' + (collapsed ? 'rotate-180' : '')"
+      ></fa-icon>
+      @if (!collapsed) {
+        <span class="text-[13px]">Collapse</span>
+      }
+    </button>
+  </div>
+</div>
