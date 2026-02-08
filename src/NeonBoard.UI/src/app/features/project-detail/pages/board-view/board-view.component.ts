@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
-import { CardDrawerComponent } from '../../components/card-drawer/card-drawer.component';
+import { GradientAccentComponent } from '../../../../shared/components/gradient-accent/gradient-accent.component';
 import { BoardService } from '../../services/board.service';
 import { ColumnService } from '../../services/column.service';
 import { CardService } from '../../services/card.service';
+import { DrawerService } from '../../services/drawer.service';
 import { BoardDetails } from '../../models/board.model';
 import { Column } from '../../models/column.model';
 import { Card } from '../../models/card.model';
@@ -22,14 +22,13 @@ import { Card } from '../../models/card.model';
     CommonModule,
     FormsModule,
     DragDropModule,
-    SidebarComponent,
     ButtonComponent,
     InputComponent,
     BadgeComponent,
-    CardDrawerComponent,
+    GradientAccentComponent,
   ],
   host: {
-    class: 'block h-screen'
+    class: 'flex flex-col h-full'
   },
   templateUrl: './board-view.component.html',
   styleUrl: './board-view.component.css',
@@ -39,6 +38,7 @@ export class BoardViewComponent implements OnInit {
   private boardService = inject(BoardService);
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
+  private drawerService = inject(DrawerService);
 
   projectId = signal<string>('');
   boardId = signal<string>('');
@@ -54,7 +54,6 @@ export class BoardViewComponent implements OnInit {
   columnMenuOpen = signal<string | null>(null);
 
   // Card operations state
-  selectedCard = signal<Card | null>(null);
   addingCardColumnId = signal<string | null>(null);
   newCardTitle = signal<string>('');
 
@@ -88,14 +87,29 @@ export class BoardViewComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('projectId');
-    const boardId = this.route.snapshot.paramMap.get('boardId');
-
-    if (projectId && boardId) {
+    // Get projectId from parent route (doesn't change)
+    const projectId = this.route.parent?.snapshot.paramMap.get('projectId');
+    if (projectId) {
       this.projectId.set(projectId);
-      this.boardId.set(boardId);
-      this.loadBoard();
     }
+
+    // Subscribe to boardId changes
+    this.route.paramMap.subscribe(params => {
+      const boardId = params.get('boardId');
+      if (boardId) {
+        this.boardId.set(boardId);
+        this.loadBoard();
+      }
+    });
+
+    // Subscribe to card updates/deletes to reload board
+    this.drawerService.cardUpdated$.subscribe(() => {
+      this.loadBoard();
+    });
+
+    this.drawerService.cardDeleted$.subscribe(() => {
+      this.loadBoard();
+    });
   }
 
   private loadBoard(): void {
@@ -247,11 +261,7 @@ export class BoardViewComponent implements OnInit {
 
   // Card operations
   selectCard(card: Card): void {
-    this.selectedCard.set(card);
-  }
-
-  closeCardDetail(): void {
-    this.selectedCard.set(null);
+    this.drawerService.openCardDrawer(card, this.projectId(), this.boardId());
   }
 
   openAddCard(columnId: string): void {
@@ -281,15 +291,5 @@ export class BoardViewComponent implements OnInit {
         console.error('Error adding card:', err);
       }
     });
-  }
-
-  onCardUpdated(): void {
-    this.closeCardDetail();
-    this.loadBoard();
-  }
-
-  onCardDeleted(): void {
-    this.closeCardDetail();
-    this.loadBoard();
   }
 }

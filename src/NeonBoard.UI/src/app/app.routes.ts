@@ -11,14 +11,19 @@ export const routes: Routes = [
   },
   {
     path: 'project/:projectId',
-    loadComponent: () => import('./features/project-detail/pages/project-detail/project.component').then(m => m.ProjectComponent),
+    loadComponent: () => import('./features/project-detail/pages/project-layout/project-layout.component').then(m => m.ProjectLayoutComponent),
     canActivate: [authGuard],
-    data: { animation: 'ProjectPage' }
-  },
-  {
-    path: 'project/:projectId/b/:boardId',
-    loadComponent: () => import('./features/project-detail/pages/board-view/board-view.component').then(m => m.BoardViewComponent),
-    canActivate: [authGuard],
-    data: { animation: 'BoardPage' }
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/project-detail/pages/project-detail/project.component').then(m => m.ProjectComponent),
+        data: { animation: 'ProjectPage' }
+      },
+      {
+        path: 'b/:boardId',
+        loadComponent: () => import('./features/project-detail/pages/board-view/board-view.component').then(m => m.BoardViewComponent),
+        data: { animation: 'BoardPage' }
+      }
+    ]
   },
 ];

@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, effect } from '@angular/core';
+import { Component, Input, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
@@ -30,6 +30,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, FontAwesomeModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'shrink-0'
   },
@@ -60,12 +61,17 @@ export class SidebarComponent {
   faGripVertical = faGripVertical;
   faCog = faCog;
 
+  private lastLoadedProjectId = '';
+
   constructor() {
     effect(() => {
-      if (this.projectId) {
-        this.loadBoards(this.projectId);
-      } else {
+      const currentProjectId = this.projectId;
+      if (currentProjectId && currentProjectId !== this.lastLoadedProjectId) {
+        this.lastLoadedProjectId = currentProjectId;
+        this.loadBoards(currentProjectId);
+      } else if (!currentProjectId) {
         this.boards.set([]);
+        this.lastLoadedProjectId = '';
       }
     });
 
