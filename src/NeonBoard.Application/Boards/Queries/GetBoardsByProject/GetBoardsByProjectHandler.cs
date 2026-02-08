@@ -1,28 +1,30 @@
 using MediatR;
+using NeonBoard.Application.Boards.DTOs;
 using NeonBoard.Application.Common.Exceptions;
 using NeonBoard.Application.Common.Interfaces;
-using NeonBoard.Application.Projects.DTOs;
 using NeonBoard.Domain.Projects;
 
-namespace NeonBoard.Application.Projects.Queries.GetProject;
+namespace NeonBoard.Application.Boards.Queries.GetBoardsByProject;
 
-public class GetProjectHandler : IRequestHandler<GetProjectQuery, ProjectDto>
+public class GetBoardsByProjectHandler : IRequestHandler<GetBoardsByProjectQuery, List<BoardDto>>
 {
+    private readonly IBoardRepository _boardRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetProjectHandler(
+    public GetBoardsByProjectHandler(
+        IBoardRepository boardRepository,
         IProjectRepository projectRepository,
         ICurrentUserService currentUserService)
     {
+        _boardRepository = boardRepository;
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
     }
 
-    public async Task<ProjectDto> Handle(GetProjectQuery request, CancellationToken cancellationToken)
+    public async Task<List<BoardDto>> Handle(GetBoardsByProjectQuery request, CancellationToken cancellationToken)
     {
         var project = await _projectRepository.GetByIdAsync(request.ProjectId, cancellationToken);
-
         if (project == null)
             throw new NotFoundException(nameof(Project), request.ProjectId);
 
@@ -30,12 +32,14 @@ public class GetProjectHandler : IRequestHandler<GetProjectQuery, ProjectDto>
         if (userId == null || project.OwnerId != userId.Value)
             throw new UnauthorizedAccessException("You do not have permission to access this project.");
 
-        return new ProjectDto(
-            project.Id,
-            project.Name,
-            project.Description,
-            project.OwnerId,
-            project.CreatedAt,
-            project.UpdatedAt);
+        var boards = await _boardRepository.GetBoardsByProjectIdAsync(request.ProjectId, cancellationToken);
+
+        return boards.Select(board => new BoardDto(
+            board.Id,
+            board.Name,
+            board.ProjectId,
+            board.CreatedAt,
+            board.UpdatedAt,
+            board.Columns.Count)).ToList();
     }
 }
