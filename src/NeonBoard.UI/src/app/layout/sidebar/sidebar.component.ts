@@ -68,6 +68,13 @@ export class SidebarComponent {
         this.boards.set([]);
       }
     });
+
+    // Subscribe to board updates
+    this.boardService.boardsUpdated$.subscribe(() => {
+      if (this.projectId) {
+        this.loadBoards(this.projectId);
+      }
+    });
   }
 
   get sidebarClasses(): string {

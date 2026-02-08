@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Board, BoardDetails, CreateBoardRequest } from '../models/board.model';
 
@@ -10,6 +11,9 @@ import { Board, BoardDetails, CreateBoardRequest } from '../models/board.model';
 export class BoardService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
+  private boardsUpdated = new Subject<void>();
+
+  boardsUpdated$ = this.boardsUpdated.asObservable();
 
   getBoardsByProject(projectId: string): Observable<Board[]> {
     return this.http.get<Board[]>(`${this.apiUrl}/projects/${projectId}/boards`);
@@ -20,6 +24,8 @@ export class BoardService {
   }
 
   createBoard(projectId: string, request: CreateBoardRequest): Observable<Board> {
-    return this.http.post<Board>(`${this.apiUrl}/projects/${projectId}/boards`, request);
+    return this.http.post<Board>(`${this.apiUrl}/projects/${projectId}/boards`, request).pipe(
+      tap(() => this.boardsUpdated.next())
+    );
   }
 }
