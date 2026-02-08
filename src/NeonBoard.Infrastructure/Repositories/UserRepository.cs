@@ -16,4 +16,10 @@ public class UserRepository : Repository<User>, IUserRepository
         return await DbSet
             .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
+
+    public async Task<User?> GetByAuth0UserIdAsync(string auth0UserId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .FirstOrDefaultAsync(u => u.Auth0UserId == auth0UserId, cancellationToken);
+    }
 }

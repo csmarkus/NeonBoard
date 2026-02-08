@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using NeonBoard.Api.Endpoints;
 using NeonBoard.Api.Middleware;
+using NeonBoard.Api.Services;
 using NeonBoard.Application;
+using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Infrastructure;
 using NeonBoard.Infrastructure.Persistence;
 using Serilog;
@@ -14,7 +17,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Configure Serilog
         builder.Host.UseSerilog((context, services, configuration) => configuration
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
@@ -32,11 +34,37 @@ public class Program
 
         builder.AddServiceDefaults();
 
-        // Add layer dependencies
+        var auth0Domain = builder.Configuration["Auth0:Domain"];
+        var auth0Audience = builder.Configuration["Auth0:Audience"];
+
+        if (string.IsNullOrEmpty(auth0Domain) || string.IsNullOrEmpty(auth0Audience))
+        {
+            throw new InvalidOperationException(
+                "Auth0 configuration is missing. Please set Auth0:Domain and Auth0:Audience in appsettings.json");
+        }
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.Authority = $"https://{auth0Domain}/";
+            options.Audience = auth0Audience;
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true
+            };
+        });
+
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
-        // Add CORS
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -48,11 +76,9 @@ public class Program
             });
         });
 
-        // Add exception handling
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
 
-        // Add services to the container.
         builder.Services.AddAuthorization();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -67,23 +93,21 @@ public class Program
             dbContext.Database.Migrate();
         }
 
-        app.MapDefaultEndpoints();
+        app.UseExceptionHandler();
 
-        // Configure the HTTP request pipeline.
+        app.UseCors();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseSerilogRequestLogging();
+
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
         }
 
-        app.UseExceptionHandler();
-
-        app.UseCors();
-
-        app.UseAuthorization();
-
-        app.UseSerilogRequestLogging();
-
-        // Map endpoints
+        app.MapDefaultEndpoints();
         app.MapProjectEndpoints();
 
         app.Run();

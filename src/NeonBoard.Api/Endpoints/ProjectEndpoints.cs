@@ -1,5 +1,6 @@
 using MediatR;
 using NeonBoard.Api.Models;
+using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Application.Projects.Commands.CreateProject;
 using NeonBoard.Application.Projects.Commands.DeleteProject;
 using NeonBoard.Application.Projects.Commands.UpdateProject;
@@ -14,7 +15,8 @@ public static class ProjectEndpoints
     public static void MapProjectEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/projects")
-            .WithTags("Projects");
+            .WithTags("Projects")
+            .RequireAuthorization();
 
         group.MapPost("/", CreateProject)
             .WithName("CreateProject")
@@ -26,8 +28,8 @@ public static class ProjectEndpoints
             .Produces<ProjectDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapGet("/user/{userId:guid}", GetProjectsByUser)
-            .WithName("GetProjectsByUser")
+        group.MapGet("/", GetProjectsByCurrentUser)
+            .WithName("GetProjects")
             .Produces<List<ProjectDto>>();
 
         group.MapPut("/{id:guid}", UpdateProject)
@@ -45,12 +47,19 @@ public static class ProjectEndpoints
     private static async Task<IResult> CreateProject(
         CreateProjectRequest request,
         IMediator mediator,
+        ICurrentUserService currentUserService,
         CancellationToken ct)
     {
+        var ownerId = await currentUserService.GetUserIdAsync(ct);
+        if (ownerId == null)
+        {
+            return Results.Unauthorized();
+        }
+
         var command = new CreateProjectCommand(
             request.Name,
             request.Description,
-            request.OwnerId);
+            ownerId.Value);
 
         var result = await mediator.Send(command, ct);
 
@@ -67,12 +76,18 @@ public static class ProjectEndpoints
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetProjectsByUser(
-        Guid userId,
+    private static async Task<IResult> GetProjectsByCurrentUser(
         IMediator mediator,
+        ICurrentUserService currentUserService,
         CancellationToken ct)
     {
-        var query = new GetProjectsByUserQuery(userId);
+        var userId = await currentUserService.GetUserIdAsync(ct);
+        if (userId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var query = new GetProjectsByUserQuery(userId.Value);
         var result = await mediator.Send(query, ct);
         return Results.Ok(result);
     }

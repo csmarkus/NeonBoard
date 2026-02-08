@@ -1,7 +1,8 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authHttpInterceptorFn } from '@auth0/auth0-angular';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -9,6 +10,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withInterceptors([authHttpInterceptorFn])),
   ]
 };

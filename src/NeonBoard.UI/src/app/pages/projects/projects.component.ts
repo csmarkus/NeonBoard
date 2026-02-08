@@ -2,6 +2,7 @@ import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '@auth0/auth0-angular';
 import { ButtonComponent } from '../../components/button/button.component';
 import { DrawerComponent } from '../../components/drawer/drawer.component';
 import { ProjectService } from '../../services/project.service';
@@ -22,6 +23,7 @@ import { Project } from '../../models/project.model';
 export class ProjectsComponent implements OnInit {
   private projectService = inject(ProjectService);
   private cdr = inject(ChangeDetectorRef);
+  protected auth = inject(AuthService);
 
   projects: Project[] = [];
   showCreateDrawer = false;
@@ -29,6 +31,7 @@ export class ProjectsComponent implements OnInit {
   newProjectDescription = '';
   error: string | null = null;
   isCreating = false;
+  showUserMenu = false;
 
   ngOnInit(): void {
     this.loadProjects();
@@ -74,11 +77,13 @@ export class ProjectsComponent implements OnInit {
         this.projects.unshift(project);
         this.closeCreateDrawer();
         this.isCreating = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error creating project:', err);
         this.error = 'Failed to create project. Please try again.';
         this.isCreating = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -132,5 +137,27 @@ export class ProjectsComponent implements OnInit {
       green: 'bg-status-done',
     };
     return colorClasses[color] || 'bg-status-todo';
+  }
+
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+  }
+
+  logout(): void {
+    this.auth.logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  }
+
+  getUserInitials(name: string | undefined): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 }

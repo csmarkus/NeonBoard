@@ -11,11 +11,8 @@ export class ProjectService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/projects`;
 
-  // Temporary user ID until we implement authentication
-  private readonly TEMP_USER_ID = '00000000-0000-0000-0000-000000000001';
-
   getProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/user/${this.TEMP_USER_ID}`);
+    return this.http.get<Project[]>(this.apiUrl);
   }
 
   getProject(id: string): Observable<Project> {
@@ -23,11 +20,7 @@ export class ProjectService {
   }
 
   createProject(request: Omit<CreateProjectRequest, 'ownerId'>): Observable<Project> {
-    const payload: CreateProjectRequest = {
-      ...request,
-      ownerId: this.TEMP_USER_ID
-    };
-    return this.http.post<Project>(this.apiUrl, payload);
+    return this.http.post<Project>(this.apiUrl, request);
   }
 
   updateProject(id: string, request: UpdateProjectRequest): Observable<Project> {

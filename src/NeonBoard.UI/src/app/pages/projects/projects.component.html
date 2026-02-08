@@ -10,9 +10,49 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-          <span class="text-[13px] text-accent font-medium">JD</span>
-        </div>
+        @if (auth.user$ | async; as user) {
+          <div class="relative">
+            <button
+              (click)="toggleUserMenu()"
+              class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              @if (user.picture) {
+                <img
+                  [src]="user.picture"
+                  [alt]="user.name || 'User'"
+                  class="w-8 h-8 rounded-full object-cover"
+                />
+              } @else {
+                <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+                  <span class="text-[13px] text-accent font-medium">{{ getUserInitials(user.name) }}</span>
+                </div>
+              }
+            </button>
+
+            <!-- User menu dropdown -->
+            @if (showUserMenu) {
+              <!-- Backdrop to close menu when clicking outside -->
+              <div class="fixed inset-0 z-40" (click)="showUserMenu = false"></div>
+              <div class="absolute right-0 mt-2 w-56 bg-surface border border-subtle rounded-lg shadow-lg py-2 z-50">
+                <div class="px-4 py-2 border-b border-subtle">
+                  <p class="text-sm font-medium text-primary">{{ user.name }}</p>
+                  <p class="text-xs text-muted mt-0.5">{{ user.email }}</p>
+                </div>
+                <button
+                  (click)="logout()"
+                  class="w-full px-4 py-2 text-left text-sm text-muted hover:text-primary hover:bg-surface-elevated transition-colors"
+                >
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Log out
+                  </span>
+                </button>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
   </header>

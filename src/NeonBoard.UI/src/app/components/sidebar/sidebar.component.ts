@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '@auth0/auth0-angular';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -34,6 +35,7 @@ interface NavItem {
 export class SidebarComponent {
   @Input() projectId?: string;
 
+  protected auth = inject(AuthService);
   collapsed = false;
   userMenuOpen = false;
 
@@ -70,5 +72,23 @@ export class SidebarComponent {
 
   get collapseButtonClasses(): string {
     return `w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted hover:text-secondary hover:bg-surface transition-colors duration-150 ${this.collapsed ? 'justify-center' : ''}`;
+  }
+
+  logout(): void {
+    this.auth.logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  }
+
+  getUserInitials(name: string | undefined): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 }

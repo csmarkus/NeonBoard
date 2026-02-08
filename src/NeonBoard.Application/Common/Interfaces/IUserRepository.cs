@@ -5,4 +5,5 @@ namespace NeonBoard.Application.Common.Interfaces;
 public interface IUserRepository : IRepository<User>
 {
     Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<User?> GetByAuth0UserIdAsync(string auth0UserId, CancellationToken cancellationToken = default);
 }

@@ -10,7 +10,6 @@ export interface Project {
 export interface CreateProjectRequest {
   name: string;
   description: string;
-  ownerId: string;
 }
 
 export interface UpdateProjectRequest {
