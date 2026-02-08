@@ -48,6 +48,7 @@ export class ProjectCardComponent {
 
   onDelete(event: Event): void {
     event.stopPropagation();
+    event.preventDefault();
     if (confirm(`Are you sure you want to delete "${this.project.name}"?`)) {
       this.delete.emit(this.project);
     }

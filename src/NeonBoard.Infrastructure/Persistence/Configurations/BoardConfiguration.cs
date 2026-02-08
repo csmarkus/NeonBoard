@@ -29,6 +29,11 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
 
         builder.HasIndex(b => b.ProjectId);
 
+        builder.HasOne<NeonBoard.Domain.Projects.Project>()
+            .WithMany()
+            .HasForeignKey(b => b.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.OwnsMany(b => b.Columns, column =>
         {
             column.ToTable("Columns");
