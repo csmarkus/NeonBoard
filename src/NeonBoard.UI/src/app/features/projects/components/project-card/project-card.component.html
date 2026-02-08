@@ -1,9 +1,6 @@
 <div class="group bg-surface border border-subtle rounded-lg p-5 hover:border-dim hover:bg-surface-elevated transition-colors duration-150 relative overflow-hidden">
   <!-- Gradient accent at top -->
-  <div
-    class="absolute inset-x-0 top-0 h-[2px]"
-    [style.background-image]="getProjectGradient(index)"
-  ></div>
+  <app-gradient-accent [variant]="index"></app-gradient-accent>
 
   <a
     [routerLink]="['/project', project.id]"
@@ -36,3 +33,6 @@
     </svg>
   </button>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal [open]="showDeleteConfirmation()" [title]="'Delete Project'" [message]="'Are you sure you want to delete ' + project.name + '? This action cannot be undone.'" [confirmText]="'Delete'" [cancelText]="'Cancel'" [variant]="'danger'" (confirm)="onConfirmDelete()" (cancel)="onCancelDelete()"></app-confirmation-modal>

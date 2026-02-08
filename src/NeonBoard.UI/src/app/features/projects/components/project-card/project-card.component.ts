@@ -1,18 +1,22 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Project } from '../../models/project.model';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { GradientAccentComponent } from '../../../../shared/components/gradient-accent/gradient-accent.component';
 
 @Component({
   selector: 'app-project-card',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ConfirmationModalComponent, GradientAccentComponent],
   templateUrl: './project-card.component.html',
 })
 export class ProjectCardComponent {
   @Input({ required: true }) project!: Project;
   @Input({ required: true }) index!: number;
   @Output() delete = new EventEmitter<Project>();
+
+  showDeleteConfirmation = signal(false);
 
   getRelativeTime(dateString: string): string {
     const date = new Date(dateString);
@@ -31,21 +35,18 @@ export class ProjectCardComponent {
     return date.toLocaleDateString();
   }
 
-  getProjectGradient(index: number): string {
-    const gradients = [
-      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(94,240,255,0.75) 28%, rgba(94,240,255,0.32) 52%, rgba(94,240,255,0) 82%)',
-      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(255,184,99,0.65) 30%, rgba(255,107,156,0.35) 60%, rgba(255,184,99,0) 90%)',
-      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(167,139,250,0.65) 24%, rgba(34,211,238,0.45) 52%, rgba(34,211,238,0) 85%)',
-      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(255,58,191,0.7) 26%, rgba(255,138,76,0.4) 54%, rgba(255,58,191,0) 86%)',
-    ];
-    return gradients[index % gradients.length];
-  }
-
   onDelete(event: Event): void {
     event.stopPropagation();
     event.preventDefault();
-    if (confirm(`Are you sure you want to delete "${this.project.name}"?`)) {
-      this.delete.emit(this.project);
-    }
+    this.showDeleteConfirmation.set(true);
+  }
+
+  onConfirmDelete(): void {
+    this.showDeleteConfirmation.set(false);
+    this.delete.emit(this.project);
+  }
+
+  onCancelDelete(): void {
+    this.showDeleteConfirmation.set(false);
   }
 }
