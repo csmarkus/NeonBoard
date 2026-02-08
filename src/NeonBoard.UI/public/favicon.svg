@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with subtle glow -->
+  <rect width="64" height="64" rx="12" fill="#09090b"/>
+  <rect width="64" height="64" rx="12" fill="#22d3ee" fill-opacity="0.15"/>
+
+  <!-- N letter -->
+  <path d="M20 44V20H26.5L37.5 35.5V20H44V44H37.5L26.5 28.5V44H20Z" fill="#22d3ee"/>
+</svg>

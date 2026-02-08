@@ -31,19 +31,14 @@ export class ProjectCardComponent {
     return date.toLocaleDateString();
   }
 
-  getProjectColor(index: number): string {
-    const colors = ['cyan', 'amber', 'violet', 'green'];
-    return colors[index % colors.length];
-  }
-
-  getColorClass(color: string): string {
-    const colorClasses: Record<string, string> = {
-      cyan: 'bg-status-todo',
-      amber: 'bg-status-progress',
-      violet: 'bg-status-review',
-      green: 'bg-status-done',
-    };
-    return colorClasses[color] || 'bg-status-todo';
+  getProjectGradient(index: number): string {
+    const gradients = [
+      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(94,240,255,0.75) 28%, rgba(94,240,255,0.32) 52%, rgba(94,240,255,0) 82%)',
+      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(255,184,99,0.65) 30%, rgba(255,107,156,0.35) 60%, rgba(255,184,99,0) 90%)',
+      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(167,139,250,0.65) 24%, rgba(34,211,238,0.45) 52%, rgba(34,211,238,0) 85%)',
+      'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(255,58,191,0.7) 26%, rgba(255,138,76,0.4) 54%, rgba(255,58,191,0) 86%)',
+    ];
+    return gradients[index % gradients.length];
   }
 
   onDelete(event: Event): void {

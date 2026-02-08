@@ -17,7 +17,6 @@ export class App implements OnInit {
   private contexts = inject(ChildrenOutletContexts);
 
   ngOnInit() {
-    // Show loading when navigation starts
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         this.loadingService.show();

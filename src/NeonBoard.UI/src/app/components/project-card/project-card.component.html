@@ -1,20 +1,23 @@
-<div class="group bg-surface border border-subtle rounded-lg p-5 hover:border-dim hover:bg-surface-elevated transition-colors duration-150 relative">
+<div class="group bg-surface border border-subtle rounded-lg p-5 hover:border-dim hover:bg-surface-elevated transition-colors duration-150 relative overflow-hidden">
+  <!-- Gradient accent at top -->
+  <div
+    class="absolute inset-x-0 top-0 h-[2px]"
+    [style.background-image]="getProjectGradient(index)"
+  ></div>
+
   <a
-    [routerLink]="['/board', project.id]"
+    [routerLink]="['/project', project.id]"
     class="block"
   >
-    <div class="flex items-start gap-3 mb-3">
-      <div [class]="'w-3 h-3 rounded-full mt-1 ' + getColorClass(getProjectColor(index))"></div>
-      <div class="flex-1 min-w-0">
-        <h3 class="text-[15px] font-medium text-primary group-hover:text-accent transition-colors">
-          {{ project.name }}
-        </h3>
-        @if (project.description) {
-          <p class="text-[13px] text-muted mt-1 line-clamp-2">
-            {{ project.description }}
-          </p>
-        }
-      </div>
+    <div class="mb-3">
+      <h3 class="text-[15px] font-medium text-primary group-hover:text-accent transition-colors">
+        {{ project.name }}
+      </h3>
+      @if (project.description) {
+        <p class="text-[13px] text-muted mt-1 line-clamp-2">
+          {{ project.description }}
+        </p>
+      }
     </div>
     <div class="flex items-center justify-between text-xs text-muted pt-3 border-t border-subtle">
       <span>Created {{ getRelativeTime(project.createdAt) }}</span>

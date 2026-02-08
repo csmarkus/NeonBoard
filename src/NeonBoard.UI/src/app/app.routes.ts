@@ -10,9 +10,9 @@ export const routes: Routes = [
     data: { animation: 'ProjectsPage' }
   },
   {
-    path: 'board/:projectId',
-    loadComponent: () => import('./pages/board/board.component').then(m => m.BoardComponent),
+    path: 'project/:projectId',
+    loadComponent: () => import('./pages/project/project.component').then(m => m.ProjectComponent),
     canActivate: [authGuard],
-    data: { animation: 'BoardPage' }
+    data: { animation: 'ProjectPage' }
   },
 ];

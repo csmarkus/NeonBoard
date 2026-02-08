@@ -16,7 +16,7 @@ import { BadgeComponent } from '../../components/badge/badge.component';
 import { LoadingService } from '../../services/loading.service';
 
 @Component({
-  selector: 'app-board',
+  selector: 'app-project',
   standalone: true,
   imports: [
     CommonModule,
@@ -32,10 +32,10 @@ import { LoadingService } from '../../services/loading.service';
   host: {
     class: 'block h-screen'
   },
-  templateUrl: './board.component.html',
-  styleUrl: './board.component.css',
+  templateUrl: './project.component.html',
+  styleUrl: './project.component.css',
 })
-export class BoardComponent implements OnDestroy {
+export class ProjectComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private loadingService = inject(LoadingService);

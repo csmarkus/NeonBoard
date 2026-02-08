@@ -40,10 +40,10 @@
       <ul class="mt-2 space-y-1">
         <li>
           <a
-            [routerLink]="['/board', projectId]"
+            [routerLink]="['/project', projectId]"
             routerLinkActive="active"
-            #boardLink="routerLinkActive"
-            [class]="getNavItemClasses(boardLink.isActive)"
+            #projectLink="routerLinkActive"
+            [class]="getNavItemClasses(projectLink.isActive)"
           >
             <fa-icon [icon]="faGripVertical" class="w-[18px] text-center"></fa-icon>
             @if (!collapsed) {
