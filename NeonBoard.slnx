@@ -3,6 +3,7 @@
     <File Path=".dockerignore" />
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
+    <File Path="claude.md" />
     <File Path="Directory.Build.Props" />
     <File Path="Directory.Packages.Props" />
     <File Path="Dockerfile" />
