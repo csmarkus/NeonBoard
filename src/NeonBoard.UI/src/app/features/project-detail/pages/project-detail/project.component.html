@@ -1,119 +1,81 @@
 <div class="h-full bg-void flex">
   <!-- Sidebar -->
-  <app-sidebar [projectId]="projectId"></app-sidebar>
+  <app-sidebar [projectId]="projectId()"></app-sidebar>
 
   <!-- Main content -->
   <div class="flex-1 flex flex-col min-w-0">
-    <!-- Header -->
-    <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <h1 class="text-[15px] font-semibold text-primary">{{ projectName }}</h1>
-          <app-badge variant="violet">Sprint 24</app-badge>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <app-input placeholder="Search tasks..." class="w-64"></app-input>
-          <app-button variant="primary" size="sm">New Task</app-button>
+    @if (isLoading()) {
+      <!-- Loading state -->
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <div class="inline-block w-8 h-8 border-4 border-accent/20 border-t-accent rounded-full animate-spin mb-4"></div>
+          <p class="text-sm text-muted">Loading project...</p>
         </div>
       </div>
-    </header>
-
-    <!-- Board toolbar -->
-    <div class="bg-void px-6 py-3 border-b border-subtle flex items-center gap-4 shrink-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-muted">Filter:</span>
-        <button class="px-2.5 py-1 text-xs text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors">
-          All tasks
-        </button>
-        <button class="px-2.5 py-1 text-xs text-muted hover:text-secondary rounded-md transition-colors">
-          My tasks
-        </button>
-        <button class="px-2.5 py-1 text-xs text-muted hover:text-secondary rounded-md transition-colors">
-          Unassigned
-        </button>
+    } @else if (error()) {
+      <!-- Error state -->
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center max-w-md">
+          <div class="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-base font-medium text-primary mb-2">{{ error() }}</h3>
+          <p class="text-sm text-muted">Please try refreshing the page</p>
+        </div>
       </div>
+    } @else if (project()) {
+      <!-- Project header -->
+      <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-[15px] font-semibold text-primary">{{ project()!.name }}</h1>
+            @if (project()!.description) {
+              <p class="text-[13px] text-muted mt-0.5">{{ project()!.description }}</p>
+            }
+          </div>
+          <app-button variant="primary" size="sm" (click)="openCreateBoardDrawer()">
+            New Board
+          </app-button>
+        </div>
+      </header>
 
-      <div class="flex items-center gap-2 ml-auto">
-        <span class="text-xs text-muted">{{ getTotalTaskCount() }} tasks</span>
-      </div>
-    </div>
-
-    <!-- Board columns -->
-    <main class="flex-1 p-6 overflow-x-auto">
-      <div
-        cdkDropList
-        cdkDropListOrientation="horizontal"
-        [cdkDropListData]="columns"
-        (cdkDropListDropped)="dropColumn($event)"
-        class="flex gap-6 min-w-max items-start"
-      >
-        <div cdkDropListGroup class="contents">
-          @for (column of columns; track column.id) {
-            <div cdkDrag class="flex flex-col w-72 shrink-0">
-              <!-- Column drag placeholder -->
-              <div *cdkDragPlaceholder class="w-72 h-full min-h-[200px] bg-accent/5 border-2 border-dashed border-accent/20 rounded-lg"></div>
-
-              <!-- Column header (drag handle) -->
-              <div cdkDragHandle class="flex items-center gap-2.5 mb-4 px-0.5 group">
-                <div [class]="'w-2 h-2 rounded-full ' + getAccentClass(column.accent)"></div>
-                <h2 class="text-[13px] font-medium text-primary">{{ column.title }}</h2>
-                <span class="text-xs text-muted tabular-nums">{{ tasksByStatus[column.id].length }}</span>
-                <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-muted">
-                    <circle cx="9" cy="5" r="1.5"/>
-                    <circle cx="9" cy="12" r="1.5"/>
-                    <circle cx="9" cy="19" r="1.5"/>
-                    <circle cx="15" cy="5" r="1.5"/>
-                    <circle cx="15" cy="12" r="1.5"/>
-                    <circle cx="15" cy="19" r="1.5"/>
-                  </svg>
-                </div>
+      <!-- Boards content -->
+      <main class="flex-1 p-6 overflow-auto">
+        @if (boards().length === 0) {
+          <!-- Empty state -->
+          <div class="flex items-center justify-center h-full">
+            <div class="text-center max-w-md">
+              <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
+                </svg>
               </div>
-
-              <!-- Cards container (drop zone) -->
-              <div
-                cdkDropList
-                [id]="column.id"
-                [cdkDropListData]="tasksByStatus[column.id]"
-                [cdkDropListConnectedTo]="columnIds"
-                (cdkDropListDropped)="dropCard($event, column.id)"
-                class="flex flex-col gap-2 min-h-[100px] rounded-lg transition-colors"
-              >
-                @for (task of tasksByStatus[column.id]; track task.id) {
-                  <div cdkDrag [cdkDragData]="task">
-                    <app-card
-                      [title]="task.title"
-                      [description]="task.description"
-                      [status]="task.status"
-                      [tags]="task.tags"
-                      [assignee]="task.assignee"
-                      (cardClick)="selectTask(task)"
-                    ></app-card>
-                  </div>
-                }
-              </div>
-
-              <!-- Add card button -->
-              <button class="mt-2 py-2 w-full text-[13px] text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150">
-                + Add card
-              </button>
+              <h3 class="text-base font-medium text-primary mb-2">No boards yet</h3>
+              <p class="text-sm text-muted mb-6">Get started by creating your first board</p>
+              <app-button variant="primary" (click)="openCreateBoardDrawer()">
+                Create First Board
+              </app-button>
             </div>
-          }
-        </div>
-
-        <!-- Add column button -->
-        <button class="w-72 shrink-0 py-3 text-[13px] text-muted border border-dashed border-dim rounded-lg hover:border-secondary hover:text-secondary hover:bg-surface/50 transition-colors duration-150">
-          + Add column
-        </button>
-      </div>
-    </main>
+          </div>
+        } @else {
+          <!-- Boards grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @for (board of boards(); track board.id; let i = $index) {
+              <app-board-card [board]="board" [index]="i"></app-board-card>
+            }
+          </div>
+        }
+      </main>
+    }
   </div>
 
-  <!-- Task detail drawer -->
-  <app-drawer [open]="!!selectedTask" (close)="selectedTask = null">
-    @if (selectedTask) {
-      <app-task-detail [task]="selectedTask"></app-task-detail>
-    }
-  </app-drawer>
+  <!-- Create board drawer -->
+  <app-create-board-drawer
+    [open]="showCreateBoardDrawer()"
+    [projectId]="projectId()"
+    (close)="closeCreateBoardDrawer()"
+    (boardCreated)="onBoardCreated()">
+  </app-create-board-drawer>
 </div>

@@ -1,33 +1,24 @@
-import { Component, inject, afterNextRender, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, NavigationStart } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Task, TaskStatus, Column } from '../../models/task.model';
-import { columns as defaultColumns, mockTasks } from '../../../../data/mock-tasks';
+import { ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
-import { CardComponent } from '../../components/card/card.component';
-import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
-import { TaskDetailComponent } from '../../components/task-detail/task-detail.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { InputComponent } from '../../../../shared/components/input/input.component';
-import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
-import { LoadingService } from '../../../../core/services/loading.service';
+import { ProjectService } from '../../../projects/services/project.service';
+import { BoardService } from '../../services/board.service';
+import { Project } from '../../../projects/models/project.model';
+import { Board } from '../../models/board.model';
+import { BoardCardComponent } from '../../components/board-card/board-card.component';
+import { CreateBoardDrawerComponent } from '../../components/create-board-drawer/create-board-drawer.component';
 
 @Component({
   selector: 'app-project',
   standalone: true,
   imports: [
     CommonModule,
-    DragDropModule,
     SidebarComponent,
-    CardComponent,
-    DrawerComponent,
-    TaskDetailComponent,
     ButtonComponent,
-    InputComponent,
-    BadgeComponent,
+    BoardCardComponent,
+    CreateBoardDrawerComponent,
   ],
   host: {
     class: 'block h-screen'
@@ -35,96 +26,69 @@ import { LoadingService } from '../../../../core/services/loading.service';
   templateUrl: './project.component.html',
   styleUrl: './project.component.css',
 })
-export class ProjectComponent implements OnDestroy {
+export class ProjectComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private loadingService = inject(LoadingService);
-  private navigationSubscription?: Subscription;
+  private projectService = inject(ProjectService);
+  private boardService = inject(BoardService);
 
-  projectId = '';
-  projectName = 'Project Alpha';
-  columns: Column[] = [...defaultColumns];
-  selectedTask: Task | null = null;
+  projectId = signal<string>('');
+  project = signal<Project | null>(null);
+  boards = signal<Board[]>([]);
+  isLoading = signal<boolean>(true);
+  error = signal<string | null>(null);
+  showCreateBoardDrawer = signal<boolean>(false);
 
-  // Store tasks organized by status for drag and drop
-  tasksByStatus: Record<TaskStatus, Task[]> = {
-    'todo': [],
-    'in-progress': [],
-    'review': [],
-    'done': []
-  };
-
-  // Column IDs for connecting drop lists
-  get columnIds(): string[] {
-    return this.columns.map(c => c.id);
-  }
-
-  private accentClasses: Record<string, string> = {
-    cyan: 'bg-status-todo',
-    amber: 'bg-status-progress',
-    violet: 'bg-status-review',
-    green: 'bg-status-done',
-  };
-
-  constructor() {
-    this.projectId = this.route.snapshot.paramMap.get('projectId') || '';
-    this.initializeTasks();
-
-    // Hide loading after the component is fully rendered
-    afterNextRender(() => {
-      this.loadingService.hide();
-    });
-
-    // Close drawer when navigation starts
-    this.navigationSubscription = this.router.events.pipe(
-      filter(event => event instanceof NavigationStart)
-    ).subscribe(() => {
-      this.selectedTask = null;
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.navigationSubscription?.unsubscribe();
-  }
-
-  private initializeTasks(): void {
-    // Group tasks by status
-    for (const task of mockTasks) {
-      this.tasksByStatus[task.status].push({ ...task });
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('projectId');
+    if (id) {
+      this.projectId.set(id);
+      this.loadProjectData();
     }
   }
 
-  getAccentClass(accent: string): string {
-    return this.accentClasses[accent] || '';
+  private loadProjectData(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    // First, load project info
+    this.projectService.getProject(this.projectId()).subscribe({
+      next: (project) => {
+        this.project.set(project);
+        // Then load boards for this project
+        this.loadBoards();
+      },
+      error: (err) => {
+        console.error('Error loading project:', err);
+        this.error.set('Failed to load project');
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  getTotalTaskCount(): number {
-    return Object.values(this.tasksByStatus).reduce((sum, tasks) => sum + tasks.length, 0);
+  private loadBoards(): void {
+    this.boardService.getBoardsByProject(this.projectId()).subscribe({
+      next: (boards) => {
+        this.boards.set(boards);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading boards:', err);
+        this.error.set('Failed to load boards');
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  dropColumn(event: CdkDragDrop<Column[]>): void {
-    moveItemInArray(this.columns, event.previousIndex, event.currentIndex);
+  openCreateBoardDrawer(): void {
+    this.showCreateBoardDrawer.set(true);
   }
 
-  dropCard(event: CdkDragDrop<Task[]>, newStatus: TaskStatus): void {
-    if (event.previousContainer === event.container) {
-      // Reorder within the same column
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      // Move to a different column
-      const task = event.previousContainer.data[event.previousIndex];
-      task.status = newStatus;
-
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-    }
+  closeCreateBoardDrawer(): void {
+    this.showCreateBoardDrawer.set(false);
   }
 
-  selectTask(task: Task): void {
-    this.selectedTask = task;
+  onBoardCreated(): void {
+    this.closeCreateBoardDrawer();
+    this.loadBoards();
   }
 }
