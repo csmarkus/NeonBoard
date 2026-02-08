@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet, NavigationStart, ChildrenOutletContexts } from '@angular/router';
-import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay.component';
-import { LoadingService } from './services/loading.service';
+import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
+import { LoadingService } from './core/services/loading.service';
 import { routeAnimations } from './animations/route-animations';
 
 @Component({

@@ -1,8 +1,8 @@
 import { Component, Input, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DrawerComponent } from '../drawer/drawer.component';
-import { ButtonComponent } from '../button/button.component';
+import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ProjectService } from '../../services/project.service';
 import { Project } from '../../models/project.model';
 

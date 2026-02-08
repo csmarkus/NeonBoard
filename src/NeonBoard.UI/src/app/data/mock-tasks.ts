@@ -1,4 +1,4 @@
-import { Task, Column } from '../models/task.model';
+import { Task, Column } from '../features/project-detail/models/task.model';
 
 export const columns: Column[] = [
   { id: 'todo', title: 'Backlog', accent: 'cyan' },

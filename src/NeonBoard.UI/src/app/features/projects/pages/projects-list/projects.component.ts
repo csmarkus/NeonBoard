@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '../../components/button/button.component';
-import { UserMenuComponent } from '../../components/user-menu/user-menu.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { UserMenuComponent } from '../../../../layout/user-menu/user-menu.component';
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
 import { CreateProjectDrawerComponent } from '../../components/create-project-drawer/create-project-drawer.component';
 import { ProjectService } from '../../services/project.service';

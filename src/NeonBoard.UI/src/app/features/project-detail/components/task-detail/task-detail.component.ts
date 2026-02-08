@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Task } from '../../models/task.model';
-import { BadgeComponent } from '../badge/badge.component';
-import { ButtonComponent } from '../button/button.component';
+import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 type TagColor = 'cyan' | 'amber' | 'violet' | 'green' | 'red' | 'neutral';
 

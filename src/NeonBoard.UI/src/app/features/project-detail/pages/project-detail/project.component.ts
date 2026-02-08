@@ -5,15 +5,15 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Task, TaskStatus, Column } from '../../models/task.model';
-import { columns as defaultColumns, mockTasks } from '../../data/mock-tasks';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { columns as defaultColumns, mockTasks } from '../../../../data/mock-tasks';
+import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
 import { CardComponent } from '../../components/card/card.component';
-import { DrawerComponent } from '../../components/drawer/drawer.component';
+import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { TaskDetailComponent } from '../../components/task-detail/task-detail.component';
-import { ButtonComponent } from '../../components/button/button.component';
-import { InputComponent } from '../../components/input/input.component';
-import { BadgeComponent } from '../../components/badge/badge.component';
-import { LoadingService } from '../../services/loading.service';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
+import { LoadingService } from '../../../../core/services/loading.service';
 
 @Component({
   selector: 'app-project',
