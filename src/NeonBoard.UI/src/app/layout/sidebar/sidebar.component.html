@@ -39,17 +39,47 @@
       }
       <ul class="mt-2 space-y-1">
         <li>
-          <a
-            [routerLink]="['/project', projectId]"
-            routerLinkActive="active"
-            #projectLink="routerLinkActive"
-            [class]="getNavItemClasses(projectLink.isActive)"
-          >
-            <fa-icon [icon]="faGripVertical" class="w-[18px] text-center"></fa-icon>
-            @if (!collapsed) {
-              <span class="text-[13px]">Board</span>
+          <div class="flex items-center">
+            <a
+              [routerLink]="['/project', projectId]"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{exact: true}"
+              #boardsLink="routerLinkActive"
+              [class]="getNavItemClasses(boardsLink.isActive) + ' flex-1'"
+            >
+              <fa-icon [icon]="faGripVertical" class="w-[18px] text-center"></fa-icon>
+              @if (!collapsed) {
+                <span class="text-[13px] flex-1">Boards</span>
+              }
+            </a>
+            @if (!collapsed && boards().length > 0) {
+              <button
+                (click)="boardsMenuOpen = !boardsMenuOpen"
+                class="p-1 hover:bg-surface rounded transition-colors mr-2"
+              >
+                <fa-icon
+                  [icon]="faChevronDown"
+                  [class]="'text-muted text-xs transition-transform duration-150 ' + (boardsMenuOpen ? '' : '-rotate-90')"
+                ></fa-icon>
+              </button>
             }
-          </a>
+          </div>
+
+          <!-- Boards submenu -->
+          @if (boardsMenuOpen && !collapsed && boards().length > 0) {
+            <ul class="mt-1 ml-7 space-y-1">
+              @for (board of boards(); track board.id) {
+                <li>
+                  <a
+                    [routerLink]="['/project', projectId, 'b', board.id]"
+                    [class]="getNavItemClasses(isBoardActive(board.id)) + ' pl-3'"
+                  >
+                    <span class="text-[13px] truncate">{{ board.name }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
         </li>
         <li>
           <button [class]="getNavItemClasses(false)">

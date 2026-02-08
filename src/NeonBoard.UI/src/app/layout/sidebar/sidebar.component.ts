@@ -1,6 +1,6 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -15,7 +15,10 @@ import {
   faSignOutAlt,
   faChevronRight,
   faChevronLeft,
+  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
+import { BoardService } from '../../features/project-detail/services/board.service';
+import { Board } from '../../features/project-detail/models/board.model';
 
 interface NavItem {
   icon: IconDefinition;
@@ -27,6 +30,7 @@ interface NavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, FontAwesomeModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'shrink-0'
   },
@@ -36,12 +40,18 @@ export class SidebarComponent {
   @Input() projectId?: string;
 
   protected auth = inject(AuthService);
+  private boardService = inject(BoardService);
+  private router = inject(Router);
+
   collapsed = false;
   userMenuOpen = false;
+  boardsMenuOpen = false;
+  boards = signal<Board[]>([]);
 
   // Icons for template
   faChevronRight = faChevronRight;
   faChevronLeft = faChevronLeft;
+  faChevronDown = faChevronDown;
   faUser = faUser;
   faLock = faLock;
   faBell = faBell;
@@ -50,6 +60,28 @@ export class SidebarComponent {
   faFolderOpen = faFolderOpen;
   faGripVertical = faGripVertical;
   faCog = faCog;
+
+  private lastLoadedProjectId = '';
+
+  constructor() {
+    effect(() => {
+      const currentProjectId = this.projectId;
+      if (currentProjectId && currentProjectId !== this.lastLoadedProjectId) {
+        this.lastLoadedProjectId = currentProjectId;
+        this.loadBoards(currentProjectId);
+      } else if (!currentProjectId) {
+        this.boards.set([]);
+        this.lastLoadedProjectId = '';
+      }
+    });
+
+    // Subscribe to board updates
+    this.boardService.boardsUpdated$.subscribe(() => {
+      if (this.projectId) {
+        this.loadBoards(this.projectId);
+      }
+    });
+  }
 
   get sidebarClasses(): string {
     return `bg-void border-r border-subtle flex flex-col shrink-0 transition-all duration-200 ease-out ${this.collapsed ? 'w-16' : 'w-64'}`;
@@ -90,5 +122,22 @@ export class SidebarComponent {
       .join('')
       .toUpperCase()
       .substring(0, 2);
+  }
+
+  private loadBoards(projectId: string): void {
+    this.boardService.getBoardsByProject(projectId).subscribe({
+      next: (boards) => {
+        this.boards.set(boards);
+        this.boardsMenuOpen = boards.length > 0;
+      },
+      error: (err) => {
+        console.error('Error loading boards:', err);
+        this.boards.set([]);
+      }
+    });
+  }
+
+  isBoardActive(boardId: string): boolean {
+    return this.router.url.includes(`/b/${boardId}`);
   }
 }

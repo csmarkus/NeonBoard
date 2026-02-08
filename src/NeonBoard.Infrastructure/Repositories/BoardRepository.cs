@@ -14,8 +14,6 @@ public class BoardRepository : Repository<Board>, IBoardRepository
     public async Task<Board?> GetBoardWithDetailsAsync(Guid boardId, CancellationToken cancellationToken = default)
     {
         return await DbSet
-            .Include(b => b.Columns)
-            .Include(b => b.Cards)
             .FirstOrDefaultAsync(b => b.Id == boardId, cancellationToken);
     }
 

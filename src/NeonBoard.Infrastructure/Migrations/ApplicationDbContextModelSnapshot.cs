@@ -127,7 +127,6 @@ namespace NeonBoard.Infrastructure.Migrations
                     b.OwnsMany("NeonBoard.Domain.Boards.Entities.Card", "Cards", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
                             b1.Property<Guid>("BoardId")
@@ -205,7 +204,6 @@ namespace NeonBoard.Infrastructure.Migrations
                     b.OwnsMany("NeonBoard.Domain.Boards.Entities.Column", "Columns", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
                             b1.Property<Guid>("BoardId")

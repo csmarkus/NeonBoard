@@ -109,6 +109,9 @@ public class Program
 
         app.MapDefaultEndpoints();
         app.MapProjectEndpoints();
+        app.MapBoardEndpoints();
+        app.MapColumnEndpoints();
+        app.MapCardEndpoints();
 
         app.Run();
     }

@@ -1,0 +1,241 @@
+@if (isLoading()) {
+      <!-- Loading state -->
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <div class="inline-block w-8 h-8 border-4 border-accent/20 border-t-accent rounded-full animate-spin mb-4"></div>
+          <p class="text-sm text-muted">Loading board...</p>
+        </div>
+      </div>
+    } @else if (error()) {
+      <!-- Error state -->
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center max-w-md">
+          <div class="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-base font-medium text-primary mb-2">{{ error() }}</h3>
+          <p class="text-sm text-muted">Please try refreshing the page</p>
+        </div>
+      </div>
+    } @else if (board()) {
+      <!-- Header -->
+      <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <h1 class="text-[15px] font-semibold text-primary">{{ board()!.name }}</h1>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <app-input placeholder="Search cards..." class="w-64"></app-input>
+            <app-button variant="primary" size="sm">New Card</app-button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Board toolbar -->
+      <div class="bg-void px-6 py-3 border-b border-subtle flex items-center gap-4 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-muted">Filter:</span>
+          <button class="px-2.5 py-1 text-xs text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors">
+            All cards
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 ml-auto">
+          <span class="text-xs text-muted">{{ getTotalCardCount() }} cards</span>
+        </div>
+      </div>
+
+      <!-- Board columns -->
+      <main class="flex-1 p-6 overflow-x-auto">
+        <div
+          cdkDropList
+          cdkDropListOrientation="horizontal"
+          [cdkDropListData]="columns()"
+          (cdkDropListDropped)="dropColumn($event)"
+          class="flex gap-6 min-w-max items-start"
+        >
+          <div cdkDropListGroup class="contents">
+            @for (column of columns(); track column.id; let i = $index) {
+              <div cdkDrag class="flex flex-col w-72 shrink-0">
+                <!-- Column drag placeholder -->
+                <div *cdkDragPlaceholder class="w-72 h-full min-h-[200px] bg-accent/15 border-2 border-dashed border-accent/40 rounded-lg"></div>
+
+                <!-- Column header (drag handle) -->
+                <div cdkDragHandle class="flex items-center gap-2.5 mb-4 px-0.5 group relative">
+                  <div [class]="'w-2 h-2 rounded-full ' + getAccentClass(i)"></div>
+
+                  @if (editingColumnId() === column.id) {
+                    <!-- Inline edit mode -->
+                    <input
+                      type="text"
+                      [(ngModel)]="editingColumnName"
+                      (keyup.enter)="saveColumnName(column.id)"
+                      (keyup.escape)="cancelEditColumn()"
+                      (blur)="saveColumnName(column.id)"
+                      class="flex-1 px-2 py-1 text-[13px] bg-surface text-primary border border-accent rounded focus:outline-none"
+                      autofocus
+                    />
+                  } @else {
+                    <h2 class="text-[13px] font-medium text-primary uppercase">{{ column.name }}</h2>
+                  }
+
+                  <span class="text-xs text-muted tabular-nums">{{ cardsByColumn()[column.id]?.length || 0 }}</span>
+
+                  <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      (click)="toggleColumnMenu(column.id)"
+                      class="p-1 hover:bg-surface rounded transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-muted">
+                        <circle cx="9" cy="5" r="1.5"/>
+                        <circle cx="9" cy="12" r="1.5"/>
+                        <circle cx="9" cy="19" r="1.5"/>
+                        <circle cx="15" cy="5" r="1.5"/>
+                        <circle cx="15" cy="12" r="1.5"/>
+                        <circle cx="15" cy="19" r="1.5"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- Column menu dropdown -->
+                  @if (columnMenuOpen() === column.id) {
+                    <div class="absolute right-0 top-8 bg-surface border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+                      <button
+                        (click)="startEditColumn(column)"
+                        class="w-full px-3 py-2 text-left text-[13px] text-primary hover:bg-surface-elevated transition-colors"
+                      >
+                        Rename
+                      </button>
+                      <button
+                        (click)="deleteColumn(column.id)"
+                        class="w-full px-3 py-2 text-left text-[13px] text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  }
+                </div>
+
+                <!-- Cards container (drop zone) -->
+                <div
+                  cdkDropList
+                  [id]="column.id"
+                  [cdkDropListData]="cardsByColumn()[column.id]"
+                  [cdkDropListConnectedTo]="columnIds()"
+                  (cdkDropListDropped)="dropCard($event, column.id)"
+                  class="flex flex-col gap-2 min-h-[100px] rounded-lg transition-colors"
+                >
+                  @for (card of cardsByColumn()[column.id]; track card.id) {
+                    <div
+                      cdkDrag
+                      [cdkDragData]="card"
+                      (click)="selectCard(card)"
+                      class="bg-surface border border-subtle rounded-lg p-3 hover:border-cyan-500/50 transition-colors cursor-pointer"
+                    >
+                      <div *cdkDragPlaceholder class="h-full min-h-[60px] bg-cyan-500/15 border-2 border-dashed border-cyan-500/50 rounded-lg"></div>
+                      <h3 class="text-[13px] font-medium text-primary">{{ card.title }}</h3>
+                      @if (card.description) {
+                        <div class="mt-2 flex items-center">
+                          <svg class="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                          </svg>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <!-- Inline add card form -->
+                  @if (addingCardColumnId() === column.id) {
+                    <div class="relative z-20 bg-surface border border-subtle rounded-lg p-3">
+                      <input
+                        type="text"
+                        [(ngModel)]="newCardTitle"
+                        (keyup.enter)="saveNewCard(column.id)"
+                        (keyup.escape)="cancelAddCard()"
+                        placeholder="Card title..."
+                        class="w-full px-0 py-0 text-[13px] bg-transparent text-primary placeholder:text-muted border-none focus:outline-none mb-2"
+                        autofocus
+                      />
+                      <div class="flex gap-1.5">
+                        <button
+                          (click)="saveNewCard(column.id)"
+                          [disabled]="!newCardTitle().trim()"
+                          class="p-1 bg-cyan-500 text-white rounded hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title="Add card"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                        </button>
+                        <button
+                          (click)="cancelAddCard()"
+                          class="p-1 bg-red-500/10 text-red-400 rounded hover:bg-red-500/20 transition-colors"
+                          title="Cancel"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Add card button -->
+                <button
+                  (click)="openAddCard(column.id)"
+                  class="mt-2 py-2 w-full text-[13px] text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150"
+                >
+                  + Add card
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Add column button / form -->
+          @if (isAddingColumn()) {
+            <div class="w-72 shrink-0 bg-surface border border-subtle rounded-lg p-3">
+              <input
+                type="text"
+                [(ngModel)]="newColumnName"
+                (keyup.enter)="addColumn()"
+                (keyup.escape)="cancelAddColumn()"
+                placeholder="Column name..."
+                class="w-full px-3 py-2 text-[13px] bg-void text-primary placeholder:text-muted border border-dim rounded-lg focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors mb-2"
+                autofocus
+              />
+              <div class="flex gap-2">
+                <button
+                  (click)="addColumn()"
+                  [disabled]="!newColumnName().trim()"
+                  class="flex-1 px-3 py-1.5 text-[13px] bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Add
+                </button>
+                <button
+                  (click)="cancelAddColumn()"
+                  class="flex-1 px-3 py-1.5 text-[13px] text-secondary bg-surface-elevated rounded-lg hover:bg-surface transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          } @else {
+            <button
+              (click)="openAddColumn()"
+              class="w-72 shrink-0 py-3 text-[13px] text-muted border border-dashed border-dim rounded-lg hover:border-secondary hover:text-secondary hover:bg-surface/50 transition-colors duration-150"
+            >
+              + Add column
+            </button>
+          }
+        </div>
+      </main>
+    }
+
+<!-- Backdrop for inline add card -->
+@if (addingCardColumnId()) {
+  <div class="fixed inset-0 z-10" (click)="cancelAddCard()"></div>
+}

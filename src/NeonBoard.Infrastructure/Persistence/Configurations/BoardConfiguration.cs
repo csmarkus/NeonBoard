@@ -25,7 +25,8 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .IsRequired();
 
         builder.Property(b => b.UpdatedAt)
-            .IsRequired();
+            .IsRequired()
+            .IsConcurrencyToken(false);
 
         builder.HasIndex(b => b.ProjectId);
 
@@ -41,6 +42,9 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             column.WithOwner().HasForeignKey("BoardId");
 
             column.HasKey(c => c.Id);
+
+            column.Property(c => c.Id)
+                .ValueGeneratedNever();
 
             column.Property(c => c.Name)
                 .IsRequired()
@@ -66,6 +70,9 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             card.WithOwner().HasForeignKey("BoardId");
 
             card.HasKey(c => c.Id);
+
+            card.Property(c => c.Id)
+                .ValueGeneratedNever();
 
             card.Property(c => c.ColumnId)
                 .IsRequired();
@@ -94,7 +101,8 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
                 .IsRequired();
 
             card.Property(c => c.UpdatedAt)
-                .IsRequired();
+                .IsRequired()
+                .IsConcurrencyToken(false);
 
             card.HasIndex(c => c.ColumnId);
 
