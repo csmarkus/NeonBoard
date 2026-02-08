@@ -13,7 +13,6 @@ public class BoardRepository : Repository<Board>, IBoardRepository
 
     public async Task<Board?> GetBoardWithDetailsAsync(Guid boardId, CancellationToken cancellationToken = default)
     {
-        // Owned entities (Columns and Cards) are automatically loaded, no need for Include
         return await DbSet
             .FirstOrDefaultAsync(b => b.Id == boardId, cancellationToken);
     }
