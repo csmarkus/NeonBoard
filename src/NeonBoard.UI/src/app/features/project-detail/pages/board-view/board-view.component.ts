@@ -55,8 +55,8 @@ export class BoardViewComponent implements OnInit {
 
   // Card operations state
   selectedCard = signal<Card | null>(null);
-  isAddingCard = signal<boolean>(false);
   addingCardColumnId = signal<string | null>(null);
+  newCardTitle = signal<string>('');
 
   // Computed values
   columns = computed(() => this.board()?.columns ?? []);
@@ -255,18 +255,32 @@ export class BoardViewComponent implements OnInit {
   }
 
   openAddCard(columnId: string): void {
-    this.isAddingCard.set(true);
     this.addingCardColumnId.set(columnId);
+    this.newCardTitle.set('');
   }
 
-  closeAddCard(): void {
-    this.isAddingCard.set(false);
+  cancelAddCard(): void {
     this.addingCardColumnId.set(null);
+    this.newCardTitle.set('');
   }
 
-  onCardCreated(): void {
-    this.closeAddCard();
-    this.loadBoard();
+  saveNewCard(columnId: string): void {
+    const title = this.newCardTitle().trim();
+    if (!title) return;
+
+    this.cardService.addCard(this.projectId(), this.boardId(), {
+      columnId,
+      title,
+      description: ''
+    }).subscribe({
+      next: () => {
+        this.cancelAddCard();
+        this.loadBoard();
+      },
+      error: (err) => {
+        console.error('Error adding card:', err);
+      }
+    });
   }
 
   onCardUpdated(): void {
