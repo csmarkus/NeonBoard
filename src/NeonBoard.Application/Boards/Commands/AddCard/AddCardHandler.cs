@@ -42,8 +42,6 @@ public class AddCardHandler : IRequestHandler<AddCardCommand, CardDto>
 
         var cardId = board.AddCard(request.ColumnId, request.Title, request.Description ?? string.Empty);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         var card = board.Cards.First(c => c.Id == cardId);
         return new CardDto(
             card.Id,

@@ -41,8 +41,6 @@ public class MoveCardHandler : IRequestHandler<MoveCardCommand, Unit>
 
         board.MoveCard(request.CardId, request.TargetColumnId, request.TargetPosition);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         return Unit.Value;
     }
 }

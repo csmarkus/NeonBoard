@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Board, CreateBoardRequest } from '../models/board.model';
+import { Board, BoardDetails, CreateBoardRequest } from '../models/board.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,10 @@ export class BoardService {
 
   getBoardsByProject(projectId: string): Observable<Board[]> {
     return this.http.get<Board[]>(`${this.apiUrl}/projects/${projectId}/boards`);
+  }
+
+  getBoardDetails(projectId: string, boardId: string): Observable<BoardDetails> {
+    return this.http.get<BoardDetails>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}`);
   }
 
   createBoard(projectId: string, request: CreateBoardRequest): Observable<Board> {

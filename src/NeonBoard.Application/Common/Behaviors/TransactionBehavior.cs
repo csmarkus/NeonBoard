@@ -25,7 +25,6 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
     {
         var requestName = typeof(TRequest).Name;
 
-        // Skip transaction for queries (by convention, queries are read-only and don't need transactions)
         if (requestName.EndsWith("Query"))
         {
             return await next();

@@ -48,8 +48,6 @@ public class DeleteColumnHandler : IRequestHandler<DeleteColumnCommand, Unit>
 
         board.DeleteColumn(request.ColumnId, null);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         return Unit.Value;
     }
 }

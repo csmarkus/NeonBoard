@@ -41,8 +41,6 @@ public class UpdateCardHandler : IRequestHandler<UpdateCardCommand, Unit>
 
         board.UpdateCard(request.CardId, request.Title, request.Description ?? string.Empty);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         return Unit.Value;
     }
 }

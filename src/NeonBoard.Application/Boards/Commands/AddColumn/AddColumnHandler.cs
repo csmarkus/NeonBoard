@@ -42,8 +42,6 @@ public class AddColumnHandler : IRequestHandler<AddColumnCommand, ColumnDto>
 
         var columnId = board.AddColumn(request.Name);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         var column = board.Columns.First(c => c.Id == columnId);
         return new ColumnDto(
             column.Id,

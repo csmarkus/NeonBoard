@@ -15,4 +15,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { animation: 'ProjectPage' }
   },
+  {
+    path: 'project/:projectId/b/:boardId',
+    loadComponent: () => import('./features/project-detail/pages/board-view/board-view.component').then(m => m.BoardViewComponent),
+    canActivate: [authGuard],
+    data: { animation: 'BoardPage' }
+  },
 ];

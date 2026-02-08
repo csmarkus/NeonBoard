@@ -63,7 +63,7 @@
           <!-- Boards grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             @for (board of boards(); track board.id; let i = $index) {
-              <app-board-card [board]="board" [index]="i"></app-board-card>
+              <app-board-card [board]="board" [index]="i" [projectId]="projectId()"></app-board-card>
             }
           </div>
         }

@@ -41,8 +41,6 @@ public class ReorderColumnsHandler : IRequestHandler<ReorderColumnsCommand, Unit
 
         board.ReorderColumns(request.ColumnIds);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         return Unit.Value;
     }
 }

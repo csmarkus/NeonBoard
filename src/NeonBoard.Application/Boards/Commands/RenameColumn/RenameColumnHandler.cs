@@ -41,8 +41,6 @@ public class RenameColumnHandler : IRequestHandler<RenameColumnCommand, Unit>
 
         board.RenameColumn(request.ColumnId, request.NewName);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         return Unit.Value;
     }
 }

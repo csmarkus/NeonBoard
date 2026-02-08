@@ -41,8 +41,6 @@ public class DeleteCardHandler : IRequestHandler<DeleteCardCommand, Unit>
 
         board.DeleteCard(request.CardId);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
-
         return Unit.Value;
     }
 }
