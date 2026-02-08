@@ -1,3 +1,6 @@
+using NeonBoard.Application.Columns.DTOs;
+using NeonBoard.Application.Cards.DTOs;
+
 namespace NeonBoard.Application.Boards.DTOs;
 
 public record BoardDetailsDto(
