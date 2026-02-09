@@ -32,7 +32,7 @@
   </nav>
 
   <!-- Project nav (only show when on a project) -->
-  @if (projectId) {
+  @if (projectId()) {
     <nav class="px-3 py-2 mt-2 flex-1">
       @if (!collapsed) {
         <span class="px-3 text-[11px] font-medium text-muted uppercase tracking-wider">Project</span>
@@ -41,7 +41,7 @@
         <li>
           <div class="flex items-center">
             <a
-              [routerLink]="['/project', projectId]"
+              [routerLink]="['/project', projectId()]"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{exact: true}"
               #boardsLink="routerLinkActive"
@@ -71,7 +71,7 @@
               @for (board of boards(); track board.id) {
                 <li>
                   <a
-                    [routerLink]="['/project', projectId, 'b', board.id]"
+                    [routerLink]="['/project', projectId(), 'b', board.id]"
                     [class]="getNavItemClasses(isBoardActive(board.id)) + ' pl-3'"
                   >
                     <span class="text-[13px] truncate">{{ board.name }}</span>
@@ -94,7 +94,7 @@
   }
 
   <!-- Spacer when no project nav -->
-  @if (!projectId) {
+  @if (!projectId()) {
     <div class="flex-1"></div>
   }
 

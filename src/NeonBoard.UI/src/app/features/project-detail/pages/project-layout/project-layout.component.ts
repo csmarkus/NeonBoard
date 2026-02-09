@@ -1,7 +1,6 @@
 import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, RouterOutlet, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { filter } from 'rxjs/operators';
 import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
 import { CreateBoardDrawerComponent } from '../../components/create-board-drawer/create-board-drawer.component';
 import { CardDrawerComponent } from '../../components/card-drawer/card-drawer.component';
@@ -22,14 +21,7 @@ import { BoardService } from '../../services/board.service';
       <app-sidebar [projectId]="projectId()"></app-sidebar>
 
       <!-- Content area (router outlet) -->
-      <div class="flex-1 flex flex-col min-w-0 relative">
-        <!-- Loading overlay -->
-        @if (isNavigating()) {
-          <div class="absolute inset-0 bg-void z-[100] flex items-center justify-center">
-            <div class="inline-block w-8 h-8 border-4 border-accent/20 border-t-accent rounded-full animate-spin"></div>
-          </div>
-        }
-
+      <div class="flex-1 flex flex-col min-w-0">
         <router-outlet></router-outlet>
       </div>
     </div>
@@ -56,13 +48,11 @@ import { BoardService } from '../../services/board.service';
 })
 export class ProjectLayoutComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private boardService = inject(BoardService);
 
   protected drawerService = inject(DrawerService);
 
   projectId = signal<string>('');
-  isNavigating = signal<boolean>(false);
 
   ngOnInit(): void {
     // Set projectId once on init
@@ -70,31 +60,6 @@ export class ProjectLayoutComponent implements OnInit {
     if (id) {
       this.projectId.set(id);
     }
-
-    // Listen to router events for loading state - only for child routes
-    let lastNavigatingState = false;
-    this.router.events.pipe(
-      filter(event =>
-        event instanceof NavigationStart ||
-        event instanceof NavigationEnd ||
-        event instanceof NavigationCancel ||
-        event instanceof NavigationError
-      )
-    ).subscribe(event => {
-      if (event instanceof NavigationStart) {
-        // Only show loading for child route navigations (within the same project)
-        const currentProjectId = this.route.snapshot.paramMap.get('projectId');
-        if (event.url.includes(`/project/${currentProjectId}`) && !lastNavigatingState) {
-          lastNavigatingState = true;
-          this.isNavigating.set(true);
-        }
-      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
-        if (lastNavigatingState) {
-          lastNavigatingState = false;
-          this.isNavigating.set(false);
-        }
-      }
-    });
   }
 
   onBoardCreated(): void {

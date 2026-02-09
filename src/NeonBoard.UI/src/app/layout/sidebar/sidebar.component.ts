@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';

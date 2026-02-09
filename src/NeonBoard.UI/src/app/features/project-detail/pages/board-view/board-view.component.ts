@@ -93,27 +93,29 @@ export class BoardViewComponent implements OnInit {
       this.projectId.set(projectId);
     }
 
-    // Subscribe to boardId changes
+    // Subscribe to boardId changes - show loading for route transitions
     this.route.paramMap.subscribe(params => {
       const boardId = params.get('boardId');
       if (boardId) {
         this.boardId.set(boardId);
-        this.loadBoard();
+        this.loadBoard(true);
       }
     });
 
-    // Subscribe to card updates/deletes to reload board
+    // Subscribe to card updates/deletes to reload board silently
     this.drawerService.cardUpdated$.subscribe(() => {
-      this.loadBoard();
+      this.loadBoard(false);
     });
 
     this.drawerService.cardDeleted$.subscribe(() => {
-      this.loadBoard();
+      this.loadBoard(false);
     });
   }
 
-  private loadBoard(): void {
-    this.isLoading.set(true);
+  private loadBoard(showLoading = true): void {
+    if (showLoading) {
+      this.isLoading.set(true);
+    }
     this.error.set(null);
 
     this.boardService.getBoardDetails(this.projectId(), this.boardId()).subscribe({
@@ -153,7 +155,7 @@ export class BoardViewComponent implements OnInit {
     this.columnService.reorderColumns(this.projectId(), this.boardId(), { columnIds }).subscribe({
       error: (err) => {
         console.error('Error reordering columns:', err);
-        this.loadBoard(); // Reload on error
+        this.loadBoard(false); // Reload on error
       }
     });
   }
@@ -184,7 +186,7 @@ export class BoardViewComponent implements OnInit {
     }).subscribe({
       error: (err) => {
         console.error('Error moving card:', err);
-        this.loadBoard(); // Reload on error
+        this.loadBoard(false); // Reload on error
       }
     });
   }
@@ -207,7 +209,7 @@ export class BoardViewComponent implements OnInit {
     this.columnService.addColumn(this.projectId(), this.boardId(), { name }).subscribe({
       next: () => {
         this.cancelAddColumn();
-        this.loadBoard();
+        this.loadBoard(false);
       },
       error: (err) => {
         console.error('Error adding column:', err);
@@ -233,7 +235,7 @@ export class BoardViewComponent implements OnInit {
     this.columnService.renameColumn(this.projectId(), this.boardId(), columnId, { newName }).subscribe({
       next: () => {
         this.cancelEditColumn();
-        this.loadBoard();
+        this.loadBoard(false);
       },
       error: (err) => {
         console.error('Error renaming column:', err);
@@ -245,7 +247,7 @@ export class BoardViewComponent implements OnInit {
     this.columnService.deleteColumn(this.projectId(), this.boardId(), columnId).subscribe({
       next: () => {
         this.columnMenuOpen.set(null);
-        this.loadBoard();
+        this.loadBoard(false);
       },
       error: (err) => {
         console.error('Error deleting column:', err);
@@ -285,7 +287,7 @@ export class BoardViewComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.cancelAddCard();
-        this.loadBoard();
+        this.loadBoard(false);
       },
       error: (err) => {
         console.error('Error adding card:', err);
