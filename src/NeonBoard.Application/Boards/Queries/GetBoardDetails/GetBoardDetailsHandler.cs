@@ -1,5 +1,7 @@
 using MediatR;
 using NeonBoard.Application.Boards.DTOs;
+using NeonBoard.Application.Cards.DTOs;
+using NeonBoard.Application.Columns.DTOs;
 using NeonBoard.Application.Common.Exceptions;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards;

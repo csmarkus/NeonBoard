@@ -37,7 +37,7 @@ interface NavItem {
   templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent {
-  @Input() projectId?: string;
+  projectId = input.required<string>();
 
   protected auth = inject(AuthService);
   private boardService = inject(BoardService);
@@ -65,7 +65,7 @@ export class SidebarComponent {
 
   constructor() {
     effect(() => {
-      const currentProjectId = this.projectId;
+      const currentProjectId = this.projectId();
       if (currentProjectId && currentProjectId !== this.lastLoadedProjectId) {
         this.lastLoadedProjectId = currentProjectId;
         this.loadBoards(currentProjectId);
@@ -77,8 +77,9 @@ export class SidebarComponent {
 
     // Subscribe to board updates
     this.boardService.boardsUpdated$.subscribe(() => {
-      if (this.projectId) {
-        this.loadBoards(this.projectId);
+      const currentProjectId = this.projectId();
+      if (currentProjectId) {
+        this.loadBoards(currentProjectId);
       }
     });
   }
