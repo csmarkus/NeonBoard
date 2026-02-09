@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -11,6 +11,7 @@ import { BoardService } from '../../services/board.service';
 import { ColumnService } from '../../services/column.service';
 import { CardService } from '../../services/card.service';
 import { DrawerService } from '../../services/drawer.service';
+import { ProjectService } from '../../../projects/services/project.service';
 import { BoardDetails } from '../../models/board.model';
 import { Column } from '../../models/column.model';
 import { Card } from '../../models/card.model';
@@ -22,6 +23,7 @@ import { Card } from '../../models/card.model';
     CommonModule,
     FormsModule,
     DragDropModule,
+    RouterLink,
     ButtonComponent,
     InputComponent,
     BadgeComponent,
@@ -39,9 +41,11 @@ export class BoardViewComponent implements OnInit {
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
+  private projectService = inject(ProjectService);
 
   projectId = signal<string>('');
   boardId = signal<string>('');
+  projectName = signal<string>('');
   board = signal<BoardDetails | null>(null);
   isLoading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -91,6 +95,9 @@ export class BoardViewComponent implements OnInit {
     const projectId = this.route.parent?.snapshot.paramMap.get('projectId');
     if (projectId) {
       this.projectId.set(projectId);
+      this.projectService.getProject(projectId).subscribe({
+        next: (project) => this.projectName.set(project.name),
+      });
     }
 
     // Subscribe to boardId changes - show loading for route transitions
