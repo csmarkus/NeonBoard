@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using NeonBoard.Api.Constants;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Users;
 
@@ -25,12 +26,10 @@ public sealed class CurrentUserService : ICurrentUserService
         ?? _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
 
     public string? Email =>
-        _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value
-        ?? _httpContextAccessor.HttpContext?.User?.FindFirst("email")?.Value;
+        _httpContextAccessor.HttpContext?.User?.FindFirst(Auth0Claims.Email)?.Value;
 
     public string? Name =>
-        _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value
-        ?? _httpContextAccessor.HttpContext?.User?.FindFirst("name")?.Value;
+        _httpContextAccessor.HttpContext?.User?.FindFirst(Auth0Claims.Name)?.Value;
 
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
