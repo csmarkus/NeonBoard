@@ -96,6 +96,9 @@ public class Program
 
         app.UseCors();
 
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -111,6 +114,8 @@ public class Program
         app.MapBoardEndpoints();
         app.MapColumnEndpoints();
         app.MapCardEndpoints();
+
+        app.MapFallbackToFile("index.html");
 
         app.Run();
     }
