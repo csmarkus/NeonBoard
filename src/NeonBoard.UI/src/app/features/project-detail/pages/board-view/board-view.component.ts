@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, afterNextRender, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -42,6 +42,7 @@ export class BoardViewComponent implements OnInit {
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
   private projectService = inject(ProjectService);
+  private injector = inject(Injector);
 
   projectId = signal<string>('');
   boardId = signal<string>('');
@@ -276,6 +277,14 @@ export class BoardViewComponent implements OnInit {
   openAddCard(columnId: string): void {
     this.addingCardColumnId.set(columnId);
     this.newCardTitle.set('');
+
+    // Focus the input after the DOM updates
+    afterNextRender(() => {
+      const input = document.querySelector(`input[placeholder="Card title..."]`) as HTMLInputElement;
+      if (input) {
+        input.focus();
+      }
+    }, { injector: this.injector });
   }
 
   cancelAddCard(): void {
