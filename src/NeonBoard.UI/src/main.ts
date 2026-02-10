@@ -1,9 +1,10 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
-import { provideAuth0 } from '@auth0/auth0-angular';
+import { authHttpInterceptorFn, provideAuth0 } from '@auth0/auth0-angular';
 import { mergeApplicationConfig } from '@angular/core';
 import { environment } from './environments/environment';
 import { App } from './app/app';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 if (!environment.auth0.domain || !environment.auth0.clientId) {
   console.error("Auth0 configuration missing. Please check your environment.ts file.");
@@ -27,21 +28,19 @@ const auth0Config = mergeApplicationConfig(appConfig, {
       clientId: environment.auth0.clientId,
       authorizationParams: {
         redirect_uri: window.location.origin,
-        audience: `https://${environment.auth0.domain}/api/v2/`
+        audience: environment.auth0.audience
       },
       httpInterceptor: {
         allowedList: [
           {
-            uri: `${environment.apiUrl}/*`,
-            tokenOptions: {
-              authorizationParams: {
-                audience: `https://${environment.auth0.domain}/api/v2/`
-              }
-            }
+            uri: `${environment.apiUrl}/*`
           }
         ]
       }
-    })
+    }),
+    provideHttpClient(
+      withInterceptors([authHttpInterceptorFn])
+    )
   ]
 });
 

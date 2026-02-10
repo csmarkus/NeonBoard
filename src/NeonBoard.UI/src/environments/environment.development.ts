@@ -3,7 +3,8 @@ export const environment = {
   apiUrl: 'http://localhost:5000/api',
   enableDebugLogging: true,
   auth0: {
-    domain: 'dev-lnslt3fvp0lxebck.us.auth0.com',
-    clientId: 'l8W22ekKdHObNbYjI6dNnn0yEbuqzqCU'
+    domain: 'https://dev-lnslt3fvp0lxebck.us.auth0.com',
+    clientId: 'l8W22ekKdHObNbYjI6dNnn0yEbuqzqCU',
+    audience: 'https://nb.dev.neonboard.app'
   }
 };
