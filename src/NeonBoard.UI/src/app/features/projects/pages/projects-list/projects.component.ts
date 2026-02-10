@@ -5,6 +5,7 @@ import { UserMenuComponent } from '../../../../layout/user-menu/user-menu.compon
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
 import { CreateProjectDrawerComponent } from '../../components/create-project-drawer/create-project-drawer.component';
 import { ProjectService } from '../../services/project.service';
+import { LoadingService } from '../../../../core/services/loading.service';
 import { Project } from '../../models/project.model';
 
 @Component({
@@ -21,6 +22,7 @@ import { Project } from '../../models/project.model';
 })
 export class ProjectsComponent implements OnInit {
   private projectService = inject(ProjectService);
+  private loadingService = inject(LoadingService);
   private cdr = inject(ChangeDetectorRef);
 
   projects: Project[] = [];
@@ -33,15 +35,18 @@ export class ProjectsComponent implements OnInit {
 
   loadProjects(): void {
     this.error = null;
+    this.loadingService.show();
 
     this.projectService.getProjects().subscribe({
       next: (projects) => {
         this.projects = projects;
+        this.loadingService.hide();
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading projects:', err);
         this.error = 'Failed to load projects. Please try again.';
+        this.loadingService.hide();
         this.cdr.detectChanges();
       }
     });
