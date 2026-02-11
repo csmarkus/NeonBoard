@@ -9,6 +9,7 @@
 A modern Kanban project tracking application built with Clean Architecture principles, featuring a .NET 10 backend and Angular frontend.
 
 **Live Demo:** [https://nb.dev.neonboard.app/](https://nb.dev.neonboard.app/)
+**Email/Pass:** test@neonboard.app/neondev123!
 
 ## Overview
 
