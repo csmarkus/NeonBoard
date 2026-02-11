@@ -1,10 +1,10 @@
 # NeonBoard
 
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![Angular](https://img.shields.io/badge/Angular-18+-DD0031?logo=angular)](https://angular.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&style=for-the-badge)](https://dotnet.microsoft.com/)
+[![Angular](https://img.shields.io/badge/Angular-18+-DD0031?logo=angular&style=for-the-badge)](https://angular.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white&style=for-the-badge)](https://www.postgresql.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white&style=for-the-badge)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white&style=for-the-badge)](https://www.docker.com/)
 
 A modern Kanban project tracking application built with Clean Architecture principles, featuring a .NET 10 backend and Angular frontend.
 
