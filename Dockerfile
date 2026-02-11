@@ -11,7 +11,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS api-build
 WORKDIR /app
 
 # Copy project files and restore dependencies (layer caching)
-COPY Directory.Build.props Directory.Packages.props NeonBoard.slnx ./
+COPY Directory.Build.Props Directory.Packages.props NeonBoard.slnx ./
 COPY src/NeonBoard.Api/NeonBoard.Api.csproj src/NeonBoard.Api/
 COPY src/NeonBoard.Application/NeonBoard.Application.csproj src/NeonBoard.Application/
 COPY src/NeonBoard.Domain/NeonBoard.Domain.csproj src/NeonBoard.Domain/
