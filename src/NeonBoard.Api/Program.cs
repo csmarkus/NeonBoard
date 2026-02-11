@@ -85,11 +85,23 @@ public class Program
 
         var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
+        // Apply database migrations on startup
+        using (var scope = app.Services.CreateScope())
         {
-            using var scope = app.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            dbContext.Database.Migrate();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                logger.LogInformation("Applying database migrations...");
+                dbContext.Database.Migrate();
+                logger.LogInformation("Database migrations applied successfully");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while migrating the database");
+                throw;
+            }
         }
 
         app.UseExceptionHandler();
