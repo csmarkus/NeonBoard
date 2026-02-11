@@ -30,5 +30,5 @@ WORKDIR /app
 COPY --from=api-build /app/publish .
 COPY --from=ui-build /app/dist/neonboard/browser wwwroot/
 
-EXPOSE 8080
+EXPOSE 5001
 ENTRYPOINT ["dotnet", "NeonBoard.Api.dll"]
