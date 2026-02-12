@@ -6,6 +6,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { CardComponent } from '../../components/card/card.component';
 import { BoardService } from '../../services/board.service';
 import { ColumnService } from '../../services/column.service';
 import { CardService } from '../../services/card.service';
@@ -25,6 +26,7 @@ import { Card } from '../../models/card.model';
     RouterLink,
     FontAwesomeModule,
     InputComponent,
+    CardComponent,
   ],
   host: {
     class: 'flex flex-col h-full'
