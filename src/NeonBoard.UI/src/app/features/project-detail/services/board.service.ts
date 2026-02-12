@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { Board, BoardDetails, CreateBoardRequest } from '../models/board.model';
+import { Board, BoardDetails, CreateBoardRequest, RenameBoardRequest } from '../models/board.model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +25,18 @@ export class BoardService {
 
   createBoard(projectId: string, request: CreateBoardRequest): Observable<Board> {
     return this.http.post<Board>(`${this.apiUrl}/projects/${projectId}/boards`, request).pipe(
+      tap(() => this.boardsUpdated.next())
+    );
+  }
+
+  renameBoard(projectId: string, boardId: string, request: RenameBoardRequest): Observable<Board> {
+    return this.http.put<Board>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}`, request).pipe(
+      tap(() => this.boardsUpdated.next())
+    );
+  }
+
+  deleteBoard(projectId: string, boardId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}`).pipe(
       tap(() => this.boardsUpdated.next())
     );
   }

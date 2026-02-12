@@ -50,6 +50,16 @@ public sealed class Board : Entity, IAggregateRoot
         return board;
     }
 
+    public void Rename(string newName)
+    {
+        ValidateName(newName);
+
+        Name = newName;
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new BoardRenamedEvent(Id, newName));
+    }
+
     #region Column Operations
 
     public Guid AddColumn(string name)

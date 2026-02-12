@@ -23,3 +23,7 @@ export interface BoardDetails {
 export interface CreateBoardRequest {
   name: string;
 }
+
+export interface RenameBoardRequest {
+  name: string;
+}

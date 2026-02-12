@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { unsavedChangesGuard } from './core/guards/unsaved-changes.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'projects', pathMatch: 'full' },
@@ -23,6 +24,12 @@ export const routes: Routes = [
         path: 'b/:boardId',
         loadComponent: () => import('./features/project-detail/pages/board-view/board-view.component').then(m => m.BoardViewComponent),
         data: { animation: 'BoardPage' }
+      },
+      {
+        path: 'b/:boardId/settings',
+        loadComponent: () => import('./features/project-detail/pages/board-settings/board-settings.component').then(m => m.BoardSettingsComponent),
+        canDeactivate: [unsavedChangesGuard],
+        data: { animation: 'BoardSettingsPage' }
       }
     ]
   },

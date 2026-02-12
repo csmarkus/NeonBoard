@@ -1,6 +1,8 @@
 using MediatR;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Boards.Commands.CreateBoard;
+using NeonBoard.Application.Boards.Commands.DeleteBoard;
+using NeonBoard.Application.Boards.Commands.RenameBoard;
 using NeonBoard.Application.Boards.DTOs;
 using NeonBoard.Application.Boards.Queries.GetBoardsByProject;
 using NeonBoard.Application.Boards.Queries.GetBoardDetails;
@@ -29,6 +31,17 @@ public static class BoardEndpoints
             .WithName("CreateBoard")
             .Produces<BoardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
+
+        group.MapPut("/{boardId:guid}", RenameBoard)
+            .WithName("RenameBoard")
+            .Produces<BoardDto>()
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapDelete("/{boardId:guid}", DeleteBoard)
+            .WithName("DeleteBoard")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> GetBoardsByProject(
@@ -61,5 +74,28 @@ public static class BoardEndpoints
         var command = new CreateBoardCommand(projectId, request.Name);
         var result = await mediator.Send(command, ct);
         return Results.Created($"/api/projects/{projectId}/boards/{result.Id}", result);
+    }
+
+    private static async Task<IResult> RenameBoard(
+        Guid projectId,
+        Guid boardId,
+        RenameBoardRequest request,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new RenameBoardCommand(projectId, boardId, request.Name);
+        var result = await mediator.Send(command, ct);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> DeleteBoard(
+        Guid projectId,
+        Guid boardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new DeleteBoardCommand(projectId, boardId);
+        await mediator.Send(command, ct);
+        return Results.NoContent();
     }
 }
