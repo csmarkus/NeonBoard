@@ -67,127 +67,17 @@
         >
           <div cdkDropListGroup class="contents">
             @for (column of columns(); track column.id; let i = $index) {
-              <div cdkDrag class="flex flex-col w-72 shrink-0 max-h-full">
-                <!-- Column drag placeholder -->
-                <div *cdkDragPlaceholder class="w-72 h-full min-h-[200px] bg-accent/15 border-2 border-dashed border-accent/40 rounded-lg"></div>
-
-                <!-- Column header (drag handle) -->
-                <div cdkDragHandle class="flex items-center gap-2.5 mb-4 px-0.5 group relative">
-                  <div [class]="'w-2 h-2 rounded-full ' + getAccentClass(i)"></div>
-
-                  @if (editingColumnId() === column.id) {
-                    <!-- Inline edit mode -->
-                    <input
-                      type="text"
-                      [(ngModel)]="editingColumnName"
-                      (keyup.enter)="saveColumnName(column.id)"
-                      (keyup.escape)="cancelEditColumn()"
-                      (blur)="saveColumnName(column.id)"
-                      class="flex-1 px-2 py-1 text-sm bg-surface text-primary border border-accent rounded focus:outline-none"
-                      autofocus
-                    />
-                  } @else {
-                    <h2 class="text-sm font-medium text-primary uppercase">{{ column.name }}</h2>
-                  }
-
-                  <span class="text-sm text-muted tabular-nums">{{ cardsByColumn()[column.id]?.length || 0 }}</span>
-
-                  <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      (click)="toggleColumnMenu(column.id)"
-                      class="p-1 hover:bg-surface rounded transition-colors"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-muted">
-                        <circle cx="9" cy="5" r="1.5"/>
-                        <circle cx="9" cy="12" r="1.5"/>
-                        <circle cx="9" cy="19" r="1.5"/>
-                        <circle cx="15" cy="5" r="1.5"/>
-                        <circle cx="15" cy="12" r="1.5"/>
-                        <circle cx="15" cy="19" r="1.5"/>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Column menu dropdown -->
-                  @if (columnMenuOpen() === column.id) {
-                    <div class="absolute right-0 top-8 bg-surface border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
-                      <button
-                        (click)="startEditColumn(column)"
-                        class="w-full px-3 py-2 text-left text-sm text-primary hover:bg-surface-elevated transition-colors"
-                      >
-                        Rename
-                      </button>
-                      <button
-                        (click)="deleteColumn(column.id)"
-                        class="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  }
-                </div>
-
-                <!-- Cards container (drop zone) -->
-                <div
-                  cdkDropList
-                  [id]="column.id"
-                  [cdkDropListData]="cardsByColumn()[column.id]"
-                  [cdkDropListConnectedTo]="columnIds()"
-                  (cdkDropListDropped)="dropCard($event, column.id)"
-                  class="flex flex-col gap-2 min-h-[100px] rounded-lg transition-colors overflow-y-auto flex-1"
-                >
-                  @for (card of cardsByColumn()[column.id]; track card.id) {
-                    <div cdkDrag [cdkDragData]="card">
-                      <div *cdkDragPlaceholder class="h-full min-h-[60px] bg-cyan-500/15 border-2 border-dashed border-cyan-500/50 rounded-lg"></div>
-                      <app-card [card]="card" (cardClick)="selectCard(card)"></app-card>
-                    </div>
-                  }
-
-                  <!-- Inline add card form -->
-                  @if (addingCardColumnId() === column.id) {
-                    <div class="relative z-20 bg-surface border border-subtle rounded-lg p-3">
-                      <input
-                        type="text"
-                        [(ngModel)]="newCardTitle"
-                        (keyup.enter)="saveNewCard(column.id)"
-                        (keyup.escape)="cancelAddCard()"
-                        placeholder="Card title..."
-                        class="w-full px-0 py-0 text-sm bg-transparent text-primary placeholder:text-muted border-none focus:outline-none mb-2"
-                        autofocus
-                      />
-                      <div class="flex gap-1.5">
-                        <button
-                          (click)="saveNewCard(column.id)"
-                          [disabled]="!newCardTitle().trim()"
-                          class="p-1 bg-cyan-500 text-white rounded hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          title="Add card"
-                        >
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
-                        </button>
-                        <button
-                          (click)="cancelAddCard()"
-                          class="p-1 bg-red-500/10 text-red-400 rounded hover:bg-red-500/20 transition-colors"
-                          title="Cancel"
-                        >
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  }
-                </div>
-
-                <!-- Add card button -->
-                <button
-                  (click)="openAddCard(column.id)"
-                  class="mt-2 py-2 w-full text-sm text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150 shrink-0"
-                >
-                  + Add card
-                </button>
-              </div>
+              <app-column
+                [column]="column"
+                [cards]="cardsByColumn()[column.id]"
+                [columnIds]="columnIds()"
+                [accentClass]="getAccentClass(i)"
+                (cardDropped)="onCardDropped($event, column.id)"
+                (columnRenamed)="onColumnRenamed($event)"
+                (columnDeleted)="onColumnDeleted($event)"
+                (cardSelected)="onCardSelected($event)"
+                (cardAdded)="onCardAdded($event)"
+              ></app-column>
             }
           </div>
 
@@ -230,8 +120,3 @@
         </div>
       </main>
     }
-
-<!-- Backdrop for inline add card -->
-@if (addingCardColumnId()) {
-  <div class="fixed inset-0 z-10" (click)="cancelAddCard()"></div>
-}
