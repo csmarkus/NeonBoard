@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div>
       <h2 class="text-lg font-semibold text-primary">Create Project</h2>
-      <p class="text-[13px] text-muted mt-1">Add a new project to organize your tasks</p>
+      <p class="text-sm text-muted mt-1">Add a new project to organize your tasks</p>
     </div>
 
     <!-- Error message -->
@@ -14,22 +14,22 @@
 
     <div class="space-y-4">
       <div>
-        <label class="block text-[13px] text-secondary mb-1.5">Project name</label>
+        <label class="block text-sm text-secondary mb-1.5">Project name</label>
         <input
           type="text"
           [(ngModel)]="newProjectName"
           placeholder="Enter project name..."
-          class="w-full px-3 py-2 text-[13px] bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
+          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
         />
       </div>
 
       <div>
-        <label class="block text-[13px] text-secondary mb-1.5">Description (optional)</label>
+        <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
         <textarea
           [(ngModel)]="newProjectDescription"
           placeholder="What is this project about?"
           rows="3"
-          class="w-full px-3 py-2 text-[13px] bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
+          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
         ></textarea>
       </div>
     </div>

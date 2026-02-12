@@ -9,7 +9,7 @@
   <!-- Header -->
   <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
     <div class="flex items-center">
-      <nav class="flex items-center gap-2 text-[15px]">
+      <nav class="flex items-center gap-2 text-base">
         @if (projectName()) {
           <a [routerLink]="['/project', projectId()]" class="text-muted hover:text-secondary transition-colors">{{ projectName() }}</a>
           <span class="text-muted/50">/</span>
@@ -27,7 +27,7 @@
       <!-- Back link -->
       <a
         [routerLink]="['/project', projectId(), 'b', boardId()]"
-        class="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-primary transition-colors mb-4"
+        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors mb-4"
       >
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -37,7 +37,7 @@
 
       <!-- Content header -->
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-[17px] font-semibold text-primary">Board settings</h2>
+        <h2 class="text-lg font-semibold text-primary">Board settings</h2>
         <app-button
           variant="primary"
           size="sm"
@@ -55,12 +55,12 @@
       <!-- General section -->
       <section class="grid grid-cols-[220px_1fr] gap-12">
         <div>
-          <h2 class="text-[15px] font-semibold text-primary">General</h2>
-          <p class="text-[13px] text-muted mt-1">Manage your board settings.</p>
+          <h2 class="text-base font-semibold text-primary">General</h2>
+          <p class="text-sm text-muted mt-1">Manage your board settings.</p>
         </div>
 
         <div>
-          <label for="board-name" class="block text-[13px] font-medium text-primary mb-1.5">Board name</label>
+          <label for="board-name" class="block text-sm font-medium text-primary mb-1.5">Board name</label>
           <input
             id="board-name"
             type="text"
@@ -68,9 +68,9 @@
             (input)="onNameInput($event)"
             (keyup.enter)="saveChanges()"
             maxlength="100"
-            class="w-full px-3 py-2 text-[13px] bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
+            class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
           />
-          <span class="text-[12px] text-muted mt-1.5">{{ boardName().length }} / 100</span>
+          <span class="text-xs text-muted mt-1.5">{{ boardName().length }} / 100</span>
         </div>
       </section>
 
@@ -79,15 +79,15 @@
       <!-- Danger zone -->
       <section class="grid grid-cols-[220px_1fr] gap-12">
         <div>
-          <h2 class="text-[15px] font-semibold text-red-400">Danger zone</h2>
-          <p class="text-[13px] text-muted mt-1">Irreversible actions for this board.</p>
+          <h2 class="text-base font-semibold text-red-400">Danger zone</h2>
+          <p class="text-sm text-muted mt-1">Irreversible actions for this board.</p>
         </div>
 
         <div class="bg-surface border border-red-500/20 rounded-lg p-5">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-[13px] font-medium text-primary">Delete this board</h3>
-              <p class="text-[12px] text-muted mt-0.5">All columns and cards will be permanently removed.</p>
+              <h3 class="text-sm font-medium text-primary">Delete this board</h3>
+              <p class="text-xs text-muted mt-0.5">All columns and cards will be permanently removed.</p>
             </div>
             <app-button
               variant="danger"

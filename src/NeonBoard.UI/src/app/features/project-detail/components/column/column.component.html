@@ -2,7 +2,7 @@
   <!-- Column header -->
   <div class="flex items-center gap-2.5 mb-4 px-0.5">
     <div [class]="dotClasses"></div>
-    <h2 class="text-[13px] font-medium text-primary">{{ title }}</h2>
+    <h2 class="text-sm font-medium text-primary">{{ title }}</h2>
     @if (count !== undefined) {
       <span class="text-xs text-muted tabular-nums">{{ count }}</span>
     }
@@ -13,7 +13,7 @@
     <ng-content></ng-content>
 
     <!-- Add card button -->
-    <button class="py-2 w-full text-[13px] text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150">
+    <button class="py-2 w-full text-sm text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150">
       + Add card
     </button>
   </div>

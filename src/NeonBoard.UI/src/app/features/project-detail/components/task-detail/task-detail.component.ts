@@ -67,11 +67,11 @@ export class TaskDetailComponent {
   }
 
   getPriorityClasses(): string {
-    return `px-2 py-0.5 text-[11px] rounded-md ${this.priorityStyles[this.task.priority!]}`;
+    return `px-2 py-0.5 text-xs rounded-md ${this.priorityStyles[this.task.priority!]}`;
   }
 
   getTagClasses(tag: string): string {
     const color = this.tagColorMap[tag.toLowerCase()] || 'neutral';
-    return `px-2 py-0.5 text-[11px] rounded-md ${this.tagColorStyles[color]}`;
+    return `px-2 py-0.5 text-xs rounded-md ${this.tagColorStyles[color]}`;
   }
 }

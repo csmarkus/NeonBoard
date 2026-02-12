@@ -15,7 +15,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
           </div>
-          <h3 class="text-base font-medium text-primary mb-2">{{ error() }}</h3>
+          <h3 class="text-sm font-medium text-primary mb-2">{{ error() }}</h3>
           <p class="text-sm text-muted">Please try refreshing the page</p>
         </div>
       </div>
@@ -23,7 +23,7 @@
       <!-- Header -->
       <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
         <div class="flex items-center justify-between">
-          <nav class="flex items-center gap-2 text-[15px]">
+          <nav class="flex items-center gap-2 text-base">
             @if (projectName()) {
               <a [routerLink]="['/project', projectId()]" class="text-muted hover:text-secondary transition-colors">{{ projectName() }}</a>
               <span class="text-muted/50">/</span>
@@ -33,17 +33,6 @@
 
           <div class="flex items-center gap-3">
             <app-input placeholder="Search cards..." class="w-64"></app-input>
-            <a
-              [routerLink]="['/project', projectId(), 'b', boardId(), 'settings']"
-              class="p-2 text-muted hover:text-primary hover:bg-surface rounded-lg transition-colors"
-              aria-label="Board settings"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-            </a>
-            <app-button variant="primary" size="sm">New Card</app-button>
           </div>
         </div>
       </header>
@@ -51,15 +40,20 @@
       <!-- Board toolbar -->
       <div class="bg-void px-6 py-3 border-b border-subtle flex items-center gap-4 shrink-0">
         <div class="flex items-center gap-2">
-          <span class="text-xs text-muted">Filter:</span>
-          <button class="px-2.5 py-1 text-xs text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors">
+          <span class="text-sm text-muted">Filter:</span>
+          <button class="px-2.5 py-1 text-sm text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors">
             All cards
           </button>
         </div>
 
-        <div class="flex items-center gap-2 ml-auto">
-          <span class="text-xs text-muted">{{ getTotalCardCount() }} cards</span>
-        </div>
+        <a
+          [routerLink]="['/project', projectId(), 'b', boardId(), 'settings']"
+          class="flex items-center gap-1.5 ml-auto text-sm text-muted hover:text-primary transition-colors"
+          aria-label="Board settings"
+        >
+          <fa-icon [icon]="faGear" class="text-sm"></fa-icon>
+          <span>Settings</span>
+        </a>
       </div>
 
       <!-- Board columns -->
@@ -89,14 +83,14 @@
                       (keyup.enter)="saveColumnName(column.id)"
                       (keyup.escape)="cancelEditColumn()"
                       (blur)="saveColumnName(column.id)"
-                      class="flex-1 px-2 py-1 text-[13px] bg-surface text-primary border border-accent rounded focus:outline-none"
+                      class="flex-1 px-2 py-1 text-sm bg-surface text-primary border border-accent rounded focus:outline-none"
                       autofocus
                     />
                   } @else {
-                    <h2 class="text-[13px] font-medium text-primary uppercase">{{ column.name }}</h2>
+                    <h2 class="text-sm font-medium text-primary uppercase">{{ column.name }}</h2>
                   }
 
-                  <span class="text-xs text-muted tabular-nums">{{ cardsByColumn()[column.id]?.length || 0 }}</span>
+                  <span class="text-sm text-muted tabular-nums">{{ cardsByColumn()[column.id]?.length || 0 }}</span>
 
                   <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
@@ -119,13 +113,13 @@
                     <div class="absolute right-0 top-8 bg-surface border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
                       <button
                         (click)="startEditColumn(column)"
-                        class="w-full px-3 py-2 text-left text-[13px] text-primary hover:bg-surface-elevated transition-colors"
+                        class="w-full px-3 py-2 text-left text-sm text-primary hover:bg-surface-elevated transition-colors"
                       >
                         Rename
                       </button>
                       <button
                         (click)="deleteColumn(column.id)"
-                        class="w-full px-3 py-2 text-left text-[13px] text-red-400 hover:bg-red-500/10 transition-colors"
+                        class="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                       >
                         Delete
                       </button>
@@ -150,7 +144,7 @@
                       class="bg-surface border border-subtle rounded-lg p-3 hover:border-cyan-500/50 transition-colors cursor-pointer"
                     >
                       <div *cdkDragPlaceholder class="h-full min-h-[60px] bg-cyan-500/15 border-2 border-dashed border-cyan-500/50 rounded-lg"></div>
-                      <h3 class="text-[13px] font-medium text-primary">{{ card.title }}</h3>
+                      <h3 class="text-sm font-medium text-primary">{{ card.title }}</h3>
                       @if (card.description) {
                         <div class="mt-2 flex items-center">
                           <svg class="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +164,7 @@
                         (keyup.enter)="saveNewCard(column.id)"
                         (keyup.escape)="cancelAddCard()"
                         placeholder="Card title..."
-                        class="w-full px-0 py-0 text-[13px] bg-transparent text-primary placeholder:text-muted border-none focus:outline-none mb-2"
+                        class="w-full px-0 py-0 text-sm bg-transparent text-primary placeholder:text-muted border-none focus:outline-none mb-2"
                         autofocus
                       />
                       <div class="flex gap-1.5">
@@ -201,7 +195,7 @@
                 <!-- Add card button -->
                 <button
                   (click)="openAddCard(column.id)"
-                  class="mt-2 py-2 w-full text-[13px] text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150 shrink-0"
+                  class="mt-2 py-2 w-full text-sm text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150 shrink-0"
                 >
                   + Add card
                 </button>
@@ -218,20 +212,20 @@
                 (keyup.enter)="addColumn()"
                 (keyup.escape)="cancelAddColumn()"
                 placeholder="Column name..."
-                class="w-full px-3 py-2 text-[13px] bg-void text-primary placeholder:text-muted border border-dim rounded-lg focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors mb-2"
+                class="w-full px-3 py-2 text-sm bg-void text-primary placeholder:text-muted border border-dim rounded-lg focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors mb-2"
                 autofocus
               />
               <div class="flex gap-2">
                 <button
                   (click)="addColumn()"
                   [disabled]="!newColumnName().trim()"
-                  class="flex-1 px-3 py-1.5 text-[13px] bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  class="flex-1 px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Add
                 </button>
                 <button
                   (click)="cancelAddColumn()"
-                  class="flex-1 px-3 py-1.5 text-[13px] text-secondary bg-surface-elevated rounded-lg hover:bg-surface transition-colors"
+                  class="flex-1 px-3 py-1.5 text-sm text-secondary bg-surface-elevated rounded-lg hover:bg-surface transition-colors"
                 >
                   Cancel
                 </button>
@@ -240,7 +234,7 @@
           } @else {
             <button
               (click)="openAddColumn()"
-              class="w-72 shrink-0 py-3 text-[13px] text-muted border border-dashed border-dim rounded-lg hover:border-secondary hover:text-secondary hover:bg-surface/50 transition-colors duration-150"
+              class="w-72 shrink-0 py-3 text-sm text-muted border border-dashed border-dim rounded-lg hover:border-secondary hover:text-secondary hover:bg-surface/50 transition-colors duration-150"
             >
               + Add column
             </button>

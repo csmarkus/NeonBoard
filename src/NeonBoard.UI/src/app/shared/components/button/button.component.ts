@@ -24,7 +24,7 @@ export class ButtonComponent {
 
   private sizeStyles: Record<ButtonSize, string> = {
     sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-[13px]',
+    md: 'px-4 py-2 text-sm',
   };
 
   get buttonClasses(): string {

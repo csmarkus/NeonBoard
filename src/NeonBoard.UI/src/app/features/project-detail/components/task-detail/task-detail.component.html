@@ -11,13 +11,13 @@
   </div>
 
   <!-- Meta -->
-  <div class="flex flex-wrap gap-4 text-[13px]">
+  <div class="flex flex-wrap gap-4 text-sm">
     @if (task.assignee) {
       <div class="flex items-center gap-2">
         <span class="text-muted">Assignee</span>
         <div class="flex items-center gap-2">
           <div class="w-6 h-6 rounded-full bg-surface-elevated flex items-center justify-center">
-            <span class="text-[11px] text-secondary font-medium">
+            <span class="text-xs text-secondary font-medium">
               {{ task.assignee.charAt(0).toUpperCase() }}
             </span>
           </div>
@@ -49,8 +49,8 @@
   <!-- Description -->
   @if (task.description) {
     <div class="pt-4 border-t border-subtle">
-      <h3 class="text-[13px] font-medium text-secondary mb-2">Description</h3>
-      <p class="text-[13px] text-primary whitespace-pre-wrap leading-relaxed">
+      <h3 class="text-sm font-medium text-secondary mb-2">Description</h3>
+      <p class="text-sm text-primary whitespace-pre-wrap leading-relaxed">
         {{ task.description }}
       </p>
     </div>
@@ -59,23 +59,23 @@
   <!-- Comments -->
   @if (task.comments && task.comments.length > 0) {
     <div class="pt-4 border-t border-subtle">
-      <h3 class="text-[13px] font-medium text-secondary mb-4">
+      <h3 class="text-sm font-medium text-secondary mb-4">
         Comments ({{ task.comments.length }})
       </h3>
       <div class="space-y-4">
         @for (comment of task.comments; track comment.id) {
           <div class="flex gap-3">
             <div class="w-7 h-7 rounded-full bg-surface-elevated flex items-center justify-center shrink-0">
-              <span class="text-[11px] text-secondary font-medium">
+              <span class="text-xs text-secondary font-medium">
                 {{ comment.author.charAt(0).toUpperCase() }}
               </span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <span class="text-[13px] font-medium text-primary">{{ comment.author }}</span>
+                <span class="text-sm font-medium text-primary">{{ comment.author }}</span>
                 <span class="text-xs text-muted">{{ comment.createdAt }}</span>
               </div>
-              <p class="text-[13px] text-secondary">{{ comment.content }}</p>
+              <p class="text-sm text-secondary">{{ comment.content }}</p>
             </div>
           </div>
         }

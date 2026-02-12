@@ -1,12 +1,12 @@
 <app-modal [open]="open()" [gradientVariant]="gradientVariant()" (close)="onCancel()">
   <!-- Header -->
   <div class="px-6 py-4 border-b border-subtle">
-    <h3 class="text-[15px] font-semibold text-primary">{{ title() }}</h3>
+    <h3 class="text-base font-semibold text-primary">{{ title() }}</h3>
   </div>
 
   <!-- Content -->
   <div class="px-6 py-4">
-    <p class="text-[14px] text-secondary leading-relaxed">{{ message() }}</p>
+    <p class="text-sm text-secondary leading-relaxed">{{ message() }}</p>
   </div>
 
   <!-- Footer -->

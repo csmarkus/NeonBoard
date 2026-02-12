@@ -5,14 +5,14 @@
       <span class="text-accent font-semibold text-sm">N</span>
     </a>
     @if (!collapsed) {
-      <span class="text-[15px] font-semibold text-primary">NeonBoard</span>
+      <span class="text-base font-semibold text-primary">NeonBoard</span>
     }
   </div>
 
   <!-- Main nav -->
   <nav class="px-3 py-2">
     @if (!collapsed) {
-      <span class="px-3 text-[11px] font-medium text-muted uppercase tracking-wider">Main</span>
+      <span class="px-3 text-xs font-medium text-muted uppercase tracking-wider">Main</span>
     }
     <ul class="mt-2 space-y-1">
       <li>
@@ -22,9 +22,9 @@
           #projectsLink="routerLinkActive"
           [class]="getNavItemClasses(projectsLink.isActive)"
         >
-          <fa-icon [icon]="faFolderOpen" class="w-[18px] text-center"></fa-icon>
+          <fa-icon [icon]="faFolderOpen" class="w-4 text-center"></fa-icon>
           @if (!collapsed) {
-            <span class="text-[13px]">Projects</span>
+            <span class="text-sm font-semibold">Projects</span>
           }
         </a>
       </li>
@@ -35,7 +35,7 @@
   @if (projectId()) {
     <nav class="px-3 py-2 mt-2 flex-1">
       @if (!collapsed) {
-        <span class="px-3 text-[11px] font-medium text-muted uppercase tracking-wider">Project</span>
+        <span class="px-3 text-xs font-medium text-muted uppercase tracking-wider">Project</span>
       }
       <ul class="mt-2 space-y-1">
         <li>
@@ -47,9 +47,9 @@
               #boardsLink="routerLinkActive"
               [class]="getNavItemClasses(boardsLink.isActive) + ' flex-1'"
             >
-              <fa-icon [icon]="faGripVertical" class="w-[18px] text-center"></fa-icon>
+              <fa-icon [icon]="faGripVertical" class="w-4 text-center"></fa-icon>
               @if (!collapsed) {
-                <span class="text-[13px] flex-1">Boards</span>
+                <span class="text-sm font-semibold flex-1">Boards</span>
               }
             </a>
             @if (!collapsed && boards().length > 0) {
@@ -74,7 +74,7 @@
                     [routerLink]="['/project', projectId(), 'b', board.id]"
                     [class]="getNavItemClasses(isBoardActive(board.id)) + ' pl-3'"
                   >
-                    <span class="text-[13px] truncate">{{ board.name }}</span>
+                    <span class="text-sm font-semibold truncate">{{ board.name }}</span>
                   </a>
                 </li>
               }
@@ -83,9 +83,9 @@
         </li>
         <li>
           <button [class]="getNavItemClasses(false)">
-            <fa-icon [icon]="faCog" class="w-[18px] text-center"></fa-icon>
+            <fa-icon [icon]="faCog" class="w-4 text-center"></fa-icon>
             @if (!collapsed) {
-              <span class="text-[13px]">Settings</span>
+              <span class="text-sm font-semibold">Settings</span>
             }
           </button>
         </li>
@@ -113,13 +113,13 @@
           />
         } @else {
           <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-            <span class="text-[13px] text-accent font-medium">{{ getUserInitials(user.name) }}</span>
+            <span class="text-sm text-accent font-medium">{{ getUserInitials(user.name) }}</span>
           </div>
         }
         @if (!collapsed) {
           <div class="flex-1 min-w-0 text-left">
-            <div class="text-[13px] text-primary truncate">{{ user.name }}</div>
-            <div class="text-[11px] text-muted truncate">{{ user.email }}</div>
+            <div class="text-sm text-primary truncate">{{ user.name }}</div>
+            <div class="text-xs text-muted truncate">{{ user.email }}</div>
           </div>
           <fa-icon
             [icon]="faChevronRight"
@@ -133,23 +133,23 @@
         <div class="fixed inset-0 z-40" (click)="userMenuOpen = false"></div>
         <div [class]="userMenuClasses">
           <div class="px-4 py-3 border-b border-subtle">
-            <div class="text-[13px] font-medium text-primary">{{ user.name }}</div>
+            <div class="text-sm font-medium text-primary">{{ user.name }}</div>
             <div class="text-[12px] text-muted">{{ user.email }}</div>
           </div>
           <div class="py-1">
-            <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <button class="w-full px-4 py-2 text-sm text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
               <fa-icon [icon]="faUser" class="w-4"></fa-icon>
               Profile
             </button>
-            <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <button class="w-full px-4 py-2 text-sm text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
               <fa-icon [icon]="faLock" class="w-4"></fa-icon>
               Account settings
             </button>
-            <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <button class="w-full px-4 py-2 text-sm text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
               <fa-icon [icon]="faBell" class="w-4"></fa-icon>
               Notifications
             </button>
-            <button class="w-full px-4 py-2 text-[13px] text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
+            <button class="w-full px-4 py-2 text-sm text-secondary text-left hover:bg-surface-elevated hover:text-primary transition-colors flex items-center gap-3">
               <fa-icon [icon]="faQuestionCircle" class="w-4"></fa-icon>
               Help & support
             </button>
@@ -157,7 +157,7 @@
           <div class="py-1 border-t border-subtle">
             <button
               (click)="logout()"
-              class="w-full px-4 py-2 text-[13px] text-danger text-left hover:bg-danger/10 transition-colors flex items-center gap-3"
+              class="w-full px-4 py-2 text-sm text-danger text-left hover:bg-danger/10 transition-colors flex items-center gap-3"
             >
               <fa-icon [icon]="faSignOutAlt" class="w-4"></fa-icon>
               Sign out
@@ -179,7 +179,7 @@
         [class]="'transition-transform duration-200 ' + (collapsed ? 'rotate-180' : '')"
       ></fa-icon>
       @if (!collapsed) {
-        <span class="text-[13px]">Collapse</span>
+        <span class="text-sm">Collapse</span>
       }
     </button>
   </div>

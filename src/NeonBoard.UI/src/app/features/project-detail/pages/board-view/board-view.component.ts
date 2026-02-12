@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
-import { GradientAccentComponent } from '../../../../shared/components/gradient-accent/gradient-accent.component';
 import { BoardService } from '../../services/board.service';
 import { ColumnService } from '../../services/column.service';
 import { CardService } from '../../services/card.service';
@@ -24,10 +23,8 @@ import { Card } from '../../models/card.model';
     FormsModule,
     DragDropModule,
     RouterLink,
-    ButtonComponent,
+    FontAwesomeModule,
     InputComponent,
-    BadgeComponent,
-    GradientAccentComponent,
   ],
   host: {
     class: 'flex flex-col h-full'
@@ -43,6 +40,8 @@ export class BoardViewComponent implements OnInit {
   private drawerService = inject(DrawerService);
   private projectService = inject(ProjectService);
   private injector = inject(Injector);
+
+  faGear = faGear;
 
   projectId = signal<string>('');
   boardId = signal<string>('');

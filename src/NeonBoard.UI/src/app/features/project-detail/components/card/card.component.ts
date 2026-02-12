@@ -61,6 +61,6 @@ export class CardComponent {
 
   getTagClasses(tag: string): string {
     const color = this.tagColorMap[tag.toLowerCase()] || 'neutral';
-    return `px-2 py-0.5 text-[11px] rounded-md ${this.tagColorStyles[color]}`;
+    return `px-2 py-0.5 text-xs rounded-md ${this.tagColorStyles[color]}`;
   }
 }

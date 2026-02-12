@@ -21,6 +21,6 @@ export class BadgeComponent {
   };
 
   get badgeClasses(): string {
-    return `inline-flex items-center px-2 py-0.5 text-[11px] font-medium rounded-md ${this.variantStyles[this.variant]}`;
+    return `inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md ${this.variantStyles[this.variant]}`;
   }
 }
