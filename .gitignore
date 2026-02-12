@@ -390,3 +390,5 @@ logs/
 .claude/
 
 nul
+
+analysis/
