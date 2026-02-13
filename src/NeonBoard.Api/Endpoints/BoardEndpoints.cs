@@ -2,7 +2,7 @@ using MediatR;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Boards.Commands.CreateBoard;
 using NeonBoard.Application.Boards.Commands.DeleteBoard;
-using NeonBoard.Application.Boards.Commands.RenameBoard;
+using NeonBoard.Application.Boards.Commands.UpdateBoardSettings;
 using NeonBoard.Application.Boards.DTOs;
 using NeonBoard.Application.Boards.Queries.GetBoardsByProject;
 using NeonBoard.Application.Boards.Queries.GetBoardDetails;
@@ -32,8 +32,8 @@ public static class BoardEndpoints
             .Produces<BoardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
-        group.MapPut("/{boardId:guid}", RenameBoard)
-            .WithName("RenameBoard")
+        group.MapPut("/{boardId:guid}", UpdateBoardSettings)
+            .WithName("UpdateBoardSettings")
             .Produces<BoardDto>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound);
@@ -76,14 +76,14 @@ public static class BoardEndpoints
         return Results.Created($"/api/projects/{projectId}/boards/{result.Id}", result);
     }
 
-    private static async Task<IResult> RenameBoard(
+    private static async Task<IResult> UpdateBoardSettings(
         Guid projectId,
         Guid boardId,
-        RenameBoardRequest request,
+        UpdateBoardSettingsRequest request,
         IMediator mediator,
         CancellationToken ct)
     {
-        var command = new RenameBoardCommand(projectId, boardId, request.Name);
+        var command = new UpdateBoardSettingsCommand(projectId, boardId, request.Name);
         var result = await mediator.Send(command, ct);
         return Results.Ok(result);
     }

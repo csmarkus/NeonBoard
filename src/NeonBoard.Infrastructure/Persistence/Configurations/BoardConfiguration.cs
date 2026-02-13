@@ -108,6 +108,43 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
 
             card.Navigation(c => c.Content).IsRequired();
             card.Navigation(c => c.Position).IsRequired();
+
+            card.OwnsMany(c => c.CardLabels, cl =>
+            {
+                cl.ToTable("CardLabels");
+
+                cl.WithOwner().HasForeignKey("CardId");
+
+                cl.HasKey("CardId", "LabelId");
+
+                cl.Property(l => l.CardId)
+                    .IsRequired();
+
+                cl.Property(l => l.LabelId)
+                    .IsRequired();
+
+                cl.HasIndex(l => l.LabelId);
+            });
+        });
+
+        builder.OwnsMany(b => b.Labels, label =>
+        {
+            label.ToTable("Labels");
+
+            label.WithOwner().HasForeignKey("BoardId");
+
+            label.HasKey(l => l.Id);
+
+            label.Property(l => l.Id)
+                .ValueGeneratedNever();
+
+            label.Property(l => l.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            label.Property(l => l.Color)
+                .IsRequired()
+                .HasMaxLength(20);
         });
     }
 }

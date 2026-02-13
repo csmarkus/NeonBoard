@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace NeonBoard.Application.Boards.Commands.RenameBoard;
+namespace NeonBoard.Application.Boards.Commands.UpdateBoardSettings;
 
-public class RenameBoardValidator : AbstractValidator<RenameBoardCommand>
+public class UpdateBoardSettingsValidator : AbstractValidator<UpdateBoardSettingsCommand>
 {
-    public RenameBoardValidator()
+    public UpdateBoardSettingsValidator()
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()

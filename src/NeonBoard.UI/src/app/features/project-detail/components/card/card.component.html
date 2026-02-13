@@ -3,6 +3,16 @@
   class="bg-surface border border-subtle rounded-lg p-3 hover:border-cyan-500/50 transition-colors cursor-pointer"
 >
   <h3 class="text-sm text-primary">{{ card().title }}</h3>
+  @if (cardLabels().length) {
+    <div class="flex flex-wrap gap-1 mt-2">
+      @for (label of cardLabels(); track label.id) {
+        <span
+          [class]="'inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded border ' + getLabelClasses(label.color)"
+          [title]="label.name"
+        >{{ label.name }}</span>
+      }
+    </div>
+  }
   @if (card().description) {
     <div class="mt-2 flex items-center">
       <svg class="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">

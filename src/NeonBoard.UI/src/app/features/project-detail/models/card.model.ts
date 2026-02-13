@@ -4,6 +4,7 @@ export interface Card {
   description: string;
   columnId: string;
   position: number;
+  labelIds: string[];
   createdAt: string;
   updatedAt: string;
 }

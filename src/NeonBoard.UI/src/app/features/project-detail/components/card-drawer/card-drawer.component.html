@@ -1,64 +1,183 @@
 <app-drawer [open]="open()" (close)="onClose()">
   <div class="space-y-6">
+    <!-- Header -->
     <div>
-      <h2 class="text-lg font-semibold text-primary">{{ drawerTitle }}</h2>
+      <h2 class="text-lg font-semibold text-primary">{{ drawerTitle() }}</h2>
       <p class="text-sm text-muted mt-1">
-        {{ isEditMode ? 'Update the card details' : 'Add a new card to the column' }}
+        {{ isEditMode() ? 'View and update card details' : 'Add a new card to the column' }}
       </p>
     </div>
 
     <!-- Error message -->
-    @if (error) {
+    @if (error()) {
       <div class="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-        <p class="text-sm text-red-400">{{ error }}</p>
+        <p class="text-sm text-red-400">{{ error() }}</p>
       </div>
     }
 
-    <div class="space-y-4">
+    @if (isEditMode()) {
+      <!-- ===== EDIT MODE ===== -->
+
+      <!-- Title section (auto-saves on blur/enter) -->
       <div>
-        <label class="block text-sm text-secondary mb-1.5">Title</label>
+        <label class="block text-sm font-medium text-secondary mb-1.5">Title</label>
         <input
           type="text"
-          [(ngModel)]="cardTitle"
-          placeholder="Enter card title..."
+          [ngModel]="cardTitle()"
+          (ngModelChange)="cardTitle.set($event)"
+          (blur)="saveTitle()"
+          (keyup.enter)="saveTitle()"
           class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
         />
       </div>
 
+      <!-- Labels section -->
+      @if (drawerService.boardLabels().length) {
+        <div>
+          <label class="block text-sm font-medium text-secondary mb-2">Labels</label>
+
+          <!-- Assigned labels -->
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            @for (label of assignedLabels(); track label.id) {
+              <button
+                (click)="toggleLabel(label.id)"
+                [class]="'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded border cursor-pointer transition-opacity ' + getLabelClasses(label.color)"
+                [disabled]="togglingLabelId() === label.id"
+                [attr.aria-label]="'Remove label ' + label.name"
+              >
+                {{ label.name }}
+                <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            }
+
+            @if (!assignedLabels().length) {
+              <span class="text-xs text-muted">No labels assigned</span>
+            }
+          </div>
+
+          <!-- Toggle label picker -->
+          <button
+            (click)="toggleLabelPicker()"
+            class="text-xs text-muted hover:text-primary transition-colors"
+          >
+            {{ showLabelPicker() ? 'Hide labels' : '+ Add label' }}
+          </button>
+
+          <!-- Label picker dropdown -->
+          @if (showLabelPicker()) {
+            <div class="mt-2 bg-void border border-dim rounded-lg p-2 space-y-1">
+              @for (label of drawerService.boardLabels(); track label.id) {
+                <button
+                  (click)="toggleLabel(label.id)"
+                  [disabled]="togglingLabelId() === label.id"
+                  class="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-surface transition-colors text-left"
+                  [attr.aria-label]="(isLabelAssigned(label.id) ? 'Remove' : 'Add') + ' label ' + label.name"
+                >
+                  <!-- Checkbox indicator -->
+                  <div
+                    [class]="'w-4 h-4 rounded border flex items-center justify-center shrink-0 ' +
+                      (isLabelAssigned(label.id)
+                        ? 'bg-accent border-accent'
+                        : 'border-dim')"
+                  >
+                    @if (isLabelAssigned(label.id)) {
+                      <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    }
+                  </div>
+
+                  <!-- Label chip -->
+                  <span
+                    [class]="'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded border ' + getLabelClasses(label.color)"
+                  >{{ label.name }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Description section -->
       <div>
-        <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
+        <label class="block text-sm font-medium text-secondary mb-1.5">Description</label>
         <textarea
-          [(ngModel)]="cardDescription"
+          [ngModel]="cardDescription()"
+          (ngModelChange)="cardDescription.set($event)"
           placeholder="Add more details..."
-          rows="4"
+          rows="5"
           class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
         ></textarea>
+        @if (descriptionChanged()) {
+          <div class="mt-2">
+            <app-button
+              variant="primary"
+              size="sm"
+              (click)="saveDescription()"
+              [disabled]="isSaving()"
+            >
+              {{ isSaving() ? 'Saving...' : 'Save description' }}
+            </app-button>
+          </div>
+        }
       </div>
-    </div>
 
-    <div class="flex gap-3 pt-4 border-t border-subtle">
-      <app-button
-        variant="primary"
-        (click)="saveCard()"
-        [disabled]="isSaving || isDeleting || !cardTitle.trim()">
-        {{ isSaving ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Add Card') }}
-      </app-button>
-
-      @if (isEditMode) {
+      <!-- Danger zone -->
+      <div class="pt-4 border-t border-subtle">
         <app-button
           variant="danger"
           (click)="deleteCard()"
-          [disabled]="isSaving || isDeleting">
-          {{ isDeleting ? 'Deleting...' : 'Delete' }}
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Deleting...' : 'Delete card' }}
         </app-button>
-      }
+      </div>
 
-      <app-button
-        variant="secondary"
-        (click)="onClose()"
-        [disabled]="isSaving || isDeleting">
-        Cancel
-      </app-button>
-    </div>
+    } @else {
+      <!-- ===== ADD MODE ===== -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-secondary mb-1.5">Title</label>
+          <input
+            type="text"
+            [ngModel]="cardTitle()"
+            (ngModelChange)="cardTitle.set($event)"
+            placeholder="Enter card title..."
+            class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
+          <textarea
+            [ngModel]="cardDescription()"
+            (ngModelChange)="cardDescription.set($event)"
+            placeholder="Add more details..."
+            rows="4"
+            class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-4 border-t border-subtle">
+        <app-button
+          variant="primary"
+          (click)="addCard()"
+          [disabled]="isSaving() || !cardTitle().trim()"
+        >
+          {{ isSaving() ? 'Adding...' : 'Add Card' }}
+        </app-button>
+
+        <app-button
+          variant="secondary"
+          (click)="onClose()"
+          [disabled]="isSaving()"
+        >
+          Cancel
+        </app-button>
+      </div>
+    }
   </div>
 </app-drawer>

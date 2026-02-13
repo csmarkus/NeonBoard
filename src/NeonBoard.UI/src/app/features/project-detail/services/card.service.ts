@@ -26,4 +26,17 @@ export class CardService {
   deleteCard(projectId: string, boardId: string, cardId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}`);
   }
+
+  addCardLabel(projectId: string, boardId: string, cardId: string, labelId: string): Observable<void> {
+    return this.http.put<void>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/labels/${labelId}`,
+      {}
+    );
+  }
+
+  removeCardLabel(projectId: string, boardId: string, cardId: string, labelId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/labels/${labelId}`
+    );
+  }
 }

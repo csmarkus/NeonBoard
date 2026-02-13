@@ -10,6 +10,7 @@ public sealed class Board : Entity, IAggregateRoot
     private const int MaxNameLength = 100;
     private readonly List<Column> _columns = new();
     private readonly List<Card> _cards = new();
+    private readonly List<Label> _labels = new();
 
     public string Name { get; private set; } = default!;
 
@@ -18,6 +19,8 @@ public sealed class Board : Entity, IAggregateRoot
     public IReadOnlyList<Column> Columns => _columns.AsReadOnly();
 
     public IReadOnlyList<Card> Cards => _cards.AsReadOnly();
+
+    public IReadOnlyList<Label> Labels => _labels.AsReadOnly();
 
     public DateTime CreatedAt { get; private set; }
 
@@ -225,6 +228,70 @@ public sealed class Board : Entity, IAggregateRoot
 
     #endregion
 
+    #region Label Operations
+
+    public Guid AddLabel(string name, string color)
+    {
+        var label = Label.Create(name, color);
+        _labels.Add(label);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new LabelCreatedEvent(Id, label.Id, label.Name, label.Color));
+
+        return label.Id;
+    }
+
+    public void UpdateLabel(Guid labelId, string name, string color)
+    {
+        var label = FindLabel(labelId);
+        label.Update(name, color);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new LabelUpdatedEvent(Id, labelId, name, color));
+    }
+
+    public void RemoveLabel(Guid labelId)
+    {
+        var label = FindLabel(labelId);
+
+        // Remove label from all cards that have it
+        foreach (var card in _cards)
+        {
+            if (card.GetLabelIds().Contains(labelId))
+            {
+                card.RemoveLabel(labelId);
+            }
+        }
+
+        _labels.Remove(label);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new LabelRemovedEvent(Id, labelId));
+    }
+
+    public void AddLabelToCard(Guid cardId, Guid labelId)
+    {
+        var card = FindCard(cardId);
+        FindLabel(labelId);
+
+        card.AddLabel(labelId);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new CardLabelAddedEvent(Id, cardId, labelId));
+    }
+
+    public void RemoveLabelFromCard(Guid cardId, Guid labelId)
+    {
+        var card = FindCard(cardId);
+
+        card.RemoveLabel(labelId);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new CardLabelRemovedEvent(Id, cardId, labelId));
+    }
+
+    #endregion
+
     #region Private Helper Methods
 
     private Column FindColumn(Guid columnId)
@@ -241,6 +308,14 @@ public sealed class Board : Entity, IAggregateRoot
         if (card == null)
             throw new DomainException($"Card with ID {cardId} not found.");
         return card;
+    }
+
+    private Label FindLabel(Guid labelId)
+    {
+        var label = _labels.FirstOrDefault(l => l.Id == labelId);
+        if (label == null)
+            throw new DomainException($"Label with ID {labelId} not found.");
+        return label;
     }
 
     private List<Card> GetCardsInColumn(Guid columnId)

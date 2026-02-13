@@ -1,5 +1,6 @@
 import { Column } from './column.model';
 import { Card } from './card.model';
+import { Label } from './label.model';
 
 export interface Board {
   id: string;
@@ -18,12 +19,13 @@ export interface BoardDetails {
   updatedAt: string;
   columns: Column[];
   cards: Card[];
+  labels: Label[];
 }
 
 export interface CreateBoardRequest {
   name: string;
 }
 
-export interface RenameBoardRequest {
+export interface UpdateBoardSettingsRequest {
   name: string;
 }

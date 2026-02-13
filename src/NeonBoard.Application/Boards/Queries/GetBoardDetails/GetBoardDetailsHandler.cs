@@ -4,6 +4,7 @@ using NeonBoard.Application.Cards.DTOs;
 using NeonBoard.Application.Columns.DTOs;
 using NeonBoard.Application.Common.Exceptions;
 using NeonBoard.Application.Common.Interfaces;
+using NeonBoard.Application.Labels.DTOs;
 using NeonBoard.Domain.Boards;
 using NeonBoard.Domain.Projects;
 
@@ -58,8 +59,13 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
                 c.Content.Description,
                 c.ColumnId,
                 c.Position.Value,
+                c.GetLabelIds().ToList(),
                 c.CreatedAt,
                 c.UpdatedAt))
+            .ToList();
+
+        var labels = board.Labels
+            .Select(l => new LabelDto(l.Id, l.Name, l.Color))
             .ToList();
 
         return new BoardDetailsDto(
@@ -69,6 +75,7 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
             board.CreatedAt,
             board.UpdatedAt,
             columns,
-            cards);
+            cards,
+            labels);
     }
 }

@@ -55,7 +55,6 @@ export class ProjectLayoutComponent implements OnInit {
   projectId = signal<string>('');
 
   ngOnInit(): void {
-    // Set projectId once on init
     const id = this.route.snapshot.paramMap.get('projectId');
     if (id) {
       this.projectId.set(id);
@@ -68,7 +67,6 @@ export class ProjectLayoutComponent implements OnInit {
   }
 
   onCardUpdated(): void {
-    this.drawerService.closeCardDrawer();
     this.drawerService.notifyCardUpdated();
   }
 

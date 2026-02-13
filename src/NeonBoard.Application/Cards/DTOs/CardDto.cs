@@ -6,5 +6,6 @@ public record CardDto(
     string Description,
     Guid ColumnId,
     int Position,
+    List<Guid> LabelIds,
     DateTime CreatedAt,
     DateTime UpdatedAt);

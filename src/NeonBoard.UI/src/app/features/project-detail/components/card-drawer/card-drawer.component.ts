@@ -1,57 +1,86 @@
-import { Component, input, output, inject, ChangeDetectorRef, effect } from '@angular/core';
+import { Component, input, output, inject, signal, effect, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CardService } from '../../services/card.service';
+import { DrawerService } from '../../services/drawer.service';
 import { Card } from '../../models/card.model';
+import { getLabelColorClasses } from '../../models/label.model';
 
 @Component({
   selector: 'app-card-drawer',
-  standalone: true,
   imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent],
   templateUrl: './card-drawer.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardDrawerComponent {
   open = input.required<boolean>();
   projectId = input.required<string>();
   boardId = input.required<string>();
   columnId = input<string | null>(null);
-  card = input<Card | null>(null); // If provided, edit mode; otherwise add mode
+  card = input<Card | null>(null);
 
   close = output<void>();
   cardSaved = output<void>();
   cardDeleted = output<void>();
 
   private cardService = inject(CardService);
-  private cdr = inject(ChangeDetectorRef);
+  protected drawerService = inject(DrawerService);
 
-  cardTitle = '';
-  cardDescription = '';
-  error: string | null = null;
-  isSaving = false;
-  isDeleting = false;
+  cardTitle = signal('');
+  cardDescription = signal('');
+  originalTitle = signal('');
+  originalDescription = signal('');
+  error = signal<string | null>(null);
+  isSaving = signal(false);
+  isDeleting = signal(false);
+  showLabelPicker = signal(false);
+  togglingLabelId = signal<string | null>(null);
+
+  cardLabelIds = signal<string[]>([]);
 
   constructor() {
-    // Reset form when card input changes
     effect(() => {
       const existingCard = this.card();
       if (existingCard) {
-        this.cardTitle = existingCard.title;
-        this.cardDescription = existingCard.description;
+        this.cardTitle.set(existingCard.title);
+        this.cardDescription.set(existingCard.description);
+        this.originalTitle.set(existingCard.title);
+        this.originalDescription.set(existingCard.description);
+        this.cardLabelIds.set(existingCard.labelIds ?? []);
       } else {
-        this.cardTitle = '';
-        this.cardDescription = '';
+        this.cardTitle.set('');
+        this.cardDescription.set('');
+        this.originalTitle.set('');
+        this.originalDescription.set('');
+        this.cardLabelIds.set([]);
       }
+      this.showLabelPicker.set(false);
     });
   }
 
-  get isEditMode(): boolean {
-    return this.card() !== null;
+  isEditMode = computed(() => this.card() !== null);
+
+  drawerTitle = computed(() => this.isEditMode() ? 'Card Details' : 'Add Card');
+
+  descriptionChanged = computed(() =>
+    this.cardDescription() !== this.originalDescription()
+  );
+
+  assignedLabels = computed(() => {
+    const ids = this.cardLabelIds();
+    const allLabels = this.drawerService.boardLabels();
+    return allLabels.filter(l => ids.includes(l.id));
+  });
+
+  isLabelAssigned(labelId: string): boolean {
+    return this.cardLabelIds().includes(labelId);
   }
 
-  get drawerTitle(): string {
-    return this.isEditMode ? 'Edit Card' : 'Add Card';
+  getLabelClasses(color: string): string {
+    const classes = getLabelColorClasses(color);
+    return `${classes.bg} ${classes.text} ${classes.border}`;
   }
 
   onClose(): void {
@@ -59,102 +88,145 @@ export class CardDrawerComponent {
     this.close.emit();
   }
 
-  saveCard(): void {
-    if (!this.cardTitle.trim()) return;
+  saveTitle(): void {
+    if (!this.isEditMode()) return;
+    const title = this.cardTitle().trim();
+    if (!title || title === this.originalTitle()) return;
 
-    this.isSaving = true;
-    this.error = null;
+    const cardId = this.card()!.id;
+    this.cardService.updateCard(
+      this.projectId(), this.boardId(), cardId,
+      { title, description: this.originalDescription() }
+    ).subscribe({
+      next: () => {
+        this.originalTitle.set(title);
+        this.cardSaved.emit();
+      },
+      error: () => {
+        this.error.set('Failed to update title.');
+      }
+    });
+  }
 
-    if (this.isEditMode) {
-      // Edit existing card
-      const cardId = this.card()!.id;
-      this.cardService.updateCard(
-        this.projectId(),
-        this.boardId(),
-        cardId,
-        {
-          title: this.cardTitle,
-          description: this.cardDescription
-        }
-      ).subscribe({
+  saveDescription(): void {
+    if (!this.isEditMode() || !this.descriptionChanged()) return;
+
+    this.isSaving.set(true);
+    const cardId = this.card()!.id;
+    this.cardService.updateCard(
+      this.projectId(), this.boardId(), cardId,
+      { title: this.originalTitle(), description: this.cardDescription() }
+    ).subscribe({
+      next: () => {
+        this.originalDescription.set(this.cardDescription());
+        this.isSaving.set(false);
+        this.cardSaved.emit();
+      },
+      error: () => {
+        this.error.set('Failed to update description.');
+        this.isSaving.set(false);
+      }
+    });
+  }
+
+  addCard(): void {
+    if (!this.cardTitle().trim()) return;
+
+    const targetColumnId = this.columnId();
+    if (!targetColumnId) {
+      this.error.set('Column ID is required');
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.error.set(null);
+
+    this.cardService.addCard(
+      this.projectId(), this.boardId(),
+      { columnId: targetColumnId, title: this.cardTitle(), description: this.cardDescription() }
+    ).subscribe({
+      next: () => {
+        this.cardSaved.emit();
+        this.resetForm();
+        this.isSaving.set(false);
+        this.close.emit();
+      },
+      error: () => {
+        this.error.set('Failed to add card. Please try again.');
+        this.isSaving.set(false);
+      }
+    });
+  }
+
+  toggleLabel(labelId: string): void {
+    if (!this.isEditMode() || this.togglingLabelId()) return;
+
+    const cardId = this.card()!.id;
+    const isAssigned = this.isLabelAssigned(labelId);
+    this.togglingLabelId.set(labelId);
+
+    if (isAssigned) {
+      this.cardLabelIds.update(ids => ids.filter(id => id !== labelId));
+      this.cardService.removeCardLabel(this.projectId(), this.boardId(), cardId, labelId).subscribe({
         next: () => {
+          this.togglingLabelId.set(null);
           this.cardSaved.emit();
-          this.resetForm();
-          this.isSaving = false;
-          this.close.emit();
-          this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error('Error updating card:', err);
-          this.error = 'Failed to update card. Please try again.';
-          this.isSaving = false;
-          this.cdr.detectChanges();
+        error: () => {
+          this.cardLabelIds.update(ids => [...ids, labelId]);
+          this.togglingLabelId.set(null);
+          this.error.set('Failed to remove label.');
         }
       });
     } else {
-      // Add new card
-      const targetColumnId = this.columnId();
-      if (!targetColumnId) {
-        this.error = 'Column ID is required';
-        this.isSaving = false;
-        return;
-      }
-
-      this.cardService.addCard(
-        this.projectId(),
-        this.boardId(),
-        {
-          columnId: targetColumnId,
-          title: this.cardTitle,
-          description: this.cardDescription
-        }
-      ).subscribe({
+      this.cardLabelIds.update(ids => [...ids, labelId]);
+      this.cardService.addCardLabel(this.projectId(), this.boardId(), cardId, labelId).subscribe({
         next: () => {
+          this.togglingLabelId.set(null);
           this.cardSaved.emit();
-          this.resetForm();
-          this.isSaving = false;
-          this.close.emit();
-          this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error('Error adding card:', err);
-          this.error = 'Failed to add card. Please try again.';
-          this.isSaving = false;
-          this.cdr.detectChanges();
+        error: () => {
+          this.cardLabelIds.update(ids => ids.filter(id => id !== labelId));
+          this.togglingLabelId.set(null);
+          this.error.set('Failed to add label.');
         }
       });
     }
   }
 
-  deleteCard(): void {
-    if (!this.isEditMode) return;
+  toggleLabelPicker(): void {
+    this.showLabelPicker.update(v => !v);
+  }
 
+  deleteCard(): void {
+    if (!this.isEditMode()) return;
     if (!confirm('Are you sure you want to delete this card?')) return;
 
-    this.isDeleting = true;
-    this.error = null;
+    this.isDeleting.set(true);
+    this.error.set(null);
 
     const cardId = this.card()!.id;
     this.cardService.deleteCard(this.projectId(), this.boardId(), cardId).subscribe({
       next: () => {
         this.cardDeleted.emit();
         this.resetForm();
-        this.isDeleting = false;
+        this.isDeleting.set(false);
         this.close.emit();
-        this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error deleting card:', err);
-        this.error = 'Failed to delete card. Please try again.';
-        this.isDeleting = false;
-        this.cdr.detectChanges();
+      error: () => {
+        this.error.set('Failed to delete card. Please try again.');
+        this.isDeleting.set(false);
       }
     });
   }
 
   private resetForm(): void {
-    this.cardTitle = '';
-    this.cardDescription = '';
-    this.error = null;
+    this.cardTitle.set('');
+    this.cardDescription.set('');
+    this.originalTitle.set('');
+    this.originalDescription.set('');
+    this.error.set(null);
+    this.showLabelPicker.set(false);
+    this.cardLabelIds.set([]);
   }
 }

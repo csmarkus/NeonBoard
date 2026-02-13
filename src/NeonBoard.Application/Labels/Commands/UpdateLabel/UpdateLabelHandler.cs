@@ -1,19 +1,18 @@
 using MediatR;
-using NeonBoard.Application.Boards.DTOs;
 using NeonBoard.Application.Common.Exceptions;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards;
 using NeonBoard.Domain.Projects;
 
-namespace NeonBoard.Application.Boards.Commands.RenameBoard;
+namespace NeonBoard.Application.Labels.Commands.UpdateLabel;
 
-public class RenameBoardHandler : IRequestHandler<RenameBoardCommand, BoardDto>
+public class UpdateLabelHandler : IRequestHandler<UpdateLabelCommand, Unit>
 {
     private readonly IBoardRepository _boardRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public RenameBoardHandler(
+    public UpdateLabelHandler(
         IBoardRepository boardRepository,
         IProjectRepository projectRepository,
         ICurrentUserService currentUserService)
@@ -23,7 +22,7 @@ public class RenameBoardHandler : IRequestHandler<RenameBoardCommand, BoardDto>
         _currentUserService = currentUserService;
     }
 
-    public async Task<BoardDto> Handle(RenameBoardCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateLabelCommand request, CancellationToken cancellationToken)
     {
         var project = await _projectRepository.GetByIdAsync(request.ProjectId, cancellationToken);
         if (project == null)
@@ -31,22 +30,17 @@ public class RenameBoardHandler : IRequestHandler<RenameBoardCommand, BoardDto>
 
         var userId = await _currentUserService.GetUserIdAsync(cancellationToken);
         if (userId == null || project.OwnerId != userId.Value)
-            throw new UnauthorizedAccessException("You do not have permission to modify boards in this project.");
+            throw new UnauthorizedAccessException("You do not have permission to modify this project.");
 
         var board = await _boardRepository.GetBoardWithDetailsAsync(request.BoardId, cancellationToken);
         if (board == null)
             throw new NotFoundException(nameof(Board), request.BoardId);
 
-        board.Rename(request.Name);
+        if (board.ProjectId != request.ProjectId)
+            throw new NotFoundException(nameof(Board), request.BoardId);
 
-        await _boardRepository.UpdateAsync(board, cancellationToken);
+        board.UpdateLabel(request.LabelId, request.Name, request.Color);
 
-        return new BoardDto(
-            board.Id,
-            board.Name,
-            board.ProjectId,
-            board.CreatedAt,
-            board.UpdatedAt,
-            board.Columns.Count);
+        return Unit.Value;
     }
 }

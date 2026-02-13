@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { Board, BoardDetails, CreateBoardRequest, RenameBoardRequest } from '../models/board.model';
+import { Board, BoardDetails, CreateBoardRequest, UpdateBoardSettingsRequest } from '../models/board.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,7 @@ export class BoardService {
     );
   }
 
-  renameBoard(projectId: string, boardId: string, request: RenameBoardRequest): Observable<Board> {
+  updateBoardSettings(projectId: string, boardId: string, request: UpdateBoardSettingsRequest): Observable<Board> {
     return this.http.put<Board>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}`, request).pipe(
       tap(() => this.boardsUpdated.next())
     );

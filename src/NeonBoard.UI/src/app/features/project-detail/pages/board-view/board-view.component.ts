@@ -55,6 +55,7 @@ export class BoardViewComponent implements OnInit {
 
   columns = computed(() => this.board()?.columns ?? []);
   columnIds = computed(() => this.columns().map(c => c.id));
+  labels = computed(() => this.board()?.labels ?? []);
 
   cardsByColumn = computed(() => {
     const cards = this.board()?.cards ?? [];
@@ -112,6 +113,7 @@ export class BoardViewComponent implements OnInit {
     this.boardService.getBoardDetails(this.projectId(), this.boardId()).subscribe({
       next: (board) => {
         this.board.set(board);
+        this.drawerService.setBoardLabels(board.labels);
         this.isLoading.set(false);
       },
       error: (err) => {

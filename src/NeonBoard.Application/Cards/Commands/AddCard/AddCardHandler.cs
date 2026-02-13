@@ -49,6 +49,7 @@ public class AddCardHandler : IRequestHandler<AddCardCommand, CardDto>
             card.Content.Description,
             card.ColumnId,
             card.Position.Value,
+            [],
             card.CreatedAt,
             card.UpdatedAt);
     }

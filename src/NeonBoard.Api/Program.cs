@@ -126,6 +126,7 @@ public class Program
         app.MapBoardEndpoints();
         app.MapColumnEndpoints();
         app.MapCardEndpoints();
+        app.MapLabelEndpoints();
 
         app.MapFallbackToFile("index.html");
 

@@ -1,9 +1,11 @@
 using MediatR;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Cards.Commands.AddCard;
+using NeonBoard.Application.Cards.Commands.AddCardLabel;
 using NeonBoard.Application.Cards.Commands.UpdateCard;
 using NeonBoard.Application.Cards.Commands.MoveCard;
 using NeonBoard.Application.Cards.Commands.DeleteCard;
+using NeonBoard.Application.Cards.Commands.RemoveCardLabel;
 using NeonBoard.Application.Cards.DTOs;
 
 namespace NeonBoard.Api.Endpoints;
@@ -33,6 +35,14 @@ public static class CardEndpoints
 
         group.MapDelete("/{cardId:guid}", DeleteCard)
             .WithName("DeleteCard")
+            .Produces(StatusCodes.Status204NoContent);
+
+        group.MapPut("/{cardId:guid}/labels/{labelId:guid}", AddCardLabel)
+            .WithName("AddCardLabel")
+            .Produces(StatusCodes.Status204NoContent);
+
+        group.MapDelete("/{cardId:guid}/labels/{labelId:guid}", RemoveCardLabel)
+            .WithName("RemoveCardLabel")
             .Produces(StatusCodes.Status204NoContent);
     }
 
@@ -97,6 +107,32 @@ public static class CardEndpoints
         CancellationToken ct)
     {
         var command = new DeleteCardCommand(projectId, boardId, cardId);
+        await mediator.Send(command, ct);
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> AddCardLabel(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        Guid labelId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new AddCardLabelCommand(projectId, boardId, cardId, labelId);
+        await mediator.Send(command, ct);
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> RemoveCardLabel(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        Guid labelId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new RemoveCardLabelCommand(projectId, boardId, cardId, labelId);
         await mediator.Send(command, ct);
         return Results.NoContent();
     }

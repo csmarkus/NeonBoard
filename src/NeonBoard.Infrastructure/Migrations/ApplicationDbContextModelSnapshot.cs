@@ -169,6 +169,25 @@ namespace NeonBoard.Infrastructure.Migrations
                                         .HasForeignKey("CardId");
                                 });
 
+                            b1.OwnsMany("NeonBoard.Domain.Boards.Entities.CardLabel", "CardLabels", b2 =>
+                                {
+                                    b2.Property<Guid>("CardId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<Guid>("LabelId")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("uuid");
+
+                                    b2.HasKey("CardId", "LabelId");
+
+                                    b2.HasIndex("LabelId");
+
+                                    b2.ToTable("CardLabels", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("CardId");
+                                });
+
                             b1.OwnsOne("NeonBoard.Domain.Boards.ValueObjects.CardContent", "Content", b2 =>
                                 {
                                     b2.Property<Guid>("CardId")
@@ -193,6 +212,8 @@ namespace NeonBoard.Infrastructure.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("CardId");
                                 });
+
+                            b1.Navigation("CardLabels");
 
                             b1.Navigation("Content")
                                 .IsRequired();
@@ -247,9 +268,39 @@ namespace NeonBoard.Infrastructure.Migrations
                                 .IsRequired();
                         });
 
+                    b.OwnsMany("NeonBoard.Domain.Boards.Entities.Label", "Labels", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("BoardId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Color")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("BoardId");
+
+                            b1.ToTable("Labels", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("BoardId");
+                        });
+
                     b.Navigation("Cards");
 
                     b.Navigation("Columns");
+
+                    b.Navigation("Labels");
                 });
 #pragma warning restore 612, 618
         }

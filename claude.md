@@ -677,3 +677,21 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## Tailwind CSS Conventions
+
+### Typography
+- **Never use arbitrary pixel values for font sizes** like `text-[14px]` or `text-[16px]`
+- Always use Tailwind's built-in text size utilities which use rem for better accessibility and scaling:
+  - `text-xs` (0.75rem / 12px)
+  - `text-sm` (0.875rem / 14px)
+  - `text-base` (1rem / 16px)
+  - `text-lg` (1.125rem / 18px)
+  - `text-xl` (1.25rem / 20px)
+  - `text-2xl` through `text-9xl` for larger sizes
+- If a design requires a non-standard size, extend the theme in `tailwind.config.js` rather than using arbitrary values
+
+### General Tailwind Rules
+- Prefer semantic utility classes over arbitrary values `[]`
+- Arbitrary values are a code smell - if you need them frequently, extend the theme config instead
+- Use Tailwind's spacing scale (`p-4`, `m-2`, `gap-3`) rather than arbitrary pixel values

@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Card } from '../models/card.model';
+import { Label } from '../models/label.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ export class DrawerService {
   selectedCard = signal<Card | null>(null);
   cardDrawerProjectId = signal<string>('');
   cardDrawerBoardId = signal<string>('');
+  boardLabels = signal<Label[]>([]);
 
   // Events
   private cardUpdatedSubject = new Subject<void>();
@@ -32,6 +34,10 @@ export class DrawerService {
   closeCreateBoardDrawer(): void {
     this.showCreateBoardDrawer.set(false);
     this.createBoardProjectId.set(null);
+  }
+
+  setBoardLabels(labels: Label[]): void {
+    this.boardLabels.set(labels);
   }
 
   openCardDrawer(card: Card, projectId: string, boardId: string): void {
