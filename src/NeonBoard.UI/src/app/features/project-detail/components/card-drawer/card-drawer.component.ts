@@ -48,7 +48,7 @@ export class CardDrawerComponent {
         this.cardDescription.set(existingCard.description);
         this.originalTitle.set(existingCard.title);
         this.originalDescription.set(existingCard.description);
-        this.cardLabelIds.set(existingCard.labelIds ?? []);
+        this.cardLabelIds.set(existingCard.labels?.map(l => l.id) ?? []);
       } else {
         this.cardTitle.set('');
         this.cardDescription.set('');

@@ -5,15 +5,13 @@ namespace NeonBoard.Domain.Boards.Entities;
 
 public sealed class Card : Entity
 {
-    private readonly List<CardLabel> _cardLabels = new();
-
     public Guid ColumnId { get; private set; }
 
     public CardContent Content { get; private set; } = default!;
 
     public Position Position { get; private set; } = default!;
 
-    public IReadOnlyList<CardLabel> CardLabels => _cardLabels.AsReadOnly();
+    public List<Guid> LabelIds { get; private set; } = new();
 
     public DateTime CreatedAt { get; private set; }
 
@@ -54,26 +52,19 @@ public sealed class Card : Entity
 
     internal void AddLabel(Guid labelId)
     {
-        if (_cardLabels.Any(cl => cl.LabelId == labelId))
+        if (LabelIds.Contains(labelId))
             throw new DomainException("This label is already assigned to the card.");
 
-        var cardLabel = CardLabel.Create(Id, labelId);
-        _cardLabels.Add(cardLabel);
+        LabelIds = [..LabelIds, labelId];
         UpdatedAt = DateTime.UtcNow;
     }
 
     internal void RemoveLabel(Guid labelId)
     {
-        var cardLabel = _cardLabels.FirstOrDefault(cl => cl.LabelId == labelId);
-        if (cardLabel == null)
+        if (!LabelIds.Contains(labelId))
             throw new DomainException("This label is not assigned to the card.");
 
-        _cardLabels.Remove(cardLabel);
+        LabelIds = LabelIds.Where(id => id != labelId).ToList();
         UpdatedAt = DateTime.UtcNow;
-    }
-
-    public IReadOnlyList<Guid> GetLabelIds()
-    {
-        return _cardLabels.Select(cl => cl.LabelId).ToList();
     }
 }

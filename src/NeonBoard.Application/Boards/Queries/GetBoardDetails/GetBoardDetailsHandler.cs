@@ -59,7 +59,11 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
                 c.Content.Description,
                 c.ColumnId,
                 c.Position.Value,
-                c.GetLabelIds().ToList(),
+                c.LabelIds
+                    .Select(labelId => board.Labels.FirstOrDefault(l => l.Id == labelId))
+                    .Where(label => label != null)
+                    .Select(label => new LabelDto(label!.Id, label.Name, label.Color))
+                    .ToList(),
                 c.CreatedAt,
                 c.UpdatedAt))
             .ToList();

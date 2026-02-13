@@ -1,10 +1,12 @@
+import { Label } from './label.model';
+
 export interface Card {
   id: string;
   title: string;
   description: string;
   columnId: string;
   position: number;
-  labelIds: string[];
+  labels: Label[];
   createdAt: string;
   updatedAt: string;
 }

@@ -15,10 +15,7 @@ export class CardComponent {
   cardClick = output<void>();
 
   cardLabels = computed(() => {
-    const card = this.card();
-    const allLabels = this.drawerService.boardLabels();
-    if (!card.labelIds?.length || !allLabels.length) return [];
-    return allLabels.filter(l => card.labelIds.includes(l.id));
+    return this.card().labels ?? [];
   });
 
   getLabelClasses(color: string): string {

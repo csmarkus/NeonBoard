@@ -39,10 +39,8 @@ public class DomainEventDispatcherInterceptor : SaveChangesInterceptor
             .SelectMany(e => e.GetDomainEvents())
             .ToList();
 
-        // Clear events before dispatching to avoid infinite loops
         entities.ForEach(e => e.ClearDomainEvents());
 
-        // Dispatch events
         foreach (var domainEvent in domainEvents)
         {
             await _mediator.Publish(domainEvent, cancellationToken);

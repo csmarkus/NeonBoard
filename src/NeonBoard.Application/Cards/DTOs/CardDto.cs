@@ -1,3 +1,5 @@
+using NeonBoard.Application.Labels.DTOs;
+
 namespace NeonBoard.Application.Cards.DTOs;
 
 public record CardDto(
@@ -6,6 +8,6 @@ public record CardDto(
     string Description,
     Guid ColumnId,
     int Position,
-    List<Guid> LabelIds,
+    List<LabelDto> Labels,
     DateTime CreatedAt,
     DateTime UpdatedAt);

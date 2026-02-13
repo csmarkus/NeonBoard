@@ -257,7 +257,7 @@ public sealed class Board : Entity, IAggregateRoot
         // Remove label from all cards that have it
         foreach (var card in _cards)
         {
-            if (card.GetLabelIds().Contains(labelId))
+            if (card.LabelIds.Contains(labelId))
             {
                 card.RemoveLabel(labelId);
             }

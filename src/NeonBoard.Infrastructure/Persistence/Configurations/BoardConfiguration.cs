@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NeonBoard.Domain.Boards;
@@ -109,22 +110,18 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             card.Navigation(c => c.Content).IsRequired();
             card.Navigation(c => c.Position).IsRequired();
 
-            card.OwnsMany(c => c.CardLabels, cl =>
-            {
-                cl.ToTable("CardLabels");
+            var labelIdsProperty = card.Property(c => c.LabelIds)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<Guid>>(v, (JsonSerializerOptions?)null) ?? new List<Guid>())
+                .IsRequired();
 
-                cl.WithOwner().HasForeignKey("CardId");
-
-                cl.HasKey("CardId", "LabelId");
-
-                cl.Property(l => l.CardId)
-                    .IsRequired();
-
-                cl.Property(l => l.LabelId)
-                    .IsRequired();
-
-                cl.HasIndex(l => l.LabelId);
-            });
+            labelIdsProperty.Metadata.SetValueComparer(
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<Guid>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
         });
 
         builder.OwnsMany(b => b.Labels, label =>
