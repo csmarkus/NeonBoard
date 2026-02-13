@@ -71,7 +71,11 @@ export class CardDrawerComponent {
   assignedLabels = computed(() => {
     const ids = this.cardLabelIds();
     const allLabels = this.drawerService.boardLabels();
-    return allLabels.filter(l => ids.includes(l.id));
+    return allLabels.filter(l => ids.includes(l.id)).sort((a, b) => a.name.localeCompare(b.name));
+  });
+
+  sortedBoardLabels = computed(() => {
+    return this.drawerService.boardLabels().slice().sort((a, b) => a.name.localeCompare(b.name));
   });
 
   isLabelAssigned(labelId: string): boolean {

@@ -32,7 +32,7 @@
       </div>
 
       <!-- Labels section -->
-      @if (drawerService.boardLabels().length) {
+      @if (sortedBoardLabels().length) {
         <div>
           <label class="block text-sm font-medium text-secondary mb-2">Labels</label>
 
@@ -68,7 +68,7 @@
           <!-- Label picker dropdown -->
           @if (showLabelPicker()) {
             <div class="mt-2 bg-void border border-dim rounded-lg p-2 space-y-1">
-              @for (label of drawerService.boardLabels(); track label.id) {
+              @for (label of sortedBoardLabels(); track label.id) {
                 <button
                   (click)="toggleLabel(label.id)"
                   [disabled]="togglingLabelId() === label.id"

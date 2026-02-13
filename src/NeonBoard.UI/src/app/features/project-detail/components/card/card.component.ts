@@ -15,7 +15,8 @@ export class CardComponent {
   cardClick = output<void>();
 
   cardLabels = computed(() => {
-    return this.card().labels ?? [];
+    const labels = this.card().labels ?? [];
+    return labels.slice().sort((a, b) => a.name.localeCompare(b.name));
   });
 
   getLabelClasses(color: string): string {

@@ -85,9 +85,9 @@
 
         <div class="space-y-4">
           <!-- Existing labels list -->
-          @if (boardLabels().length) {
+          @if (sortedBoardLabels().length) {
             <div class="space-y-2">
-              @for (label of boardLabels(); track label.id) {
+              @for (label of sortedBoardLabels(); track label.id) {
                 @if (editingLabelId() === label.id) {
                   <!-- Edit inline -->
                   <div class="flex items-center gap-2 bg-surface border border-dim rounded-lg p-3">

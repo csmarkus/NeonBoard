@@ -52,6 +52,11 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
                 board.Id))
             .ToList();
 
+        var labels = board.Labels
+            .OrderBy(l => l.Name)
+            .Select(l => new LabelDto(l.Id, l.Name, l.Color))
+            .ToList();
+
         var cards = board.Cards
             .Select(c => new CardDto(
                 c.Id,
@@ -60,16 +65,13 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
                 c.ColumnId,
                 c.Position.Value,
                 c.LabelIds
-                    .Select(labelId => board.Labels.FirstOrDefault(l => l.Id == labelId))
+                    .Select(labelId => labels.FirstOrDefault(l => l.Id == labelId))
                     .Where(label => label != null)
-                    .Select(label => new LabelDto(label!.Id, label.Name, label.Color))
+                    .Cast<LabelDto>()
+                    .OrderBy(label => label.Name)
                     .ToList(),
                 c.CreatedAt,
                 c.UpdatedAt))
-            .ToList();
-
-        var labels = board.Labels
-            .Select(l => new LabelDto(l.Id, l.Name, l.Color))
             .ToList();
 
         return new BoardDetailsDto(

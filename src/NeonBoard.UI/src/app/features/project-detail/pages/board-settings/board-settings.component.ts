@@ -61,6 +61,10 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
     return nameChanged;
   });
 
+  sortedBoardLabels = computed(() => {
+    return this.boardLabels().slice().sort((a, b) => a.name.localeCompare(b.name));
+  });
+
   private discardSubject: Subject<boolean> | null = null;
 
   ngOnInit(): void {
