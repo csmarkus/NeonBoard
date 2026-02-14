@@ -1,0 +1,12 @@
+<div class="p-4 flex items-center gap-3">
+  <a
+    routerLink="/projects"
+    class="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0 hover:bg-accent/25 transition-colors"
+    aria-label="Go to projects"
+  >
+    <span class="text-accent font-semibold text-sm">N</span>
+  </a>
+  @if (!collapsed()) {
+    <span class="text-base font-semibold text-primary">NeonBoard</span>
+  }
+</div>

@@ -1,0 +1,16 @@
+<div class="p-3 border-t border-subtle">
+  <button
+    (click)="toggle.emit()"
+    [class]="buttonClasses()"
+    [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+    [attr.aria-expanded]="!collapsed()"
+  >
+    <fa-icon
+      [icon]="icons.chevronLeft"
+      [class]="'transition-transform duration-200 ' + (collapsed() ? 'rotate-180' : '')"
+    ></fa-icon>
+    @if (!collapsed()) {
+      <span class="text-sm">Collapse</span>
+    }
+  </button>
+</div>
