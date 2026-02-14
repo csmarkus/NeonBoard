@@ -1,4 +1,5 @@
 using MediatR;
+using NeonBoard.Api.Filters;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Application.Projects.Commands.CreateProject;
@@ -25,6 +26,7 @@ public static class ProjectEndpoints
 
         group.MapGet("/{id:guid}", GetProject)
             .WithName("GetProject")
+            .AddEndpointFilter<ProjectOwnershipFilter>()
             .Produces<ProjectDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -34,12 +36,14 @@ public static class ProjectEndpoints
 
         group.MapPut("/{id:guid}", UpdateProject)
             .WithName("UpdateProject")
+            .AddEndpointFilter<ProjectOwnershipFilter>()
             .Produces<ProjectDto>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{id:guid}", DeleteProject)
             .WithName("DeleteProject")
+            .AddEndpointFilter<ProjectOwnershipFilter>()
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }

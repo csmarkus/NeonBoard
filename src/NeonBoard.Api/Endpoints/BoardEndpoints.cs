@@ -1,4 +1,5 @@
 using MediatR;
+using NeonBoard.Api.Filters;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Boards.Commands.CreateBoard;
 using NeonBoard.Application.Boards.Commands.DeleteBoard;
@@ -15,7 +16,8 @@ public static class BoardEndpoints
     {
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards")
             .WithTags("Boards")
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .AddEndpointFilter<ProjectOwnershipFilter>();
 
         group.MapGet("/", GetBoardsByProject)
             .WithName("GetBoardsByProject")

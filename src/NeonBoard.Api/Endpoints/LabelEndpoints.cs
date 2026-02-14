@@ -1,4 +1,5 @@
 using MediatR;
+using NeonBoard.Api.Filters;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Labels.Commands.AddLabel;
 using NeonBoard.Application.Labels.Commands.UpdateLabel;
@@ -13,7 +14,8 @@ public static class LabelEndpoints
     {
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards/{boardId:guid}/labels")
             .WithTags("Labels")
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .AddEndpointFilter<ProjectOwnershipFilter>();
 
         group.MapPost("/", AddLabel)
             .WithName("AddLabel")

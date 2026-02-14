@@ -1,4 +1,5 @@
 using MediatR;
+using NeonBoard.Api.Filters;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Cards.Commands.AddCard;
 using NeonBoard.Application.Cards.Commands.AddCardLabel;
@@ -16,7 +17,8 @@ public static class CardEndpoints
     {
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards/{boardId:guid}/cards")
             .WithTags("Cards")
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .AddEndpointFilter<ProjectOwnershipFilter>();
 
         group.MapPost("/", AddCard)
             .WithName("AddCard")

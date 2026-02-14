@@ -1,4 +1,5 @@
 using MediatR;
+using NeonBoard.Api.Filters;
 using NeonBoard.Api.Models;
 using NeonBoard.Application.Columns.Commands.AddColumn;
 using NeonBoard.Application.Columns.Commands.RenameColumn;
@@ -14,7 +15,8 @@ public static class ColumnEndpoints
     {
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards/{boardId:guid}/columns")
             .WithTags("Columns")
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .AddEndpointFilter<ProjectOwnershipFilter>();
 
         group.MapPost("/", AddColumn)
             .WithName("AddColumn")
