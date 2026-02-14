@@ -1,0 +1,18 @@
+<section class="grid grid-cols-[220px_1fr] gap-12">
+  <div>
+    <h2 class="text-base font-semibold text-primary">General</h2>
+    <p class="text-sm text-muted mt-1">Manage your board settings.</p>
+  </div>
+
+  <div>
+    <label for="board-name" class="block text-sm font-medium text-primary mb-1.5">Board name</label>
+    <input
+      id="board-name"
+      type="text"
+      [value]="facade.boardName()"
+      (input)="onNameInput($event)"
+      maxlength="100"
+      class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150" />
+    <span class="text-xs text-muted mt-1.5">{{ facade.boardName().length }} / 100</span>
+  </div>
+</section>

@@ -1,0 +1,32 @@
+@if (isAdding()) {
+  <div class="w-72 shrink-0 bg-surface border border-subtle rounded-lg p-3">
+    <input
+      type="text"
+      [value]="columnName()"
+      (input)="onNameChange($event)"
+      (keyup.enter)="onAddColumn()"
+      (keyup.escape)="onCancelAdd()"
+      placeholder="Column name..."
+      class="w-full px-3 py-2 text-sm bg-void text-primary placeholder:text-muted border border-dim rounded-lg focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors mb-2"
+      autofocus />
+    <div class="flex gap-2">
+      <button
+        (click)="onAddColumn()"
+        [disabled]="!columnName().trim()"
+        class="flex-1 px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        Add
+      </button>
+      <button
+        (click)="onCancelAdd()"
+        class="flex-1 px-3 py-1.5 text-sm text-secondary bg-surface-elevated rounded-lg hover:bg-surface transition-colors">
+        Cancel
+      </button>
+    </div>
+  </div>
+} @else {
+  <button
+    (click)="onOpenAdd()"
+    class="w-72 shrink-0 py-3 text-sm text-muted border border-dashed border-dim rounded-lg hover:border-secondary hover:text-secondary hover:bg-surface/50 transition-colors duration-150">
+    + Add column
+  </button>
+}

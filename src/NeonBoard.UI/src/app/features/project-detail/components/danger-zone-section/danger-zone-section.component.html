@@ -1,0 +1,32 @@
+<section class="grid grid-cols-[220px_1fr] gap-12">
+  <div>
+    <h2 class="text-base font-semibold text-red-400">Danger zone</h2>
+    <p class="text-sm text-muted mt-1">Irreversible actions for this board.</p>
+  </div>
+
+  <div class="bg-surface border border-red-500/20 rounded-lg p-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-sm font-medium text-primary">Delete this board</h3>
+        <p class="text-xs text-muted mt-0.5">All columns and cards will be permanently removed.</p>
+      </div>
+      <app-button
+        variant="danger"
+        size="sm"
+        [disabled]="isDeleting()"
+        (click)="openDeleteModal()">
+        Delete board
+      </app-button>
+    </div>
+  </div>
+</section>
+
+<app-confirmation-modal
+  [open]="showDeleteModal()"
+  title="Delete Board"
+  message="Are you sure you want to delete this board? All columns and cards will be permanently removed. This action cannot be undone."
+  confirmText="Delete Board"
+  variant="danger"
+  gradientVariant="pink"
+  (confirm)="onConfirmDelete()"
+  (cancel)="closeDeleteModal()" />

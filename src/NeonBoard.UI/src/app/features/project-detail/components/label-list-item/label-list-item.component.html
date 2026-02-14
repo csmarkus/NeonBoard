@@ -1,0 +1,52 @@
+@if (isEditing()) {
+  <div class="flex items-center gap-2 bg-surface border border-dim rounded-lg p-3">
+    <input
+      type="text"
+      [ngModel]="editName()"
+      (ngModelChange)="editName.set($event)"
+      (keyup.enter)="onSave()"
+      (keyup.escape)="onCancel()"
+      maxlength="50"
+      class="flex-1 px-2 py-1 text-sm bg-void text-primary border border-dim rounded focus:outline-none focus:border-accent" />
+    <div class="flex gap-1">
+      @for (color of labelColors; track color) {
+        <button
+          (click)="editColor.set(color)"
+          [class]="'w-5 h-5 rounded-full transition-all ' + getColorSwatchClass(color) +
+            (editColor() === color ? ' ring-2 ring-white/50 scale-110' : ' opacity-60 hover:opacity-100')"
+          [attr.aria-label]="'Select ' + color + ' color'"></button>
+      }
+    </div>
+    <button
+      (click)="onSave()"
+      [disabled]="isSaving() || !editName().trim()"
+      class="px-2 py-1 text-xs bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50 transition-colors">
+      Save
+    </button>
+    <button
+      (click)="onCancel()"
+      class="px-2 py-1 text-xs text-muted hover:text-primary transition-colors">
+      Cancel
+    </button>
+  </div>
+} @else {
+  <div class="flex items-center gap-3 group">
+    <span [class]="'inline-flex items-center px-2.5 py-1 text-xs font-medium rounded border ' + getLabelClasses(label().color)">
+      {{ label().name }}
+    </span>
+    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <button
+        (click)="onEdit()"
+        class="px-1.5 py-0.5 text-xs text-muted hover:text-primary transition-colors"
+        aria-label="Edit label">
+        Edit
+      </button>
+      <button
+        (click)="onDelete()"
+        class="px-1.5 py-0.5 text-xs text-red-400 hover:text-red-300 transition-colors"
+        aria-label="Delete label">
+        Delete
+      </button>
+    </div>
+  </div>
+}
