@@ -1,7 +1,7 @@
 import { Component, input, output, signal, afterNextRender, inject, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
 import { Column } from '../../models/column.model';
 import { Card } from '../../models/card.model';
 import { CardComponent } from '../card/card.component';
@@ -28,6 +28,7 @@ export class ColumnComponent {
   columnDeleted = output<string>();
   cardSelected = output<Card>();
   cardAdded = output<{ columnId: string; title: string }>();
+  cardDragStarted = output<number>();
 
   menuOpen = signal(false);
   editingName = signal(false);
@@ -65,6 +66,12 @@ export class ColumnComponent {
 
   onCardDrop(event: CdkDragDrop<Card[]>): void {
     this.cardDropped.emit(event);
+  }
+
+  onCardDragStarted(event: CdkDragStart): void {
+    const cardElement = event.source.element.nativeElement;
+    const cardHeight = cardElement.offsetHeight;
+    this.cardDragStarted.emit(cardHeight);
   }
 
   selectCard(card: Card): void {

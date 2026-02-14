@@ -26,7 +26,7 @@
       (cdkDropListDropped)="dropColumn($event)"
       class="flex gap-6 min-w-max h-full items-start"
     >
-      <div cdkDropListGroup class="contents">
+      <div cdkDropListGroup [ngStyle]="cardHeightStyle()" class="contents">
         @for (column of columns(); track column.id; let i = $index) {
           <app-column
             [column]="column"
@@ -38,6 +38,7 @@
             (columnDeleted)="onColumnDeleted($event)"
             (cardSelected)="onCardSelected($event)"
             (cardAdded)="onCardAdded($event)"
+            (cardDragStarted)="onCardDragStarted($event)"
           ></app-column>
         }
       </div>

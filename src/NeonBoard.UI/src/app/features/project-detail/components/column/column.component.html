@@ -68,9 +68,9 @@
     class="flex flex-col gap-2 min-h-[100px] rounded-lg transition-colors overflow-y-auto flex-1"
   >
     @for (card of cards(); track card.id) {
-      <div cdkDrag [cdkDragData]="card">
-        <div *cdkDragPlaceholder class="h-full min-h-[60px] bg-cyan-500/15 border-2 border-dashed border-cyan-500/50 rounded-lg"></div>
+      <div cdkDrag [cdkDragData]="card" (cdkDragStarted)="onCardDragStarted($event)">
         <app-card [card]="card" (cardClick)="selectCard(card)"></app-card>
+        <div *cdkDragPlaceholder class="card-drag-placeholder"></div>
       </div>
     }
 

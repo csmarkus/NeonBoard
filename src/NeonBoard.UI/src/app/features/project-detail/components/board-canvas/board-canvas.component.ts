@@ -1,5 +1,5 @@
 import { Component, input, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgStyle } from '@angular/common';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { BoardStateFacade } from '../../services/board-state.facade';
 import { ColumnComponent } from '../column/column.component';
@@ -9,7 +9,7 @@ import { Card } from '../../models/card.model';
 
 @Component({
   selector: 'app-board-canvas',
-  imports: [CommonModule, DragDropModule, ColumnComponent, AddColumnButtonComponent],
+  imports: [CommonModule, NgStyle, DragDropModule, ColumnComponent, AddColumnButtonComponent],
   host: {
     class: 'flex-1 flex flex-col'
   },
@@ -24,6 +24,7 @@ export class BoardCanvasComponent {
 
   isAddingColumn = signal<boolean>(false);
   newColumnName = signal<string>('');
+  draggedCardHeight = signal<number>(0);
 
   board = this.facade.board;
   columns = this.facade.columns;
@@ -33,6 +34,10 @@ export class BoardCanvasComponent {
   error = this.facade.error;
 
   columnIds = computed(() => this.columns().map(c => c.id));
+
+  cardHeightStyle = computed(() => ({
+    '--dragged-card-height': `${this.draggedCardHeight()}px`
+  }));
 
   constructor() {
     effect(() => {
@@ -116,5 +121,9 @@ export class BoardCanvasComponent {
 
   onColumnNameChange(name: string): void {
     this.newColumnName.set(name);
+  }
+
+  onCardDragStarted(height: number): void {
+    this.draggedCardHeight.set(height);
   }
 }
