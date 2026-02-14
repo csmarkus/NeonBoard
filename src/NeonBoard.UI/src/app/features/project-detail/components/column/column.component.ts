@@ -9,9 +9,6 @@ import { CardComponent } from '../card/card.component';
 @Component({
   selector: 'app-column',
   imports: [CommonModule, FormsModule, DragDropModule, CardComponent],
-  host: {
-    class: 'h-full'
-  },
   templateUrl: './column.component.html',
   styleUrl: './column.component.css',
 })

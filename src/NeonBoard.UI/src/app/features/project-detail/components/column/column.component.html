@@ -1,4 +1,4 @@
-<div cdkDrag class="flex flex-col w-72 shrink-0 max-h-full">
+<div cdkDrag class="flex flex-col w-72 shrink-0 max-h-[calc(100vh-12rem)]">
   <!-- Column drag placeholder -->
   <div *cdkDragPlaceholder class="w-72 h-full min-h-[200px] bg-accent/15 border-2 border-dashed border-accent/40 rounded-lg"></div>
 
@@ -65,7 +65,7 @@
     [cdkDropListData]="cards()"
     [cdkDropListConnectedTo]="columnIds()"
     (cdkDropListDropped)="onCardDrop($event)"
-    class="flex flex-col gap-2 min-h-[100px] rounded-lg transition-colors overflow-y-auto flex-1"
+    class="flex flex-col gap-2 rounded-lg transition-colors overflow-y-auto flex-1 min-h-0"
   >
     @for (card of cards(); track card.id) {
       <div cdkDrag [cdkDragData]="card" (cdkDragStarted)="onCardDragStarted($event)">
