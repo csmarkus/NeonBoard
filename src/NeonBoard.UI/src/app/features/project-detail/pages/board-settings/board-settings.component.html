@@ -17,7 +17,7 @@
   </app-page-header>
 
   <main class="flex-1 overflow-y-auto">
-    <div class="max-w-4xl mx-auto py-8 px-6 space-y-8">
+    <div class="max-w-4xl mx-auto py-8 px-6">
       <a
         [routerLink]="['/project', projectId(), 'b', boardId()]"
         class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors">
@@ -27,19 +27,19 @@
         Back to board
       </a>
 
-      <h2 class="text-lg font-semibold text-primary">Board settings</h2>
+      <h2 class="text-lg font-semibold text-primary mt-8 mb-12">Board settings</h2>
 
       <app-general-settings-section
         [projectId]="projectId()"
         [boardId]="boardId()" />
 
-      <hr class="border-subtle" />
+      <hr class="border-subtle my-12" />
 
       <app-label-management-section
         [projectId]="projectId()"
         [boardId]="boardId()" />
 
-      <hr class="border-subtle" />
+      <hr class="border-subtle my-12" />
 
       <app-danger-zone-section
         [isDeleting]="isDeleting()"

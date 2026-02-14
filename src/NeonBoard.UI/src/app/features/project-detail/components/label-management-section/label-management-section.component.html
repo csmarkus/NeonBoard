@@ -4,9 +4,9 @@
     <p class="text-sm text-muted mt-1">Manage labels for cards on this board.</p>
   </div>
 
-  <div class="space-y-4">
+  <div class="space-y-6">
     @if (facade.sortedLabels().length) {
-      <div class="space-y-2">
+      <div class="space-y-3">
         @for (label of facade.sortedLabels(); track label.id) {
           <app-label-list-item
             [label]="label"

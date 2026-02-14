@@ -5,6 +5,9 @@ import { Label, LABEL_COLORS, getLabelColorClasses } from '../../models/label.mo
 @Component({
   selector: 'app-label-list-item',
   imports: [FormsModule],
+  host: {
+    class: 'block'
+  },
   templateUrl: './label-list-item.component.html',
 })
 export class LabelListItemComponent {
@@ -38,13 +41,15 @@ export class LabelListItemComponent {
   getColorSwatchClass(color: string): string {
     const map: Record<string, string> = {
       red: 'bg-red-500',
-      pink: 'bg-pink-500',
-      purple: 'bg-purple-500',
+      orange: 'bg-orange-500',
+      yellow: 'bg-yellow-600',
+      lime: 'bg-lime-500',
       cyan: 'bg-cyan-500',
       blue: 'bg-blue-500',
-      magenta: 'bg-fuchsia-500',
+      purple: 'bg-purple-500',
       violet: 'bg-violet-500',
-      lime: 'bg-lime-500',
+      magenta: 'bg-fuchsia-500',
+      pink: 'bg-pink-500',
     };
     return map[color] ?? 'bg-gray-500';
   }
