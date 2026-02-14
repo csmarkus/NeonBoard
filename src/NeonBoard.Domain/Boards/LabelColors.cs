@@ -12,10 +12,11 @@ public static class LabelColors
     public const string Violet = "violet";
     public const string Magenta = "magenta";
     public const string Pink = "pink";
+    public const string Grey = "grey";
 
     public static readonly IReadOnlyList<string> All =
     [
-        Red, Orange, Yellow, Lime, Cyan, Blue, Purple, Violet, Magenta, Pink
+        Red, Orange, Yellow, Lime, Cyan, Blue, Purple, Violet, Magenta, Pink, Grey
     ];
 
     public static bool IsValid(string color) =>

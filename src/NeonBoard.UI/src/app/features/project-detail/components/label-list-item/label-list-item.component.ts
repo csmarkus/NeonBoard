@@ -50,6 +50,7 @@ export class LabelListItemComponent {
       violet: 'bg-violet-500',
       magenta: 'bg-fuchsia-500',
       pink: 'bg-pink-500',
+      grey: 'bg-gray-500',
     };
     return map[color] ?? 'bg-gray-500';
   }
