@@ -77,16 +77,17 @@
     <!-- Inline add card form -->
     @if (addingCard()) {
       <div class="relative z-20 bg-surface border border-subtle rounded-lg p-3">
-        <input
-          type="text"
+        <textarea
           [id]="'add-card-' + column().id"
           [(ngModel)]="newCardTitle"
-          (keyup.enter)="saveCard()"
+          (keydown.enter)="$event.preventDefault(); saveCard()"
           (keyup.escape)="cancelAddCard()"
+          (input)="autoResize($event)"
           placeholder="Card title..."
-          class="w-full px-0 py-0 text-sm bg-transparent text-primary placeholder:text-muted border-none focus:outline-none mb-2"
+          rows="1"
+          class="w-full px-0 py-0 text-sm bg-transparent text-primary placeholder:text-muted border-none focus:outline-none mb-2 resize-none overflow-hidden"
           autofocus
-        />
+        ></textarea>
         <div class="flex gap-1.5">
           <button
             (click)="saveCard()"

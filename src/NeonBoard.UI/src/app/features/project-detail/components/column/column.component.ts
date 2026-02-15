@@ -82,11 +82,17 @@ export class ColumnComponent {
     this.newCardTitle.set('');
 
     afterNextRender(() => {
-      const input = document.querySelector(`#add-card-${this.column().id}`) as HTMLInputElement;
-      if (input) {
-        input.focus();
+      const textarea = document.querySelector(`#add-card-${this.column().id}`) as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.focus();
       }
     }, { injector: this.injector });
+  }
+
+  autoResize(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
   }
 
   cancelAddCard(): void {
