@@ -1,4 +1,4 @@
-import { Component, input, output, signal, afterNextRender, inject, Injector } from '@angular/core';
+import { Component, input, output, signal, afterNextRender, inject, Injector, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
@@ -11,9 +11,13 @@ import { CardComponent } from '../card/card.component';
   imports: [CommonModule, FormsModule, DragDropModule, CardComponent],
   templateUrl: './column.component.html',
   styleUrl: './column.component.css',
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class ColumnComponent {
   private injector = inject(Injector);
+  private elementRef = inject(ElementRef);
 
   column = input.required<Column>();
   cards = input.required<Card[]>();
@@ -60,6 +64,21 @@ export class ColumnComponent {
 
   toggleMenu(): void {
     this.menuOpen.update(open => !open);
+  }
+
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.menuOpen()) return;
+
+    const menuButton = this.elementRef.nativeElement.querySelector('.column-menu-trigger');
+    const menuDropdown = this.elementRef.nativeElement.querySelector('.column-menu-dropdown');
+    const target = event.target as Node;
+
+    if (
+      (!menuButton || !menuButton.contains(target)) &&
+      (!menuDropdown || !menuDropdown.contains(target))
+    ) {
+      this.menuOpen.set(false);
+    }
   }
 
   onCardDrop(event: CdkDragDrop<Card[]>): void {

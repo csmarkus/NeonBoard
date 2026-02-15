@@ -26,7 +26,7 @@
     <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
       <button
         (click)="toggleMenu()"
-        class="p-1 hover:bg-surface rounded transition-colors"
+        class="column-menu-trigger p-1 hover:bg-surface rounded transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="text-muted">
           <circle cx="9" cy="5" r="1.5"/>
@@ -41,7 +41,7 @@
 
     <!-- Column menu dropdown -->
     @if (menuOpen()) {
-      <div class="absolute right-0 top-8 bg-surface border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+      <div class="column-menu-dropdown absolute right-0 top-8 bg-surface border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
         <button
           (click)="startEdit()"
           class="w-full px-3 py-2 text-left text-sm text-primary hover:bg-surface-elevated transition-colors"
