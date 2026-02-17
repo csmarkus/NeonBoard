@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
@@ -28,6 +29,7 @@ export class ProjectComponent implements OnInit {
   private projectService = inject(ProjectService);
   private boardService = inject(BoardService);
   private drawerService = inject(DrawerService);
+  private titleService = inject(Title);
 
   projectId = signal<string>('');
   project = signal<Project | null>(null);
@@ -56,6 +58,7 @@ export class ProjectComponent implements OnInit {
     this.projectService.getProject(this.projectId()).subscribe({
       next: (project) => {
         this.project.set(project);
+        this.titleService.setTitle(`${project.name} | NeonBoard`);
         // Then load boards for this project
         this.loadBoards();
       },

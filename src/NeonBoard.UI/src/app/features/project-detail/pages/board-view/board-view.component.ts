@@ -1,5 +1,6 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { ProjectService } from '../../../projects/services/project.service';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -25,6 +26,7 @@ export class BoardViewComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private projectService = inject(ProjectService);
   private facade = inject(BoardStateFacade);
+  private titleService = inject(Title);
 
   projectId = signal<string>('');
   boardId = signal<string>('');
@@ -36,6 +38,15 @@ export class BoardViewComponent implements OnInit {
     { label: this.projectName(), link: ['/project', this.projectId()] },
     { label: this.boardName() }
   ]);
+
+  constructor() {
+    effect(() => {
+      const name = this.boardName();
+      if (name) {
+        this.titleService.setTitle(`${name} | NeonBoard`);
+      }
+    });
+  }
 
   ngOnInit(): void {
     const projectId = this.route.parent?.snapshot.paramMap.get('projectId');

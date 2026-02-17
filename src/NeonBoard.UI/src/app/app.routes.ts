@@ -8,6 +8,7 @@ export const routes: Routes = [
     path: 'projects',
     loadComponent: () => import('./features/projects/pages/projects-list/projects.component').then(m => m.ProjectsComponent),
     canActivate: [authGuard],
+    title: 'Projects | NeonBoard',
     data: { animation: 'ProjectsPage' }
   },
   {

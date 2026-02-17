@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { Observable, Subject } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -33,6 +34,7 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   private router = inject(Router);
   private projectService = inject(ProjectService);
   facade = inject(BoardSettingsFacade);
+  private titleService = inject(Title);
 
   projectId = signal('');
   boardId = signal('');
@@ -47,6 +49,15 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   ]);
 
   private discardSubject: Subject<boolean> | null = null;
+
+  constructor() {
+    effect(() => {
+      const name = this.facade.originalBoardName();
+      if (name) {
+        this.titleService.setTitle(`Settings - ${name} | NeonBoard`);
+      }
+    });
+  }
 
   ngOnInit(): void {
     const projectId = this.route.parent?.snapshot.paramMap.get('projectId');
