@@ -20,10 +20,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore src/NeonBoard.AppHost/
+        run: dotnet restore src/NeonBoard.Api/
 
       - name: Build
-        run: dotnet build src/NeonBoard.AppHost/ --no-restore
+        run: dotnet build src/NeonBoard.Api/ --no-restore
 
       - name: Test
         run: dotnet test tests/NeonBoard.UnitTests/ --verbosity normal
