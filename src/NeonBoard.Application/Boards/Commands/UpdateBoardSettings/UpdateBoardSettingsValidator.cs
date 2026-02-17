@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Boards.Commands.UpdateBoardSettings;
 
@@ -8,16 +9,16 @@ public class UpdateBoardSettingsValidator : AbstractValidator<UpdateBoardSetting
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Board name is required.")
+            .WithMessage(ValidationMessages.BoardNameRequired)
             .MaximumLength(100)
-            .WithMessage("Board name cannot exceed 100 characters.");
+            .WithMessage(ValidationMessages.BoardNameTooLong);
     }
 }

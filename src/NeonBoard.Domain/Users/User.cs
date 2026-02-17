@@ -48,30 +48,30 @@ public sealed class User : Entity, IAggregateRoot
     private static void ValidateAuth0UserId(string auth0UserId)
     {
         if (string.IsNullOrWhiteSpace(auth0UserId))
-            throw new DomainException("Auth0 User ID cannot be empty.");
+            throw new DomainException(DomainMessages.UserAuth0IdEmpty);
 
         if (auth0UserId.Length > MaxAuth0UserIdLength)
-            throw new DomainException($"Auth0 User ID cannot exceed {MaxAuth0UserIdLength} characters.");
+            throw new DomainException(DomainMessages.UserAuth0IdTooLong);
     }
 
     private static void ValidateEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException("Email cannot be empty.");
+            throw new DomainException(DomainMessages.UserEmailEmpty);
 
         if (email.Length > MaxEmailLength)
-            throw new DomainException($"Email cannot exceed {MaxEmailLength} characters.");
+            throw new DomainException(DomainMessages.UserEmailTooLong);
 
         if (!email.Contains('@'))
-            throw new DomainException("Email must contain '@' symbol.");
+            throw new DomainException(DomainMessages.UserEmailInvalid);
     }
 
     private static void ValidateDisplayName(string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName))
-            throw new DomainException("Display name cannot be empty.");
+            throw new DomainException(DomainMessages.UserDisplayNameEmpty);
 
         if (displayName.Length > MaxDisplayNameLength)
-            throw new DomainException($"Display name cannot exceed {MaxDisplayNameLength} characters.");
+            throw new DomainException(DomainMessages.UserDisplayNameTooLong);
     }
 }

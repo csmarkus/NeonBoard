@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Columns.Commands.AddColumn;
 
@@ -8,16 +9,16 @@ public class AddColumnValidator : AbstractValidator<AddColumnCommand>
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Column name is required.")
+            .WithMessage(ValidationMessages.ColumnNameRequired)
             .MaximumLength(100)
-            .WithMessage("Column name cannot exceed 100 characters.");
+            .WithMessage(ValidationMessages.ColumnNameTooLong);
     }
 }

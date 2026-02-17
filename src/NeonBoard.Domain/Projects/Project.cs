@@ -60,21 +60,21 @@ public sealed class Project : Entity, IAggregateRoot
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Project name cannot be empty.");
+            throw new DomainException(DomainMessages.ProjectNameEmpty);
 
         if (name.Length > MaxNameLength)
-            throw new DomainException($"Project name cannot exceed {MaxNameLength} characters.");
+            throw new DomainException(DomainMessages.ProjectNameTooLong);
     }
 
     private static void ValidateDescription(string? description)
     {
         if (description != null && description.Length > MaxDescriptionLength)
-            throw new DomainException($"Project description cannot exceed {MaxDescriptionLength} characters.");
+            throw new DomainException(DomainMessages.ProjectDescriptionTooLong);
     }
 
     private static void ValidateOwnerId(Guid ownerId)
     {
         if (ownerId == default)
-            throw new DomainException("Owner ID cannot be empty.");
+            throw new DomainException(DomainMessages.ProjectOwnerIdEmpty);
     }
 }

@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Labels.Commands.UpdateLabel;
 
@@ -8,24 +9,24 @@ public class UpdateLabelValidator : AbstractValidator<UpdateLabelCommand>
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.LabelId)
             .NotEmpty()
-            .WithMessage("Label ID is required.");
+            .WithMessage(ValidationMessages.LabelIdRequired);
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Label name is required.")
+            .WithMessage(ValidationMessages.LabelNameRequired)
             .MaximumLength(50)
-            .WithMessage("Label name cannot exceed 50 characters.");
+            .WithMessage(ValidationMessages.LabelNameTooLong);
 
         RuleFor(x => x.Color)
             .NotEmpty()
-            .WithMessage("Label color is required.");
+            .WithMessage(ValidationMessages.LabelColorRequired);
     }
 }

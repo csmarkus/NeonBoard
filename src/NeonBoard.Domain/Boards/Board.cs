@@ -92,12 +92,12 @@ public sealed class Board : Entity, IAggregateRoot
     public void ReorderColumns(List<Guid> columnIdsInOrder)
     {
         if (columnIdsInOrder.Count != _columns.Count)
-            throw new DomainException("Column count mismatch. All columns must be included in the reorder.");
+            throw new DomainException(DomainMessages.BoardColumnCountMismatch);
 
         foreach (var columnId in columnIdsInOrder)
         {
             if (!_columns.Any(c => c.Id == columnId))
-                throw new DomainException($"Column with ID {columnId} not found.");
+                throw new DomainException(DomainMessages.ColumnNotFound(columnId));
         }
 
         var newPositions = new Dictionary<Guid, int>();
@@ -135,7 +135,7 @@ public sealed class Board : Entity, IAggregateRoot
             }
             else
             {
-                throw new DomainException("Cannot delete column with cards. Specify a target column to move cards to.");
+                throw new DomainException(DomainMessages.BoardCannotDeleteColumnWithCards);
             }
         }
 
@@ -192,7 +192,7 @@ public sealed class Board : Entity, IAggregateRoot
         var targetColumn = FindColumn(targetColumnId);
 
         if (targetPosition < 0)
-            throw new DomainException("Target position cannot be negative.");
+            throw new DomainException(DomainMessages.BoardTargetPositionNegative);
 
         var sourceColumnId = card.ColumnId;
 
@@ -298,7 +298,7 @@ public sealed class Board : Entity, IAggregateRoot
     {
         var column = _columns.FirstOrDefault(c => c.Id == columnId);
         if (column == null)
-            throw new DomainException($"Column with ID {columnId} not found.");
+            throw new DomainException(DomainMessages.ColumnNotFound(columnId));
         return column;
     }
 
@@ -306,7 +306,7 @@ public sealed class Board : Entity, IAggregateRoot
     {
         var card = _cards.FirstOrDefault(c => c.Id == cardId);
         if (card == null)
-            throw new DomainException($"Card with ID {cardId} not found.");
+            throw new DomainException(DomainMessages.CardNotFound(cardId));
         return card;
     }
 
@@ -314,7 +314,7 @@ public sealed class Board : Entity, IAggregateRoot
     {
         var label = _labels.FirstOrDefault(l => l.Id == labelId);
         if (label == null)
-            throw new DomainException($"Label with ID {labelId} not found.");
+            throw new DomainException(DomainMessages.LabelNotFound(labelId));
         return label;
     }
 
@@ -348,16 +348,16 @@ public sealed class Board : Entity, IAggregateRoot
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Board name cannot be empty.");
+            throw new DomainException(DomainMessages.BoardNameEmpty);
 
         if (name.Length > MaxNameLength)
-            throw new DomainException($"Board name cannot exceed {MaxNameLength} characters.");
+            throw new DomainException(DomainMessages.BoardNameTooLong);
     }
 
     private static void ValidateProjectId(Guid projectId)
     {
         if (projectId == default)
-            throw new DomainException("Project ID cannot be empty.");
+            throw new DomainException(DomainMessages.BoardProjectIdEmpty);
     }
 
     #endregion

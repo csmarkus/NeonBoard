@@ -44,9 +44,9 @@ public sealed class Column : Entity
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Column name cannot be empty.");
+            throw new DomainException(DomainMessages.ColumnNameEmpty);
 
         if (name.Length > MaxNameLength)
-            throw new DomainException($"Column name cannot exceed {MaxNameLength} characters.");
+            throw new DomainException(DomainMessages.ColumnNameTooLong);
     }
 }

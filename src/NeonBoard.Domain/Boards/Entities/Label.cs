@@ -39,18 +39,18 @@ public sealed class Label : Entity
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Label name cannot be empty.");
+            throw new DomainException(DomainMessages.LabelNameEmpty);
 
         if (name.Length > MaxNameLength)
-            throw new DomainException($"Label name cannot exceed {MaxNameLength} characters.");
+            throw new DomainException(DomainMessages.LabelNameTooLong);
     }
 
     private static void ValidateColor(string color)
     {
         if (string.IsNullOrWhiteSpace(color))
-            throw new DomainException("Label color cannot be empty.");
+            throw new DomainException(DomainMessages.LabelColorEmpty);
 
         if (!LabelColors.IsValid(color))
-            throw new DomainException($"'{color}' is not a valid label color.");
+            throw new DomainException(DomainMessages.LabelColorInvalid(color));
     }
 }

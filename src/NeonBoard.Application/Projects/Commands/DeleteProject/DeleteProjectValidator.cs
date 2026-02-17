@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Projects.Commands.DeleteProject;
 
@@ -8,6 +9,6 @@ public class DeleteProjectValidator : AbstractValidator<DeleteProjectCommand>
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
     }
 }

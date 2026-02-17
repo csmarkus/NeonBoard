@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Columns.Commands.RenameColumn;
 
@@ -8,20 +9,20 @@ public class RenameColumnValidator : AbstractValidator<RenameColumnCommand>
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.ColumnId)
             .NotEmpty()
-            .WithMessage("Column ID is required.");
+            .WithMessage(ValidationMessages.ColumnIdRequired);
 
         RuleFor(x => x.NewName)
             .NotEmpty()
-            .WithMessage("Column name is required.")
+            .WithMessage(ValidationMessages.ColumnNameRequired)
             .MaximumLength(100)
-            .WithMessage("Column name cannot exceed 100 characters.");
+            .WithMessage(ValidationMessages.ColumnNameTooLong);
     }
 }

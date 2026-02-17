@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Cards.Commands.MoveCard;
 
@@ -8,22 +9,22 @@ public class MoveCardValidator : AbstractValidator<MoveCardCommand>
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.CardId)
             .NotEmpty()
-            .WithMessage("Card ID is required.");
+            .WithMessage(ValidationMessages.CardIdRequired);
 
         RuleFor(x => x.TargetColumnId)
             .NotEmpty()
-            .WithMessage("Target column ID is required.");
+            .WithMessage(ValidationMessages.TargetColumnIdRequired);
 
         RuleFor(x => x.TargetPosition)
             .GreaterThanOrEqualTo(0)
-            .WithMessage("Target position must be greater than or equal to 0.");
+            .WithMessage(ValidationMessages.TargetPositionNonNegative);
     }
 }

@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Projects.Commands.CreateProject;
 
@@ -8,16 +9,16 @@ public class CreateProjectValidator : AbstractValidator<CreateProjectCommand>
     {
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Project name is required.")
+            .WithMessage(ValidationMessages.ProjectNameRequired)
             .MaximumLength(100)
-            .WithMessage("Project name cannot exceed 100 characters.");
+            .WithMessage(ValidationMessages.ProjectNameTooLong);
 
         RuleFor(x => x.Description)
             .MaximumLength(1000)
-            .WithMessage("Project description cannot exceed 1000 characters.");
+            .WithMessage(ValidationMessages.ProjectDescriptionTooLong);
 
         RuleFor(x => x.OwnerId)
             .NotEmpty()
-            .WithMessage("Owner ID is required.");
+            .WithMessage(ValidationMessages.OwnerIdRequired);
     }
 }

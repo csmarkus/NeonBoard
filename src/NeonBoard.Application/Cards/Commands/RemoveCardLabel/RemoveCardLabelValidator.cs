@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Cards.Commands.RemoveCardLabel;
 
@@ -8,18 +9,18 @@ public class RemoveCardLabelValidator : AbstractValidator<RemoveCardLabelCommand
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.CardId)
             .NotEmpty()
-            .WithMessage("Card ID is required.");
+            .WithMessage(ValidationMessages.CardIdRequired);
 
         RuleFor(x => x.LabelId)
             .NotEmpty()
-            .WithMessage("Label ID is required.");
+            .WithMessage(ValidationMessages.LabelIdRequired);
     }
 }

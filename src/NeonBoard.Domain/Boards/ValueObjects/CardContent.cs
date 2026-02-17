@@ -35,16 +35,16 @@ public sealed class CardContent : ValueObject
     private static void ValidateTitle(string title)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Card title cannot be empty.");
+            throw new DomainException(DomainMessages.CardTitleEmpty);
 
         if (title.Length > MaxTitleLength)
-            throw new DomainException($"Card title cannot exceed {MaxTitleLength} characters.");
+            throw new DomainException(DomainMessages.CardTitleTooLong);
     }
 
     private static void ValidateDescription(string? description)
     {
         if (description != null && description.Length > MaxDescriptionLength)
-            throw new DomainException($"Card description cannot exceed {MaxDescriptionLength} characters.");
+            throw new DomainException(DomainMessages.CardDescriptionTooLong);
     }
 
     protected override IEnumerable<object?> GetEqualityComponents()

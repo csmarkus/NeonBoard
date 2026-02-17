@@ -13,7 +13,7 @@ public sealed class Position : ValueObject
     public static Position Create(int value)
     {
         if (value < 0)
-            throw new DomainException("Position cannot be negative.");
+            throw new DomainException(DomainMessages.PositionNegative);
 
         return new Position { Value = value };
     }

@@ -1,4 +1,5 @@
 using FluentValidation;
+using NeonBoard.Application.Common;
 
 namespace NeonBoard.Application.Cards.Commands.AddCard;
 
@@ -8,24 +9,24 @@ public class AddCardValidator : AbstractValidator<AddCardCommand>
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(ValidationMessages.ProjectIdRequired);
 
         RuleFor(x => x.BoardId)
             .NotEmpty()
-            .WithMessage("Board ID is required.");
+            .WithMessage(ValidationMessages.BoardIdRequired);
 
         RuleFor(x => x.ColumnId)
             .NotEmpty()
-            .WithMessage("Column ID is required.");
+            .WithMessage(ValidationMessages.ColumnIdRequired);
 
         RuleFor(x => x.Title)
             .NotEmpty()
-            .WithMessage("Card title is required.")
+            .WithMessage(ValidationMessages.CardTitleRequired)
             .MaximumLength(200)
-            .WithMessage("Card title cannot exceed 200 characters.");
+            .WithMessage(ValidationMessages.CardTitleTooLong);
 
         RuleFor(x => x.Description)
             .MaximumLength(2000)
-            .WithMessage("Card description cannot exceed 2000 characters.");
+            .WithMessage(ValidationMessages.CardDescriptionTooLong);
     }
 }

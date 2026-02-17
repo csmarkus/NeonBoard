@@ -24,7 +24,7 @@ public sealed class Card : Entity
     internal static Card CreateInternal(Guid columnId, CardContent content, Position position)
     {
         if (columnId == default)
-            throw new DomainException("Column ID cannot be empty.");
+            throw new DomainException(DomainMessages.CardColumnIdEmpty);
 
         return new Card
         {
@@ -53,7 +53,7 @@ public sealed class Card : Entity
     internal void AddLabel(Guid labelId)
     {
         if (LabelIds.Contains(labelId))
-            throw new DomainException("This label is already assigned to the card.");
+            throw new DomainException(DomainMessages.CardLabelAlreadyAssigned);
 
         LabelIds = [..LabelIds, labelId];
         UpdatedAt = DateTime.UtcNow;
@@ -62,7 +62,7 @@ public sealed class Card : Entity
     internal void RemoveLabel(Guid labelId)
     {
         if (!LabelIds.Contains(labelId))
-            throw new DomainException("This label is not assigned to the card.");
+            throw new DomainException(DomainMessages.CardLabelNotAssigned);
 
         LabelIds = LabelIds.Where(id => id != labelId).ToList();
         UpdatedAt = DateTime.UtcNow;
