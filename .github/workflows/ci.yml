@@ -90,7 +90,7 @@ jobs:
           PAYLOAD=$(jq -n \
             --arg title "${{ github.event.repository.name }}" \
             --arg commit_line "[$COMMIT_MSG]($RUN_URL)" \
-            --argi color "$COLOR" \
+            --arg color "$COLOR" \
             --arg commit "${{ github.sha }}" \
             --arg branch "${{ github.ref_name }}" \
             --arg author "${{ github.actor }}" \
