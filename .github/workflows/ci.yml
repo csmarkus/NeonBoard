@@ -89,10 +89,10 @@ jobs:
 
           PAYLOAD=$(jq -n \
             --arg title "${{ github.event.repository.name }}" \
-            --arg commit_line "## [$COMMIT_MSG]($RUN_URL)" \
+            --arg commit_line "### [$COMMIT_MSG]($RUN_URL)" \
             --arg color "$COLOR" \
-            --arg commit "`${{ github.sha }}`" \
-            --arg branch "`${{ github.ref_name }}`" \
+            --arg commit "${{ github.sha }}" \
+            --arg branch "${{ github.ref_name }}" \
             --arg author "${{ github.actor }}" \
             --arg backend "$BACKEND" \
             --arg frontend "$FRONTEND" \
@@ -102,9 +102,9 @@ jobs:
                 description: ($commit_line + "\n\n" + $backend + "\n" + $frontend),
                 color: $color,
                 fields: [
-                  { name: "Commit", value: $commit, inline: true },
-                  { name: "Branch", value: $branch, inline: true },
-                  { name: "Author", value: $author, inline: false }
+                  { name: "Commit", value: ("`" + $commit + "`"), inline: true },
+                  { name: "Branch", value: ("`" + $branch + "`"), inline: true },
+                  { name: "Author", value: ("`" + $author + "`"), inline: false }
                 ]
               }]
             }')
