@@ -29,7 +29,7 @@ jobs:
         run: dotnet test tests/NeonBoard.UnitTests/ --verbosity normal
 
   frontend:
-    name: Frontend Build
+    name: Frontend Build & Test & Test
     runs-on: ubuntu-latest
 
     defaults:
@@ -51,6 +51,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Test
+        run: npm test
 
   notify:
     name: Discord Notification
@@ -79,9 +82,9 @@ jobs:
           fi
 
           if [[ "${{ needs.frontend.result }}" == "success" ]]; then
-            FRONTEND="✅ Frontend Build"
+            FRONTEND="✅ Frontend Build & Test"
           else
-            FRONTEND="❌ Frontend Build"
+            FRONTEND="❌ Frontend Build & Test"
           fi
 
           COMMIT_MSG=$(git log -1 --pretty=%s)
