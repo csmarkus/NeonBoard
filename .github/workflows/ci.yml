@@ -29,7 +29,7 @@ jobs:
         run: dotnet test tests/NeonBoard.UnitTests/ --verbosity normal
 
   frontend:
-    name: Frontend Build & Test & Test
+    name: Frontend Build & Test
     runs-on: ubuntu-latest
 
     defaults:
