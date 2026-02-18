@@ -59,30 +59,64 @@ jobs:
     if: always()
 
     steps:
-      - name: Set status
-        id: status
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build payload
+        id: payload
         run: |
           if [[ "${{ needs.backend.result }}" == "success" && "${{ needs.frontend.result }}" == "success" ]]; then
-            echo "color=3066993" >> $GITHUB_OUTPUT
-            echo "status=Passed" >> $GITHUB_OUTPUT
-            echo "emoji=✅" >> $GITHUB_OUTPUT
+            COLOR=3066993
           else
-            echo "color=15158332" >> $GITHUB_OUTPUT
-            echo "status=Failed" >> $GITHUB_OUTPUT
-            echo "emoji=❌" >> $GITHUB_OUTPUT
+            COLOR=15158332
           fi
+
+          if [[ "${{ needs.backend.result }}" == "success" ]]; then
+            BACKEND="✅ Backend Build & Test"
+          else
+            BACKEND="❌ Backend Build & Test"
+          fi
+
+          if [[ "${{ needs.frontend.result }}" == "success" ]]; then
+            FRONTEND="✅ Frontend Build"
+          else
+            FRONTEND="❌ Frontend Build"
+          fi
+
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          PAYLOAD=$(jq -n \
+            --arg title "${{ github.event.repository.name }}" \
+            --arg commit_line "[$COMMIT_MSG]($RUN_URL)" \
+            --argi color "$COLOR" \
+            --arg commit "${{ github.sha }}" \
+            --arg branch "${{ github.ref_name }}" \
+            --arg author "${{ github.actor }}" \
+            --arg backend "$BACKEND" \
+            --arg frontend "$FRONTEND" \
+            '{
+              embeds: [{
+                title: $title,
+                description: ($commit_line + "\n\n" + $backend + "\n" + $frontend),
+                color: $color,
+                fields: [
+                  { name: "Commit", value: $commit, inline: false },
+                  { name: "Branch", value: $branch, inline: true },
+                  { name: "Author", value: $author, inline: true }
+                ]
+              }]
+            }')
+
+          echo "json<<EOF" >> $GITHUB_OUTPUT
+          echo "$PAYLOAD" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -s -H "Content-Type: application/json" \
-            -d "{
-              \"embeds\": [{
-                \"title\": \"${{ steps.status.outputs.emoji }} CI ${{ steps.status.outputs.status }}\",
-                \"description\": \"**Repo:** ${{ github.repository }}\n**Branch:** ${{ github.ref_name }}\n**Commit:** [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\n**Author:** ${{ github.actor }}\n\n**Backend:** ${{ needs.backend.result }}\n**Frontend:** ${{ needs.frontend.result }}\",
-                \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\",
-                \"color\": ${{ steps.status.outputs.color }}
-              }]
-            }" \
+            -d '${{ steps.payload.outputs.json }}' \
             "$DISCORD_WEBHOOK_URL"
