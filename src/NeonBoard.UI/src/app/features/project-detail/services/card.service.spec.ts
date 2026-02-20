@@ -25,7 +25,7 @@ describe('CardService', () => {
   });
 
   it('addCard → POST /projects/p-1/boards/b-1/cards', () => {
-    const mockCard = { id: 'card-1', title: 'New Card', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+    const mockCard = { id: 'card-1', cardNumber: 1, friendlyId: 'TST-1', title: 'New Card', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
 
     service.addCard('p-1', 'b-1', { columnId: 'col-1', title: 'New Card', description: '' }).subscribe(card => {
       expect(card).toEqual(mockCard);

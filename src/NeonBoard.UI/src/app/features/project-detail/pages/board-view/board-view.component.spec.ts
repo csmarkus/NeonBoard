@@ -70,7 +70,7 @@ describe('BoardViewComponent', () => {
 
   it('sets browser title when boardName signal has a value', () => {
     component.ngOnInit();
-    mockFacade.board.set({ id: 'b-1', name: 'Sprint Board', projectId: 'p-1', columns: [], cards: [], labels: [], createdAt: '', updatedAt: '' });
+    mockFacade.board.set({ id: 'b-1', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', columns: [], cards: [], labels: [], createdAt: '', updatedAt: '' });
     TestBed.flushEffects();
 
     expect(mockTitle.setTitle).toHaveBeenCalledWith('Sprint Board | NeonBoard');
