@@ -5,7 +5,7 @@ namespace NeonBoard.Application.Cards.DTOs;
 public record CardDto(
     Guid Id,
     int CardNumber,
-    string FriendlyId,
+    string DisplayId,
     string Title,
     string Description,
     Guid ColumnId,

@@ -24,9 +24,9 @@ function createMockBoardDetails(overrides: Partial<BoardDetails> = {}): BoardDet
       { id: 'col-2', name: 'Done', position: 1, boardId: 'board-1' },
     ],
     cards: [
-      { id: 'card-1', cardNumber: 1, friendlyId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '' },
-      { id: 'card-2', cardNumber: 2, friendlyId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' },
-      { id: 'card-3', cardNumber: 3, friendlyId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-2', position: 0, labels: [], createdAt: '', updatedAt: '' },
+      { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '' },
+      { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' },
+      { id: 'card-3', cardNumber: 3, displayId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-2', position: 0, labels: [], createdAt: '', updatedAt: '' },
     ],
     labels: [{ id: 'label-1', name: 'Bug', color: 'red' }],
     ...overrides,
@@ -238,7 +238,7 @@ describe('BoardStateFacade', () => {
 
   describe('openCardDrawer', () => {
     it('should delegate to drawerService', () => {
-      const card: Card = { id: 'card-1', cardNumber: 1, friendlyId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
 
       facade.openCardDrawer(card, 'project-1', 'board-1');
 

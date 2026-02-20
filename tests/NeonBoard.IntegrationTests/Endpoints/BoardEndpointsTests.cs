@@ -132,7 +132,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
     }
 
     [Fact]
-    public async Task AddCard_ReturnsCardWithFriendlyId()
+    public async Task AddCard_ReturnsCardWithDisplayId()
     {
         var project = await _factory.CreateProjectAsync<ProjectDto>(_client);
 
@@ -145,7 +145,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         var card = await _factory.AddCardAsync<CardDto>(_client, project.Id, board.Id, column.Id, "First Card");
 
         card.CardNumber.Should().Be(1);
-        card.FriendlyId.Should().Be("SPR-1");
+        card.DisplayId.Should().Be("SPR-1");
     }
 
     [Fact]

@@ -3,7 +3,7 @@ import { Label } from './label.model';
 export interface Card {
   id: string;
   cardNumber: number;
-  friendlyId: string;
+  displayId: string;
   title: string;
   description: string;
   columnId: string;

@@ -200,7 +200,7 @@ describe('BoardCanvasComponent', () => {
     });
 
     it('onCardSelected calls facade.openCardDrawer with card, projectId, boardId', () => {
-      const card: Card = { id: 'card-1', cardNumber: 1, friendlyId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
 
       component.onCardSelected(card);
 
@@ -208,7 +208,7 @@ describe('BoardCanvasComponent', () => {
     });
 
     it('onCardDropped calls facade.moveCard with card id, target column id, target position', () => {
-      const card: Card = { id: 'card-1', cardNumber: 1, friendlyId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
       const containerData = [card];
       const event = mockCardDrop(card, 0, 0, containerData);
 

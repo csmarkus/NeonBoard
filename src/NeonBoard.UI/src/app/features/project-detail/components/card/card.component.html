@@ -2,7 +2,7 @@
   (click)="cardClick.emit()"
   class="bg-surface border border-subtle rounded-lg p-3 pt-1 hover:border-cyan-500/50 transition-colors cursor-pointer"
 >
-  <span class="text-xs text-muted font-mono font-bold">{{ card().friendlyId }}</span>
+  <span class="text-xs text-muted font-mono font-bold">{{ card().displayId }}</span>
   <h3 class="text-sm text-primary mt-1">{{ card().title }}</h3>
   @if (cardLabels().length) {
     <div class="flex flex-wrap gap-1 mt-2">
