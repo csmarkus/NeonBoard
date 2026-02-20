@@ -3,6 +3,7 @@ using NeonBoard.Application.Boards.DTOs;
 using NeonBoard.Application.Common.Exceptions;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards;
+using NeonBoard.Domain.Boards.ValueObjects;
 
 namespace NeonBoard.Application.Boards.Commands.UpdateBoardSettings;
 
@@ -29,11 +30,22 @@ public class UpdateBoardSettingsHandler : IRequestHandler<UpdateBoardSettingsCom
             board.Rename(request.Name);
         }
 
+        if (request.Prefix != null && !string.Equals(board.Prefix.Value, request.Prefix, StringComparison.Ordinal))
+        {
+            var prefixExists = await _boardRepository.PrefixExistsInProjectAsync(
+                request.ProjectId, request.Prefix, request.BoardId, cancellationToken);
+            if (prefixExists)
+                throw new ConflictException("A board with this prefix already exists in the project.");
+
+            board.UpdatePrefix(request.Prefix);
+        }
+
         await _boardRepository.UpdateAsync(board, cancellationToken);
 
         return new BoardDto(
             board.Id,
             board.Name,
+            board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,
             board.UpdatedAt,

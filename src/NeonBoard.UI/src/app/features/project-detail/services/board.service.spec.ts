@@ -25,7 +25,7 @@ describe('BoardService', () => {
   });
 
   it('getBoardsByProject → GET /projects/p-1/boards', () => {
-    const mockBoards = [{ id: 'b-1', name: 'Board 1', projectId: 'p-1', createdAt: '', updatedAt: '' }];
+    const mockBoards = [{ id: 'b-1', name: 'Board 1', prefix: 'BRD', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 }];
 
     service.getBoardsByProject('p-1').subscribe(boards => {
       expect(boards).toEqual(mockBoards);
@@ -37,7 +37,7 @@ describe('BoardService', () => {
   });
 
   it('getBoardDetails → GET /projects/p-1/boards/b-1', () => {
-    const mockDetails = { id: 'b-1', name: 'Board 1', projectId: 'p-1', createdAt: '', updatedAt: '', columns: [], cards: [], labels: [] };
+    const mockDetails = { id: 'b-1', name: 'Board 1', prefix: 'BRD', projectId: 'p-1', createdAt: '', updatedAt: '', columns: [], cards: [], labels: [] };
 
     service.getBoardDetails('p-1', 'b-1').subscribe(details => {
       expect(details).toEqual(mockDetails);
@@ -49,7 +49,7 @@ describe('BoardService', () => {
   });
 
   it('createBoard → POST /projects/p-1/boards and emits boardsUpdated$', () => {
-    const mockBoard = { id: 'b-1', name: 'New Board', projectId: 'p-1', createdAt: '', updatedAt: '' };
+    const mockBoard = { id: 'b-1', name: 'New Board', prefix: 'NEW', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 };
     let emitted = false;
     service.boardsUpdated$.subscribe(() => (emitted = true));
 
@@ -64,7 +64,7 @@ describe('BoardService', () => {
   });
 
   it('updateBoardSettings → PUT /projects/p-1/boards/b-1 and emits boardsUpdated$', () => {
-    const mockBoard = { id: 'b-1', name: 'Updated', projectId: 'p-1', createdAt: '', updatedAt: '' };
+    const mockBoard = { id: 'b-1', name: 'Updated', prefix: 'UPD', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 };
     let emitted = false;
     service.boardsUpdated$.subscribe(() => (emitted = true));
 

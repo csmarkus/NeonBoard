@@ -4,4 +4,8 @@
     <PackageReference Include="MediatR.Contracts" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="NeonBoard.UnitTests" />
+  </ItemGroup>
+
 </Project>

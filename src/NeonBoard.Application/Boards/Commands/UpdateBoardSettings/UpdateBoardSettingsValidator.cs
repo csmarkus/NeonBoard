@@ -20,5 +20,10 @@ public class UpdateBoardSettingsValidator : AbstractValidator<UpdateBoardSetting
             .WithMessage(ValidationMessages.BoardNameRequired)
             .MaximumLength(100)
             .WithMessage(ValidationMessages.BoardNameTooLong);
+
+        RuleFor(x => x.Prefix)
+            .Matches(@"^[A-Z]{2,5}$")
+            .When(x => x.Prefix != null)
+            .WithMessage(ValidationMessages.BoardPrefixInvalid);
     }
 }

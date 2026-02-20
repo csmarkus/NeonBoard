@@ -1,8 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume()
-    .WithPgAdmin();
+    .WithDataVolume();
+    //.WithPgAdmin();
 
 var neonboardDb = postgres.AddDatabase("neonboarddb");
 

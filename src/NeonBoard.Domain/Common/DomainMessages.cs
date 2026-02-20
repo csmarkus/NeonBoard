@@ -10,6 +10,8 @@ public static class DomainMessages
     public const string BoardColumnCountMismatch = "Column count mismatch. All columns must be included in the reorder.";
     public const string BoardCannotDeleteColumnWithCards = "Cannot delete column with cards. Specify a target column to move cards to.";
     public const string BoardTargetPositionNegative = "Target position cannot be negative.";
+    public const string BoardPrefixEmpty = "Board prefix cannot be empty.";
+    public const string BoardPrefixInvalid = "Board prefix must be 2-5 uppercase letters (A-Z).";
 
     public static string ColumnNotFound(Guid columnId) =>
         $"Column with ID {columnId} not found.";
@@ -32,6 +34,7 @@ public static class DomainMessages
     #region Card
 
     public const string CardColumnIdEmpty = "Column ID cannot be empty.";
+    public const string CardNumberInvalid = "Card number must be a positive integer.";
     public const string CardLabelAlreadyAssigned = "This label is already assigned to the card.";
     public const string CardLabelNotAssigned = "This label is not assigned to the card.";
 

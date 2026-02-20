@@ -16,4 +16,11 @@ export class GeneralSettingsSectionComponent {
     const input = event.target as HTMLInputElement;
     this.facade.updateBoardName(input.value);
   }
+
+  onPrefixInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const uppercased = input.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5);
+    input.value = uppercased;
+    this.facade.updateBoardPrefix(uppercased);
+  }
 }

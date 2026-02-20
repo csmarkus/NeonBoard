@@ -29,6 +29,8 @@ public class AddCardHandler : IRequestHandler<AddCardCommand, CardDto>
         var card = board.Cards.First(c => c.Id == cardId);
         return new CardDto(
             card.Id,
+            card.CardNumber,
+            $"{board.Prefix.Value}-{card.CardNumber}",
             card.Content.Title,
             card.Content.Description,
             card.ColumnId,

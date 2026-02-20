@@ -73,7 +73,7 @@ public static class BoardEndpoints
         IMediator mediator,
         CancellationToken ct)
     {
-        var command = new CreateBoardCommand(projectId, request.Name);
+        var command = new CreateBoardCommand(projectId, request.Name, request.Prefix);
         var result = await mediator.Send(command, ct);
         return Results.Created($"/api/projects/{projectId}/boards/{result.Id}", result);
     }
@@ -85,7 +85,7 @@ public static class BoardEndpoints
         IMediator mediator,
         CancellationToken ct)
     {
-        var command = new UpdateBoardSettingsCommand(projectId, boardId, request.Name);
+        var command = new UpdateBoardSettingsCommand(projectId, boardId, request.Name, request.Prefix);
         var result = await mediator.Send(command, ct);
         return Results.Ok(result);
     }

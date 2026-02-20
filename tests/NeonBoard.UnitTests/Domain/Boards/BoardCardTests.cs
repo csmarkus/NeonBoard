@@ -235,4 +235,45 @@ public class BoardCardTests
         act.Should().Throw<DomainException>()
             .WithMessage(DomainMessages.CardNotFound(fakeId));
     }
+
+    [Fact]
+    public void AddCard_ShouldAssignCardNumber()
+    {
+        var board = new BoardBuilder().WithColumn("Todo").Build();
+        var columnId = board.Columns.First().Id;
+
+        var cardId = board.AddCard(columnId, "First Card", "");
+
+        var card = board.Cards.First(c => c.Id == cardId);
+        card.CardNumber.Should().Be(1);
+    }
+
+    [Fact]
+    public void AddCard_ShouldIncrementNextCardNumber()
+    {
+        var board = new BoardBuilder().WithColumn("Todo").Build();
+        var columnId = board.Columns.First().Id;
+
+        board.AddCard(columnId, "Card 1", "");
+        board.AddCard(columnId, "Card 2", "");
+
+        board.NextCardNumber.Should().Be(3);
+        board.Cards.First().CardNumber.Should().Be(1);
+        board.Cards.Last().CardNumber.Should().Be(2);
+    }
+
+    [Fact]
+    public void AddCard_AfterDeletion_ShouldNotReuseCardNumber()
+    {
+        var board = new BoardBuilder().WithColumn("Todo").Build();
+        var columnId = board.Columns.First().Id;
+
+        var cardId1 = board.AddCard(columnId, "Card 1", "");
+        board.DeleteCard(cardId1);
+        var cardId2 = board.AddCard(columnId, "Card 2", "");
+
+        var card2 = board.Cards.First(c => c.Id == cardId2);
+        card2.CardNumber.Should().Be(2);
+        board.NextCardNumber.Should().Be(3);
+    }
 }

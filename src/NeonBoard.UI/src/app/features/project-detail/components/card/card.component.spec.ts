@@ -7,6 +7,8 @@ initTestEnvironment();
 
 const baseCard: Card = {
   id: 'card-1',
+  cardNumber: 1,
+  displayId: 'TST-1',
   title: 'Test Card',
   description: '',
   columnId: 'col-1',
@@ -46,6 +48,11 @@ describe('CardComponent', () => {
     const labelSpans = fixture.nativeElement.querySelectorAll('span[title]');
     const names = Array.from(labelSpans).map((el: any) => el.textContent.trim());
     expect(names).toEqual(['Bug', 'Feature']);
+  });
+
+  it('renders the displayId', () => {
+    const displayIdEl = fixture.nativeElement.querySelector('span.font-mono');
+    expect(displayIdEl.textContent.trim()).toBe('TST-1');
   });
 
   it('emits cardClick when the card is clicked', () => {

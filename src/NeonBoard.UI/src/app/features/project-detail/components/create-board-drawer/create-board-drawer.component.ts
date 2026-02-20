@@ -4,11 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { BoardService } from '../../services/board.service';
-import { Board } from '../../models/board.model';
+import { Board, CreateBoardRequest } from '../../models/board.model';
 
 @Component({
   selector: 'app-create-board-drawer',
-  standalone: true,
   imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent],
   templateUrl: './create-board-drawer.component.html',
 })
@@ -22,6 +21,7 @@ export class CreateBoardDrawerComponent {
   private cdr = inject(ChangeDetectorRef);
 
   newBoardName = '';
+  newBoardPrefix = '';
   error: string | null = null;
   isCreating = false;
 
@@ -36,9 +36,12 @@ export class CreateBoardDrawerComponent {
     this.isCreating = true;
     this.error = null;
 
-    this.boardService.createBoard(this.projectId(), {
-      name: this.newBoardName
-    }).subscribe({
+    const request: CreateBoardRequest = {
+      name: this.newBoardName,
+      ...(this.newBoardPrefix.trim() && { prefix: this.newBoardPrefix.trim().toUpperCase() })
+    };
+
+    this.boardService.createBoard(this.projectId(), request).subscribe({
       next: (board) => {
         this.boardCreated.emit(board);
         this.resetForm();
@@ -57,6 +60,7 @@ export class CreateBoardDrawerComponent {
 
   private resetForm(): void {
     this.newBoardName = '';
+    this.newBoardPrefix = '';
     this.error = null;
   }
 }

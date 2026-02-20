@@ -5,6 +5,7 @@ import { Label } from './label.model';
 export interface Board {
   id: string;
   name: string;
+  prefix: string;
   projectId: string;
   createdAt: string;
   updatedAt: string;
@@ -14,6 +15,7 @@ export interface Board {
 export interface BoardDetails {
   id: string;
   name: string;
+  prefix: string;
   projectId: string;
   createdAt: string;
   updatedAt: string;
@@ -24,8 +26,10 @@ export interface BoardDetails {
 
 export interface CreateBoardRequest {
   name: string;
+  prefix?: string;
 }
 
 export interface UpdateBoardSettingsRequest {
   name: string;
+  prefix?: string;
 }

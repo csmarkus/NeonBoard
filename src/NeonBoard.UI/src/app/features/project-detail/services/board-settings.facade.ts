@@ -13,6 +13,8 @@ export class BoardSettingsFacade {
 
   private _boardName = signal<string>('');
   private _originalBoardName = signal<string>('');
+  private _boardPrefix = signal<string>('');
+  private _originalBoardPrefix = signal<string>('');
   private _boardLabels = signal<Label[]>([]);
   private _isLoading = signal<boolean>(false);
   private _isSaving = signal<boolean>(false);
@@ -20,13 +22,16 @@ export class BoardSettingsFacade {
 
   readonly boardName = this._boardName.asReadonly();
   readonly originalBoardName = this._originalBoardName.asReadonly();
+  readonly boardPrefix = this._boardPrefix.asReadonly();
+  readonly originalBoardPrefix = this._originalBoardPrefix.asReadonly();
   readonly boardLabels = this._boardLabels.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly isSaving = this._isSaving.asReadonly();
   readonly error = this._error.asReadonly();
 
   readonly hasChanges = computed(() => {
-    return this._boardName().trim() !== this._originalBoardName();
+    return this._boardName().trim() !== this._originalBoardName() ||
+      this._boardPrefix().trim() !== this._originalBoardPrefix();
   });
 
   readonly sortedLabels = computed(() => {
@@ -41,6 +46,8 @@ export class BoardSettingsFacade {
       next: (board) => {
         this._boardName.set(board.name);
         this._originalBoardName.set(board.name);
+        this._boardPrefix.set(board.prefix);
+        this._originalBoardPrefix.set(board.prefix);
         this._boardLabels.set(board.labels ?? []);
         this._isLoading.set(false);
       },
@@ -56,16 +63,23 @@ export class BoardSettingsFacade {
     this._boardName.set(name);
   }
 
+  updateBoardPrefix(prefix: string): void {
+    this._boardPrefix.set(prefix.toUpperCase());
+  }
+
   saveBoardSettings(projectId: string, boardId: string): void {
     const name = this._boardName().trim();
+    const prefix = this._boardPrefix().trim();
     if (!name || !this.hasChanges() || this._isSaving()) return;
 
     this._isSaving.set(true);
 
-    this.boardService.updateBoardSettings(projectId, boardId, { name }).subscribe({
+    this.boardService.updateBoardSettings(projectId, boardId, { name, prefix: prefix || undefined }).subscribe({
       next: (board) => {
         this._originalBoardName.set(board.name);
         this._boardName.set(board.name);
+        this._originalBoardPrefix.set(board.prefix);
+        this._boardPrefix.set(board.prefix);
         this._isSaving.set(false);
       },
       error: (err) => {

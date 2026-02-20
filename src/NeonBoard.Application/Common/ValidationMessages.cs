@@ -17,6 +17,8 @@ public static class ValidationMessages
 
     public const string BoardNameRequired = "Board name is required.";
     public const string BoardNameTooLong = "Board name cannot exceed 100 characters.";
+    public const string BoardPrefixInvalid = "Board prefix must be 2-5 uppercase letters (A-Z).";
+    public const string BoardPrefixNotUnique = "A board with this prefix already exists in the project.";
 
     #endregion
 

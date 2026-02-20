@@ -10,8 +10,8 @@ initTestEnvironment();
 const mockColumn: Column = { id: 'col-1', name: 'To Do', position: 0, boardId: 'b-1' };
 
 const mockCards: Card[] = [
-  { id: 'card-1', title: 'Card One', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' },
-  { id: 'card-2', title: 'Card Two', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '' },
+  { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card One', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' },
+  { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card Two', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '' },
 ];
 
 describe('ColumnComponent', () => {

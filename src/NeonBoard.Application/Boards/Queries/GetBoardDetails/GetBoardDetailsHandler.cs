@@ -44,6 +44,8 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
         var cards = board.Cards
             .Select(c => new CardDto(
                 c.Id,
+                c.CardNumber,
+                $"{board.Prefix.Value}-{c.CardNumber}",
                 c.Content.Title,
                 c.Content.Description,
                 c.ColumnId,
@@ -61,6 +63,7 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
         return new BoardDetailsDto(
             board.Id,
             board.Name,
+            board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,
             board.UpdatedAt,

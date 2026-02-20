@@ -12,6 +12,7 @@ function createMockBoardDetails(overrides: Partial<BoardDetails> = {}): BoardDet
   return {
     id: 'board-1',
     name: 'Test Board',
+    prefix: 'TST',
     projectId: 'project-1',
     createdAt: '2024-01-01',
     updatedAt: '2024-01-01',
@@ -63,7 +64,7 @@ describe('BoardSettingsFacade', () => {
   });
 
   describe('loadBoardSettings', () => {
-    it('should set name, labels, and loading on success', () => {
+    it('should set name, prefix, labels, and loading on success', () => {
       const mockBoard = createMockBoardDetails();
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
 
@@ -71,6 +72,8 @@ describe('BoardSettingsFacade', () => {
 
       expect(facade.boardName()).toBe('Test Board');
       expect(facade.originalBoardName()).toBe('Test Board');
+      expect(facade.boardPrefix()).toBe('TST');
+      expect(facade.originalBoardPrefix()).toBe('TST');
       expect(facade.boardLabels()).toEqual(mockBoard.labels);
       expect(facade.isLoading()).toBe(false);
       expect(facade.error()).toBeNull();
@@ -102,6 +105,14 @@ describe('BoardSettingsFacade', () => {
     });
   });
 
+  describe('updateBoardPrefix', () => {
+    it('should update the boardPrefix signal with uppercased value', () => {
+      facade.updateBoardPrefix('abc');
+
+      expect(facade.boardPrefix()).toBe('ABC');
+    });
+  });
+
   describe('hasChanges computed', () => {
     it('should detect name differences', () => {
       const mockBoard = createMockBoardDetails();
@@ -111,6 +122,17 @@ describe('BoardSettingsFacade', () => {
       expect(facade.hasChanges()).toBe(false);
 
       facade.updateBoardName('Changed Name');
+      expect(facade.hasChanges()).toBe(true);
+    });
+
+    it('should detect prefix differences', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoardSettings('project-1', 'board-1');
+
+      expect(facade.hasChanges()).toBe(false);
+
+      facade.updateBoardPrefix('NEW');
       expect(facade.hasChanges()).toBe(true);
     });
 
@@ -125,19 +147,20 @@ describe('BoardSettingsFacade', () => {
   });
 
   describe('saveBoardSettings', () => {
-    it('should call boardService and update originalName on success', () => {
+    it('should call boardService and update originalName and prefix on success', () => {
       const mockBoard = createMockBoardDetails();
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
       facade.loadBoardSettings('project-1', 'board-1');
 
       facade.updateBoardName('Updated Name');
 
-      boardService.updateBoardSettings.mockReturnValue(of({ id: 'board-1', name: 'Updated Name' }));
+      boardService.updateBoardSettings.mockReturnValue(of({ id: 'board-1', name: 'Updated Name', prefix: 'TST' }));
 
       facade.saveBoardSettings('project-1', 'board-1');
 
-      expect(boardService.updateBoardSettings).toHaveBeenCalledWith('project-1', 'board-1', { name: 'Updated Name' });
+      expect(boardService.updateBoardSettings).toHaveBeenCalledWith('project-1', 'board-1', { name: 'Updated Name', prefix: 'TST' });
       expect(facade.originalBoardName()).toBe('Updated Name');
+      expect(facade.originalBoardPrefix()).toBe('TST');
       expect(facade.isSaving()).toBe(false);
     });
 
