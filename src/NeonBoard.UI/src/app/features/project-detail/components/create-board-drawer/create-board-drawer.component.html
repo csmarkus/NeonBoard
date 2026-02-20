@@ -23,6 +23,19 @@
           class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
         />
       </div>
+
+      <div>
+        <label class="block text-sm text-secondary mb-1.5">Prefix (optional)</label>
+        <input
+          type="text"
+          [(ngModel)]="newBoardPrefix"
+          placeholder="Auto-generated if blank"
+          maxlength="5"
+          (keyup.enter)="createBoard()"
+          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 font-mono uppercase"
+        />
+        <span class="text-xs text-muted mt-1">2-5 uppercase letters for card IDs (e.g. DEV)</span>
+      </div>
     </div>
 
     <div class="flex gap-3 pt-4 border-t border-subtle">
