@@ -7,4 +7,5 @@ public interface IBoardRepository : IRepository<Board>
     Task<Board?> GetBoardWithDetailsAsync(Guid boardId, CancellationToken cancellationToken = default);
     Task<List<Board>> GetBoardsByProjectIdAsync(Guid projectId, CancellationToken cancellationToken = default);
     Task<bool> BoardExistsInProjectAsync(Guid boardId, Guid projectId, CancellationToken cancellationToken = default);
+    Task<bool> PrefixExistsInProjectAsync(Guid projectId, string prefix, Guid? excludeBoardId = null, CancellationToken cancellationToken = default);
 }

@@ -34,4 +34,14 @@ public class BoardRepository : Repository<Board>, IBoardRepository
         return await DbSet
             .AnyAsync(b => b.Id == boardId && b.ProjectId == projectId, cancellationToken);
     }
+
+    public async Task<bool> PrefixExistsInProjectAsync(Guid projectId, string prefix, Guid? excludeBoardId = null, CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.Where(b => b.ProjectId == projectId && b.Prefix.Value == prefix);
+
+        if (excludeBoardId.HasValue)
+            query = query.Where(b => b.Id != excludeBoardId.Value);
+
+        return await query.AnyAsync(cancellationToken);
+    }
 }

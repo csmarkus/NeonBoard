@@ -3,4 +3,4 @@ using NeonBoard.Application.Boards.DTOs;
 
 namespace NeonBoard.Application.Boards.Commands.CreateBoard;
 
-public record CreateBoardCommand(Guid ProjectId, string Name) : IRequest<BoardDto>;
+public record CreateBoardCommand(Guid ProjectId, string Name, string? Prefix = null) : IRequest<BoardDto>;

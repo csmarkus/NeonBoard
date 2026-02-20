@@ -20,6 +20,7 @@ public class GetBoardsByProjectHandler : IRequestHandler<GetBoardsByProjectQuery
         return boards.Select(board => new BoardDto(
             board.Id,
             board.Name,
+            board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,
             board.UpdatedAt,

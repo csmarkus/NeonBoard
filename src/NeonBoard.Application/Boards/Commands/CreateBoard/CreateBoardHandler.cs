@@ -16,13 +16,14 @@ public class CreateBoardHandler : IRequestHandler<CreateBoardCommand, BoardDto>
 
     public async Task<BoardDto> Handle(CreateBoardCommand request, CancellationToken cancellationToken)
     {
-        var board = Board.Create(request.Name, request.ProjectId);
+        var board = Board.Create(request.Name, request.ProjectId, request.Prefix);
 
         await _boardRepository.AddAsync(board, cancellationToken);
 
         return new BoardDto(
             board.Id,
             board.Name,
+            board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,
             board.UpdatedAt,
