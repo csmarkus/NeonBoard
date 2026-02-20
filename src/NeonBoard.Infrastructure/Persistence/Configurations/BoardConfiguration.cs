@@ -19,6 +19,19 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.OwnsOne(b => b.Prefix, prefix =>
+        {
+            prefix.Property(p => p.Value)
+                .HasColumnName("Prefix")
+                .HasMaxLength(5)
+                .IsRequired();
+        });
+        builder.Navigation(b => b.Prefix).IsRequired();
+
+        builder.Property(b => b.NextCardNumber)
+            .IsRequired()
+            .HasDefaultValue(1);
+
         builder.Property(b => b.ProjectId)
             .IsRequired();
 
@@ -78,6 +91,9 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             card.Property(c => c.ColumnId)
                 .IsRequired();
 
+            card.Property(c => c.CardNumber)
+                .IsRequired();
+
             card.OwnsOne(c => c.Content, content =>
             {
                 content.Property(ct => ct.Title)
@@ -106,6 +122,10 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
                 .IsConcurrencyToken(false);
 
             card.HasIndex(c => c.ColumnId);
+
+            card.HasIndex("BoardId", nameof(Card.CardNumber))
+                .IsUnique()
+                .HasDatabaseName("IX_Cards_BoardId_CardNumber");
 
             card.Navigation(c => c.Content).IsRequired();
             card.Navigation(c => c.Position).IsRequired();

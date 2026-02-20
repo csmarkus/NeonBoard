@@ -47,6 +47,14 @@ public class GlobalExceptionHandler : IExceptionHandler
                         g => g.Key,
                         g => g.Select(e => e.ErrorMessage).ToArray())),
 
+            Application.Common.Exceptions.ConflictException conflictEx => (
+                StatusCodes.Status409Conflict,
+                "Conflict",
+                new Dictionary<string, string[]>
+                {
+                    ["error"] = [conflictEx.Message]
+                }),
+
             DomainException domainEx => (
                 StatusCodes.Status400BadRequest,
                 "Domain Error",
