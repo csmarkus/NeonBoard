@@ -6,6 +6,7 @@ public class BoardBuilder
 {
     private string _name = "Test Board";
     private Guid _projectId = Guid.NewGuid();
+    private string? _prefix;
     private readonly List<string> _columns = [];
     private readonly List<(string ColumnName, string Title, string Description)> _cards = [];
     private readonly List<(string Name, string Color)> _labels = [];
@@ -20,6 +21,12 @@ public class BoardBuilder
     public BoardBuilder WithProjectId(Guid projectId)
     {
         _projectId = projectId;
+        return this;
+    }
+
+    public BoardBuilder WithPrefix(string prefix)
+    {
+        _prefix = prefix;
         return this;
     }
 
@@ -55,7 +62,7 @@ public class BoardBuilder
 
     public Board Build()
     {
-        var board = Board.Create(_name, _projectId);
+        var board = Board.Create(_name, _projectId, _prefix);
         board.ClearDomainEvents();
 
         foreach (var columnName in _columns)

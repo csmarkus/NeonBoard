@@ -34,6 +34,7 @@ public static class DomainMessages
     #region Card
 
     public const string CardColumnIdEmpty = "Column ID cannot be empty.";
+    public const string CardNumberInvalid = "Card number must be a positive integer.";
     public const string CardLabelAlreadyAssigned = "This label is already assigned to the card.";
     public const string CardLabelNotAssigned = "This label is not assigned to the card.";
 

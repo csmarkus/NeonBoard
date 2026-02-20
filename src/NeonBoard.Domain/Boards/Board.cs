@@ -26,11 +26,15 @@ public sealed class Board : Entity, IAggregateRoot
 
     public DateTime UpdatedAt { get; private set; }
 
+    public BoardPrefix Prefix { get; private set; } = default!;
+
+    public int NextCardNumber { get; private set; }
+
     private Board()
     {
     }
 
-    public static Board Create(string name, Guid projectId)
+    public static Board Create(string name, Guid projectId, string? prefix = null)
     {
         ValidateName(name);
         ValidateProjectId(projectId);
@@ -40,6 +44,10 @@ public sealed class Board : Entity, IAggregateRoot
             Id = Guid.NewGuid(),
             Name = name,
             ProjectId = projectId,
+            Prefix = prefix != null
+                ? BoardPrefix.Create(prefix)
+                : BoardPrefix.GenerateFromName(name),
+            NextCardNumber = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -61,6 +69,15 @@ public sealed class Board : Entity, IAggregateRoot
         UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new BoardRenamedEvent(Id, newName));
+    }
+
+    public void UpdatePrefix(string newPrefix)
+    {
+        var oldPrefix = Prefix.Value;
+        Prefix = BoardPrefix.Create(newPrefix);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new BoardPrefixUpdatedEvent(Id, oldPrefix, newPrefix));
     }
 
     #region Column Operations
@@ -157,7 +174,10 @@ public sealed class Board : Entity, IAggregateRoot
         var cardsInColumn = GetCardsInColumn(columnId);
         var position = Position.Create(cardsInColumn.Count);
 
-        var card = Card.CreateInternal(columnId, content, position);
+        var cardNumber = NextCardNumber;
+        NextCardNumber++;
+
+        var card = Card.CreateInternal(columnId, content, position, cardNumber);
         _cards.Add(card);
         UpdatedAt = DateTime.UtcNow;
 

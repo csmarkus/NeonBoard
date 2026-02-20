@@ -11,6 +11,8 @@ public sealed class Card : Entity
 
     public Position Position { get; private set; } = default!;
 
+    public int CardNumber { get; private set; }
+
     public List<Guid> LabelIds { get; private set; } = new();
 
     public DateTime CreatedAt { get; private set; }
@@ -21,10 +23,13 @@ public sealed class Card : Entity
     {
     }
 
-    internal static Card CreateInternal(Guid columnId, CardContent content, Position position)
+    internal static Card CreateInternal(Guid columnId, CardContent content, Position position, int cardNumber)
     {
         if (columnId == default)
             throw new DomainException(DomainMessages.CardColumnIdEmpty);
+
+        if (cardNumber <= 0)
+            throw new DomainException(DomainMessages.CardNumberInvalid);
 
         return new Card
         {
@@ -32,6 +37,7 @@ public sealed class Card : Entity
             ColumnId = columnId,
             Content = content,
             Position = position,
+            CardNumber = cardNumber,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
