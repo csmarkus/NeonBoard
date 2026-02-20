@@ -1,9 +1,9 @@
 <div
   (click)="cardClick.emit()"
-  class="bg-surface border border-subtle rounded-lg p-3 hover:border-cyan-500/50 transition-colors cursor-pointer"
+  class="bg-surface border border-subtle rounded-lg p-3 pt-1 hover:border-cyan-500/50 transition-colors cursor-pointer"
 >
-  <span class="text-xs text-muted font-mono">{{ card().friendlyId }}</span>
-  <h3 class="text-sm text-primary mt-0.5">{{ card().title }}</h3>
+  <span class="text-xs text-muted font-mono font-bold">{{ card().friendlyId }}</span>
+  <h3 class="text-sm text-primary mt-1">{{ card().title }}</h3>
   @if (cardLabels().length) {
     <div class="flex flex-wrap gap-1 mt-2">
       @for (label of cardLabels(); track label.id) {

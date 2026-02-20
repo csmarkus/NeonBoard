@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -36,24 +36,18 @@ namespace NeonBoard.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: "");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Cards_BoardId_CardNumber",
-                table: "Cards",
-                columns: new[] { "BoardId", "CardNumber" },
-                unique: true);
-
             // Backfill prefix for existing boards
             migrationBuilder.Sql(@"
                 UPDATE ""Boards""
                 SET ""Prefix"" = UPPER(LEFT(REGEXP_REPLACE(""Name"", '[^a-zA-Z]', '', 'g'), 3))
-                WHERE ""Prefix"" IS NULL OR ""Prefix"" = '';
+                WHERE ""Prefix"" = '';
 
                 UPDATE ""Boards""
                 SET ""Prefix"" = RPAD(""Prefix"", 2, UPPER(LEFT(""Prefix"", 1)))
                 WHERE LENGTH(""Prefix"") < 2;
             ");
 
-            // Backfill card numbers
+            // Backfill card numbers by CreatedAt order within each board
             migrationBuilder.Sql(@"
                 WITH numbered AS (
                     SELECT ""Id"", ""BoardId"",
@@ -66,7 +60,7 @@ namespace NeonBoard.Infrastructure.Migrations
                 WHERE c.""Id"" = n.""Id"";
             ");
 
-            // Set NextCardNumber
+            // Set NextCardNumber to max card number + 1 (or 1 if no cards)
             migrationBuilder.Sql(@"
                 UPDATE ""Boards"" b
                 SET ""NextCardNumber"" = COALESCE(
@@ -75,7 +69,13 @@ namespace NeonBoard.Infrastructure.Migrations
                 );
             ");
 
-            // Create unique index for prefix per project (composite with owned type column)
+            // Create unique indexes after backfill to avoid constraint violations
+            migrationBuilder.CreateIndex(
+                name: "IX_Cards_BoardId_CardNumber",
+                table: "Cards",
+                columns: new[] { "BoardId", "CardNumber" },
+                unique: true);
+
             migrationBuilder.Sql(@"
                 CREATE UNIQUE INDEX ""IX_Boards_ProjectId_Prefix""
                 ON ""Boards"" (""ProjectId"", ""Prefix"");
