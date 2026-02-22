@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, computed, effect, ChangeDetectionStr
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { tap, switchMap } from 'rxjs';
+import { EMPTY, tap, switchMap } from 'rxjs';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
@@ -58,36 +58,30 @@ export class BoardViewComponent implements OnInit {
 
   ngOnInit(): void {
     const shortId = this.route.parent?.snapshot.paramMap.get('shortId') ?? '';
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
-
     this.shortId.set(shortId);
 
-    // Subscribe to slug param changes for when navigating between boards
     this.route.paramMap.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(params => {
-      const currentSlug = params.get('slug');
-      if (currentSlug) {
-        this.slug.set(currentSlug);
-      }
-    });
+      switchMap(params => {
+        const slug = params.get('slug') ?? '';
+        this.slug.set(slug);
 
-    if (shortId && slug) {
-      this.projectService.getProjectByShortId(shortId).pipe(
-        tap(project => {
-          this.projectId.set(project.id);
-          this.projectName.set(project.name);
-        }),
-        switchMap(project => this.boardService.getBoardsByProject(project.id)),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe({
-        next: (boards) => {
-          const board = boards.find(b => b.slug === slug);
-          if (board) {
-            this.boardId.set(board.id);
-          }
-        }
-      });
-    }
+        if (!shortId || !slug) return EMPTY;
+
+        return this.projectService.getProjectByShortId(shortId).pipe(
+          tap(project => {
+            this.projectId.set(project.id);
+            this.projectName.set(project.name);
+          }),
+          switchMap(project => this.boardService.getBoardsByProject(project.id)),
+          tap(boards => {
+            const board = boards.find(b => b.slug === slug);
+            if (board) {
+              this.boardId.set(board.id);
+            }
+          })
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 }
