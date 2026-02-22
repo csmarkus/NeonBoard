@@ -27,6 +27,20 @@ export class CardService {
     return this.http.delete<void>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}`);
   }
 
+  archiveCard(projectId: string, boardId: string, cardId: string): Observable<Card> {
+    return this.http.patch<Card>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/archive`,
+      {}
+    );
+  }
+
+  restoreCard(projectId: string, boardId: string, cardId: string): Observable<Card> {
+    return this.http.patch<Card>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/restore`,
+      {}
+    );
+  }
+
   addCardLabel(projectId: string, boardId: string, cardId: string, labelId: string): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/labels/${labelId}`,

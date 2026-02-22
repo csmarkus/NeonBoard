@@ -11,6 +11,7 @@ export interface Card {
   labels: Label[];
   createdAt: string;
   updatedAt: string;
+  archivedAt: string | null;
 }
 
 export interface AddCardRequest {
