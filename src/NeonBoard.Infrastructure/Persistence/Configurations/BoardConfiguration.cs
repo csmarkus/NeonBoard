@@ -128,6 +128,8 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
                 .IsRequired()
                 .IsConcurrencyToken(false);
 
+            card.Property(c => c.ArchivedAt);
+
             card.HasIndex(c => c.ColumnId);
 
             card.HasIndex("BoardId", nameof(Card.CardNumber))
