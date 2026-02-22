@@ -36,6 +36,7 @@ export class CardDrawerComponent {
   error = signal<string | null>(null);
   isSaving = signal(false);
   isDeleting = signal(false);
+  isArchiving = signal(false);
   showDeleteModal = signal(false);
   showLabelPicker = signal(false);
   togglingLabelId = signal<string | null>(null);
@@ -231,6 +232,46 @@ export class CardDrawerComponent {
 
   cancelDeleteCard(): void {
     this.showDeleteModal.set(false);
+  }
+
+  archiveCard(): void {
+    if (!this.isEditMode() || this.isArchiving()) return;
+
+    this.isArchiving.set(true);
+    this.error.set(null);
+
+    const cardId = this.card()!.id;
+    this.cardService.archiveCard(this.projectId(), this.boardId(), cardId).subscribe({
+      next: (updatedCard) => {
+        this.drawerService.selectedCard.set(updatedCard);
+        this.isArchiving.set(false);
+        this.drawerService.notifyCardArchived();
+      },
+      error: () => {
+        this.error.set('Failed to archive card. Please try again.');
+        this.isArchiving.set(false);
+      }
+    });
+  }
+
+  restoreCard(): void {
+    if (!this.isEditMode() || this.isArchiving()) return;
+
+    this.isArchiving.set(true);
+    this.error.set(null);
+
+    const cardId = this.card()!.id;
+    this.cardService.restoreCard(this.projectId(), this.boardId(), cardId).subscribe({
+      next: (updatedCard) => {
+        this.drawerService.selectedCard.set(updatedCard);
+        this.isArchiving.set(false);
+        this.drawerService.notifyCardArchived();
+      },
+      error: () => {
+        this.error.set('Failed to restore card. Please try again.');
+        this.isArchiving.set(false);
+      }
+    });
   }
 
   private resetForm(): void {
