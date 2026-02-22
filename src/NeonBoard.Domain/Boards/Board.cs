@@ -14,6 +14,8 @@ public sealed class Board : Entity, IAggregateRoot
 
     public string Name { get; private set; } = default!;
 
+    public string Slug { get; private set; } = default!;
+
     public Guid ProjectId { get; private set; }
 
     public IReadOnlyList<Column> Columns => _columns.AsReadOnly();
@@ -43,6 +45,7 @@ public sealed class Board : Entity, IAggregateRoot
         {
             Id = Guid.NewGuid(),
             Name = name,
+            Slug = SlugHelper.Slugify(name),
             ProjectId = projectId,
             Prefix = prefix != null
                 ? BoardPrefix.Create(prefix)
@@ -66,6 +69,7 @@ public sealed class Board : Entity, IAggregateRoot
         ValidateName(newName);
 
         Name = newName;
+        Slug = SlugHelper.Slugify(newName);
         UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new BoardRenamedEvent(Id, newName));

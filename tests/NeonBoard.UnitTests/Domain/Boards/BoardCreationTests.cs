@@ -166,4 +166,19 @@ public class BoardCreationTests
 
         act.Should().Throw<DomainException>();
     }
+
+    [Fact]
+    public void Create_ShouldGenerateSlugFromName()
+    {
+        var board = Board.Create("Sprint Board", Guid.NewGuid());
+        board.Slug.Should().Be("sprint-board");
+    }
+
+    [Fact]
+    public void Rename_ShouldUpdateSlug()
+    {
+        var board = Board.Create("Sprint Board", Guid.NewGuid());
+        board.Rename("Backlog Board");
+        board.Slug.Should().Be("backlog-board");
+    }
 }
