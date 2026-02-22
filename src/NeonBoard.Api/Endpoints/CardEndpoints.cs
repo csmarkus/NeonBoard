@@ -7,6 +7,8 @@ using NeonBoard.Application.Cards.Commands.UpdateCard;
 using NeonBoard.Application.Cards.Commands.MoveCard;
 using NeonBoard.Application.Cards.Commands.DeleteCard;
 using NeonBoard.Application.Cards.Commands.RemoveCardLabel;
+using NeonBoard.Application.Cards.Commands.ArchiveCard;
+using NeonBoard.Application.Cards.Commands.RestoreCard;
 using NeonBoard.Application.Cards.DTOs;
 
 namespace NeonBoard.Api.Endpoints;
@@ -38,6 +40,16 @@ public static class CardEndpoints
         group.MapDelete("/{cardId:guid}", DeleteCard)
             .WithName("DeleteCard")
             .Produces(StatusCodes.Status204NoContent);
+
+        group.MapPatch("/{cardId:guid}/archive", ArchiveCard)
+            .WithName("ArchiveCard")
+            .Produces<CardDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/{cardId:guid}/restore", RestoreCard)
+            .WithName("RestoreCard")
+            .Produces<CardDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPut("/{cardId:guid}/labels/{labelId:guid}", AddCardLabel)
             .WithName("AddCardLabel")
@@ -111,6 +123,30 @@ public static class CardEndpoints
         var command = new DeleteCardCommand(projectId, boardId, cardId);
         await mediator.Send(command, ct);
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> ArchiveCard(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new ArchiveCardCommand(projectId, boardId, cardId);
+        var result = await mediator.Send(command, ct);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> RestoreCard(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new RestoreCardCommand(projectId, boardId, cardId);
+        var result = await mediator.Send(command, ct);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> AddCardLabel(
