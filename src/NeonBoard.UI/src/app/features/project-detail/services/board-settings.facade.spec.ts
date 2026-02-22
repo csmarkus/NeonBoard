@@ -154,9 +154,9 @@ describe('BoardSettingsFacade', () => {
 
       facade.updateBoardName('Updated Name');
 
-      boardService.updateBoardSettings.mockReturnValue(of({ id: 'board-1', name: 'Updated Name', prefix: 'TST' }));
+      boardService.updateBoardSettings.mockReturnValue(of({ id: 'board-1', name: 'Updated Name', prefix: 'TST', slug: 'updated-name' }));
 
-      facade.saveBoardSettings('project-1', 'board-1');
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
 
       expect(boardService.updateBoardSettings).toHaveBeenCalledWith('project-1', 'board-1', { name: 'Updated Name', prefix: 'TST' });
       expect(facade.originalBoardName()).toBe('Updated Name');
@@ -169,7 +169,7 @@ describe('BoardSettingsFacade', () => {
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
       facade.loadBoardSettings('project-1', 'board-1');
 
-      facade.saveBoardSettings('project-1', 'board-1');
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
 
       expect(boardService.updateBoardSettings).not.toHaveBeenCalled();
     });
@@ -180,7 +180,7 @@ describe('BoardSettingsFacade', () => {
       facade.loadBoardSettings('project-1', 'board-1');
 
       facade.updateBoardName('   ');
-      facade.saveBoardSettings('project-1', 'board-1');
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
 
       expect(boardService.updateBoardSettings).not.toHaveBeenCalled();
     });
@@ -193,8 +193,8 @@ describe('BoardSettingsFacade', () => {
       facade.updateBoardName('New Name');
       boardService.updateBoardSettings.mockReturnValue(new Subject()); // never completes
 
-      facade.saveBoardSettings('project-1', 'board-1');
-      facade.saveBoardSettings('project-1', 'board-1');
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
 
       expect(boardService.updateBoardSettings).toHaveBeenCalledTimes(1);
     });

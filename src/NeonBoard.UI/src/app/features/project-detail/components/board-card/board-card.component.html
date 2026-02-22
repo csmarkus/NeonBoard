@@ -3,7 +3,7 @@
   <app-gradient-accent [variant]="index()"></app-gradient-accent>
 
   <a
-    [routerLink]="['/project', projectId(), 'b', board().id]"
+    [routerLink]="['/p', shortId(), 'b', board().slug]"
     class="block"
   >
     <div class="mb-3">

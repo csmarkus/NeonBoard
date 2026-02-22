@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { ProjectLayoutComponent } from './project-layout.component';
 import { ActivatedRoute } from '@angular/router';
 import { DrawerService } from '../../services/drawer.service';
-import { BoardService } from '../../services/board.service';
+import { ProjectService } from '../../../projects/services/project.service';
 
 initTestEnvironment();
 
@@ -40,7 +40,7 @@ describe('ProjectLayoutComponent', () => {
     };
 
     const mockRoute = {
-      snapshot: { paramMap: convertToParamMap({ projectId: 'p-1' }) },
+      snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) },
     };
 
     TestBed.configureTestingModule({
@@ -48,7 +48,7 @@ describe('ProjectLayoutComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
         { provide: DrawerService, useValue: mockDrawerService },
-        { provide: BoardService, useValue: {} },
+        { provide: ProjectService, useValue: { getProjectByShortId: vi.fn().mockReturnValue(of({ id: 'p-1', shortId: 'p-short-1', name: 'Test Project', ownerId: 'user-1', createdAt: '', updatedAt: '' })) } },
       ],
     });
     TestBed.overrideTemplate(ProjectLayoutComponent, '');

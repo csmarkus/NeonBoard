@@ -7,6 +7,7 @@ import { Title } from '@angular/platform-browser';
 import { BoardViewComponent } from './board-view.component';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../../projects/services/project.service';
+import { BoardService } from '../../services/board.service';
 import { BoardStateFacade } from '../../services/board-state.facade';
 import { Project } from '../../../projects/models/project.model';
 
@@ -14,6 +15,7 @@ initTestEnvironment();
 
 const mockProject: Project = {
   id: 'p-1',
+  shortId: 'p-short-1',
   name: 'My Project',
   ownerId: 'user-1',
   createdAt: '',
@@ -33,7 +35,8 @@ describe('BoardViewComponent', () => {
     mockTitle = { setTitle: vi.fn() };
 
     const mockRoute = {
-      parent: { snapshot: { paramMap: convertToParamMap({ projectId: 'p-1' }) } },
+      parent: { snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) } },
+      snapshot: { paramMap: convertToParamMap({ slug: 'sprint-board' }) },
       paramMap: paramMap$.asObservable(),
     };
 
@@ -41,7 +44,8 @@ describe('BoardViewComponent', () => {
       imports: [BoardViewComponent],
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
-        { provide: ProjectService, useValue: { getProject: vi.fn().mockReturnValue(of(mockProject)) } },
+        { provide: ProjectService, useValue: { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) } },
+        { provide: BoardService, useValue: { getBoardsByProject: vi.fn().mockReturnValue(of([{ id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 }])) } },
         { provide: BoardStateFacade, useValue: mockFacade },
         { provide: Title, useValue: mockTitle },
       ],
@@ -52,20 +56,25 @@ describe('BoardViewComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('extracts projectId from parent route snapshot', () => {
+  it('extracts shortId from parent route snapshot', () => {
     component.ngOnInit();
-    expect(component.projectId()).toBe('p-1');
+    expect(component.shortId()).toBe('p-short-1');
   });
 
-  it('loads project name from ProjectService using projectId', () => {
+  it('loads project name from ProjectService using shortId', () => {
     component.ngOnInit();
     expect(component.projectName()).toBe('My Project');
   });
 
-  it('extracts boardId from paramMap and sets boardId signal', () => {
+  it('resolves slug to boardId via BoardService', () => {
     component.ngOnInit();
-    paramMap$.next(convertToParamMap({ boardId: 'b-1' }));
     expect(component.boardId()).toBe('b-1');
+  });
+
+  it('extracts slug from paramMap and sets slug signal', () => {
+    component.ngOnInit();
+    paramMap$.next(convertToParamMap({ slug: 'sprint-board' }));
+    expect(component.slug()).toBe('sprint-board');
   });
 
   it('sets browser title when boardName signal has a value', () => {

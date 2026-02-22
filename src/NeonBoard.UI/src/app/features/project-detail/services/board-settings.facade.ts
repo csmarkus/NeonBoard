@@ -1,7 +1,9 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, EMPTY } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { BoardService } from './board.service';
 import { LabelService } from './label.service';
+import { Board } from '../models/board.model';
 import { Label } from '../models/label.model';
 
 @Injectable({
@@ -15,6 +17,7 @@ export class BoardSettingsFacade {
   private _originalBoardName = signal<string>('');
   private _boardPrefix = signal<string>('');
   private _originalBoardPrefix = signal<string>('');
+  private _boardSlug = signal<string>('');
   private _boardLabels = signal<Label[]>([]);
   private _isLoading = signal<boolean>(false);
   private _isSaving = signal<boolean>(false);
@@ -24,6 +27,7 @@ export class BoardSettingsFacade {
   readonly originalBoardName = this._originalBoardName.asReadonly();
   readonly boardPrefix = this._boardPrefix.asReadonly();
   readonly originalBoardPrefix = this._originalBoardPrefix.asReadonly();
+  readonly boardSlug = this._boardSlug.asReadonly();
   readonly boardLabels = this._boardLabels.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly isSaving = this._isSaving.asReadonly();
@@ -48,6 +52,7 @@ export class BoardSettingsFacade {
         this._originalBoardName.set(board.name);
         this._boardPrefix.set(board.prefix);
         this._originalBoardPrefix.set(board.prefix);
+        this._boardSlug.set(board.slug);
         this._boardLabels.set(board.labels ?? []);
         this._isLoading.set(false);
       },
@@ -67,26 +72,28 @@ export class BoardSettingsFacade {
     this._boardPrefix.set(prefix.toUpperCase());
   }
 
-  saveBoardSettings(projectId: string, boardId: string): void {
+  saveBoardSettings(projectId: string, boardId: string): Observable<Board> {
     const name = this._boardName().trim();
     const prefix = this._boardPrefix().trim();
-    if (!name || !this.hasChanges() || this._isSaving()) return;
+    if (!name || !this.hasChanges() || this._isSaving()) return EMPTY;
 
     this._isSaving.set(true);
 
-    this.boardService.updateBoardSettings(projectId, boardId, { name, prefix: prefix || undefined }).subscribe({
-      next: (board) => {
+    return this.boardService.updateBoardSettings(projectId, boardId, { name, prefix: prefix || undefined }).pipe(
+      tap((board) => {
         this._originalBoardName.set(board.name);
         this._boardName.set(board.name);
         this._originalBoardPrefix.set(board.prefix);
         this._boardPrefix.set(board.prefix);
+        this._boardSlug.set(board.slug);
         this._isSaving.set(false);
-      },
-      error: (err) => {
+      }),
+      catchError((err) => {
         console.error('Error saving board settings:', err);
         this._isSaving.set(false);
-      }
-    });
+        return EMPTY;
+      })
+    );
   }
 
   deleteBoard(projectId: string, boardId: string): Observable<void> {

@@ -13,7 +13,7 @@ import { GradientAccentComponent } from '../../../../shared/components/gradient-
 export class BoardCardComponent {
   board = input.required<Board>();
   index = input.required<number>();
-  projectId = input.required<string>();
+  shortId = input.required<string>();
 
   getRelativeTime(dateString: string): string {
     const date = new Date(dateString);

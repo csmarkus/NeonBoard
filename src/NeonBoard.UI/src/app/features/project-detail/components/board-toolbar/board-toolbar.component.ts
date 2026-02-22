@@ -9,7 +9,7 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
   templateUrl: './board-toolbar.component.html',
 })
 export class BoardToolbarComponent {
-  projectId = input.required<string>();
-  boardId = input.required<string>();
+  shortId = input.required<string>();
+  slug = input.required<string>();
   faGear = faGear;
 }

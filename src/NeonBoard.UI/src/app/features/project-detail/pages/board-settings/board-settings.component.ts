@@ -7,6 +7,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { ProjectService } from '../../../projects/services/project.service';
+import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
 import { GeneralSettingsSectionComponent } from '../../components/general-settings-section/general-settings-section.component';
 import { LabelManagementSectionComponent } from '../../components/label-management-section/label-management-section.component';
@@ -33,9 +34,12 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private projectService = inject(ProjectService);
+  private boardService = inject(BoardService);
   facade = inject(BoardSettingsFacade);
   private titleService = inject(Title);
 
+  shortId = signal('');
+  slug = signal('');
   projectId = signal('');
   boardId = signal('');
   projectName = signal('');
@@ -43,8 +47,8 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   showDiscardModal = signal(false);
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    { label: this.projectName(), link: ['/project', this.projectId()] },
-    { label: this.facade.originalBoardName(), link: ['/project', this.projectId(), 'b', this.boardId()] },
+    { label: this.projectName(), link: ['/p', this.shortId()] },
+    { label: this.facade.originalBoardName(), link: ['/p', this.shortId(), 'b', this.slug()] },
     { label: 'Settings' }
   ]);
 
@@ -60,18 +64,31 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   }
 
   ngOnInit(): void {
-    const projectId = this.route.parent?.snapshot.paramMap.get('projectId');
-    if (projectId) {
-      this.projectId.set(projectId);
-      this.projectService.getProject(projectId).subscribe({
-        next: (project) => this.projectName.set(project.name),
-      });
-    }
+    const shortId = this.route.parent?.snapshot.paramMap.get('shortId');
+    const slug = this.route.snapshot.paramMap.get('slug');
 
-    const boardId = this.route.snapshot.paramMap.get('boardId');
-    if (boardId) {
-      this.boardId.set(boardId);
-      this.facade.loadBoardSettings(projectId!, boardId);
+    if (slug) this.slug.set(slug);
+
+    if (shortId) {
+      this.shortId.set(shortId);
+      this.projectService.getProjectByShortId(shortId).subscribe({
+        next: (project) => {
+          this.projectId.set(project.id);
+          this.projectName.set(project.name);
+          // Resolve slug → boardId
+          if (slug) {
+            this.boardService.getBoardsByProject(project.id).subscribe({
+              next: (boards) => {
+                const board = boards.find(b => b.slug === slug);
+                if (board) {
+                  this.boardId.set(board.id);
+                  this.facade.loadBoardSettings(project.id, board.id);
+                }
+              }
+            });
+          }
+        }
+      });
     }
   }
 
@@ -100,7 +117,15 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   }
 
   saveChanges(): void {
-    this.facade.saveBoardSettings(this.projectId(), this.boardId());
+    this.facade.saveBoardSettings(this.projectId(), this.boardId()).subscribe({
+      next: (board) => {
+        // If slug changed (board was renamed), navigate to new URL
+        if (board.slug !== this.slug()) {
+          this.slug.set(board.slug);
+          this.router.navigate(['/p', this.shortId(), 'b', board.slug, 'settings']);
+        }
+      }
+    });
   }
 
   onDeleteBoard(): void {
@@ -108,7 +133,7 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
 
     this.facade.deleteBoard(this.projectId(), this.boardId()).subscribe({
       next: () => {
-        this.router.navigate(['/project', this.projectId()]);
+        this.router.navigate(['/p', this.shortId()]);
       },
       error: () => {
         this.isDeleting.set(false);

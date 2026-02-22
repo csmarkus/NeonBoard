@@ -7,6 +7,7 @@ import { Title } from '@angular/platform-browser';
 import { BoardSettingsComponent } from './board-settings.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../projects/services/project.service';
+import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
 import { Project } from '../../../projects/models/project.model';
 
@@ -14,6 +15,7 @@ initTestEnvironment();
 
 const mockProject: Project = {
   id: 'p-1',
+  shortId: 'p-short-1',
   name: 'Test Project',
   ownerId: 'user-1',
   createdAt: '',
@@ -42,7 +44,7 @@ describe('BoardSettingsComponent', () => {
   beforeEach(() => {
     mockFacade = {
       loadBoardSettings: vi.fn(),
-      saveBoardSettings: vi.fn(),
+      saveBoardSettings: vi.fn().mockReturnValue(of({ id: 'b-1', name: 'Test Board', prefix: 'TST', slug: 'sprint-board' })),
       deleteBoard: vi.fn().mockReturnValue(of(undefined)),
       hasChanges: signal(false),
       originalBoardName: signal(''),
@@ -57,8 +59,8 @@ describe('BoardSettingsComponent', () => {
     mockTitle = { setTitle: vi.fn() };
 
     const mockRoute = {
-      parent: { snapshot: { paramMap: convertToParamMap({ projectId: 'p-1' }) } },
-      snapshot: { paramMap: convertToParamMap({ boardId: 'b-1' }) },
+      parent: { snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) } },
+      snapshot: { paramMap: convertToParamMap({ slug: 'sprint-board' }) },
     };
 
     TestBed.configureTestingModule({
@@ -66,7 +68,8 @@ describe('BoardSettingsComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
         { provide: Router, useValue: mockRouter },
-        { provide: ProjectService, useValue: { getProject: vi.fn().mockReturnValue(of(mockProject)) } },
+        { provide: ProjectService, useValue: { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) } },
+        { provide: BoardService, useValue: { getBoardsByProject: vi.fn().mockReturnValue(of([{ id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 }])) } },
         { provide: BoardSettingsFacade, useValue: mockFacade },
         { provide: Title, useValue: mockTitle },
       ],
@@ -86,21 +89,24 @@ describe('BoardSettingsComponent', () => {
   it('saveChanges delegates to facade.saveBoardSettings', () => {
     component.projectId.set('p-1');
     component.boardId.set('b-1');
+    component.shortId.set('p-short-1');
+    component.slug.set('sprint-board');
 
     component.saveChanges();
 
     expect(mockFacade.saveBoardSettings).toHaveBeenCalledWith('p-1', 'b-1');
   });
 
-  it('onDeleteBoard calls facade.deleteBoard and navigates to /project/:id on success', () => {
+  it('onDeleteBoard calls facade.deleteBoard and navigates to /p/:shortId on success', () => {
     component.projectId.set('p-1');
     component.boardId.set('b-1');
+    component.shortId.set('p-short-1');
     mockFacade.deleteBoard.mockReturnValue(of(undefined));
 
     component.onDeleteBoard();
 
     expect(mockFacade.deleteBoard).toHaveBeenCalledWith('p-1', 'b-1');
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/project', 'p-1']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/p', 'p-short-1']);
   });
 
   it('hasUnsavedChanges returns facade.hasChanges() value', () => {

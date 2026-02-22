@@ -7,7 +7,7 @@
   </div>
 
   <a
-    [routerLink]="['/project', projectId(), 'b', boardId(), 'settings']"
+    [routerLink]="['/p', shortId(), 'b', slug(), 'settings']"
     class="flex items-center gap-1.5 ml-auto text-sm text-muted hover:text-primary transition-colors"
     aria-label="Board settings">
     <fa-icon [icon]="faGear" class="text-sm"></fa-icon>

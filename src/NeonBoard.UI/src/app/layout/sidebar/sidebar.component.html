@@ -36,7 +36,7 @@
         <li>
           <div class="flex items-center">
             <a
-              [routerLink]="['/project', projectId()]"
+              [routerLink]="['/p', shortId()]"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{exact: true}"
               #boardsLink="routerLinkActive"
@@ -70,9 +70,9 @@
               @for (board of facade.boards(); track board.id) {
                 <li role="none">
                   <a
-                    [routerLink]="['/project', projectId(), 'b', board.id]"
-                    [class]="facade.getNavItemClasses(facade.isBoardActive(board.id)) + ' pl-3'"
-                    [attr.aria-current]="facade.isBoardActive(board.id) ? 'page' : null"
+                    [routerLink]="['/p', shortId(), 'b', board.slug]"
+                    [class]="facade.getNavItemClasses(facade.isBoardActive(board.slug)) + ' pl-3'"
+                    [attr.aria-current]="facade.isBoardActive(board.slug) ? 'page' : null"
                     role="menuitem"
                   >
                     <span class="text-sm font-semibold truncate">{{ board.name }}</span>
@@ -98,7 +98,7 @@
   }
 
   <!-- Spacer when no project nav -->
-  @if (!projectId()) {
+  @if (!shortId()) {
     <div class="flex-1"></div>
   }
 

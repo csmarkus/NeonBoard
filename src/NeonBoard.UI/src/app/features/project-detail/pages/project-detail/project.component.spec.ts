@@ -15,6 +15,7 @@ initTestEnvironment();
 
 const mockProject: Project = {
   id: 'p-1',
+  shortId: 'p-short-1',
   name: 'Test Project',
   ownerId: 'user-1',
   createdAt: '',
@@ -28,7 +29,7 @@ const mockBoards: Board[] = [
 describe('ProjectComponent', () => {
   let fixture: ComponentFixture<ProjectComponent>;
   let component: ProjectComponent;
-  let mockProjectService: { getProject: ReturnType<typeof vi.fn> };
+  let mockProjectService: { getProjectByShortId: ReturnType<typeof vi.fn> };
   let mockBoardService: { getBoardsByProject: ReturnType<typeof vi.fn> };
   let boardCreated$: Subject<void>;
   let mockDrawerService: { boardCreated$: Subject<void>; openCreateBoardDrawer: ReturnType<typeof vi.fn> };
@@ -36,7 +37,7 @@ describe('ProjectComponent', () => {
 
   beforeEach(() => {
     boardCreated$ = new Subject<void>();
-    mockProjectService = { getProject: vi.fn().mockReturnValue(of(mockProject)) };
+    mockProjectService = { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) };
     mockBoardService = { getBoardsByProject: vi.fn().mockReturnValue(of(mockBoards)) };
     mockDrawerService = {
       boardCreated$,
@@ -45,7 +46,7 @@ describe('ProjectComponent', () => {
     mockTitle = { setTitle: vi.fn() };
 
     const mockRoute = {
-      snapshot: { paramMap: convertToParamMap({ projectId: 'p-1' }) },
+      snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) },
     };
 
     TestBed.configureTestingModule({
@@ -89,7 +90,7 @@ describe('ProjectComponent', () => {
   });
 
   it('sets error signal when project load fails', () => {
-    mockProjectService.getProject.mockReturnValue(throwError(() => new Error('fail')));
+    mockProjectService.getProjectByShortId.mockReturnValue(throwError(() => new Error('fail')));
 
     component.ngOnInit();
 

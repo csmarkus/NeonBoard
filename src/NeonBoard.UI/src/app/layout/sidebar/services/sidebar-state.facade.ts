@@ -101,7 +101,7 @@ export class SidebarStateFacade {
     return `${base} ${active} ${collapsed}`;
   }
 
-  isBoardActive(boardId: string): boolean {
-    return this.router.url.includes(`/b/${boardId}`);
+  isBoardActive(slug: string): boolean {
+    return this.router.url.includes(`/b/${slug}`);
   }
 }

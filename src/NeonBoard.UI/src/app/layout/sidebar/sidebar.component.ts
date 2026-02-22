@@ -28,6 +28,7 @@ import { SidebarCollapseButtonComponent } from './components/sidebar-collapse-bu
 })
 export class SidebarComponent {
   projectId = input.required<string>();
+  shortId = input.required<string>();
 
   protected auth = inject(AuthService);
   protected facade = inject(SidebarStateFacade);

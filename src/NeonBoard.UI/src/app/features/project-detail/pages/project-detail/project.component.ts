@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -12,7 +12,6 @@ import { BoardCardComponent } from '../../components/board-card/board-card.compo
 
 @Component({
   selector: 'app-project',
-  standalone: true,
   imports: [
     CommonModule,
     ButtonComponent,
@@ -21,6 +20,7 @@ import { BoardCardComponent } from '../../components/board-card/board-card.compo
   host: {
     class: 'flex flex-col h-full'
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project.component.html',
   styleUrl: './project.component.css',
 })
@@ -31,6 +31,7 @@ export class ProjectComponent implements OnInit {
   private drawerService = inject(DrawerService);
   private titleService = inject(Title);
 
+  shortId = signal<string>('');
   projectId = signal<string>('');
   project = signal<Project | null>(null);
   boards = signal<Board[]>([]);
@@ -38,35 +39,27 @@ export class ProjectComponent implements OnInit {
   error = signal<string | null>(null);
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('projectId');
-    if (id) {
-      this.projectId.set(id);
-      this.loadProjectData();
+    const shortId = this.route.snapshot.paramMap.get('shortId');
+    if (shortId) {
+      this.projectService.getProjectByShortId(shortId).subscribe({
+        next: (project) => {
+          this.shortId.set(project.shortId);
+          this.projectId.set(project.id);
+          this.project.set(project);
+          this.titleService.setTitle(`${project.name} | NeonBoard`);
+          this.loadBoards();
+        },
+        error: (err) => {
+          console.error('Error loading project:', err);
+          this.error.set('Failed to load project');
+          this.isLoading.set(false);
+        }
+      });
     }
 
     // Subscribe to board creation to reload boards list
     this.drawerService.boardCreated$.subscribe(() => {
       this.loadBoards();
-    });
-  }
-
-  private loadProjectData(): void {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    // First, load project info
-    this.projectService.getProject(this.projectId()).subscribe({
-      next: (project) => {
-        this.project.set(project);
-        this.titleService.setTitle(`${project.name} | NeonBoard`);
-        // Then load boards for this project
-        this.loadBoards();
-      },
-      error: (err) => {
-        console.error('Error loading project:', err);
-        this.error.set('Failed to load project');
-        this.isLoading.set(false);
-      }
     });
   }
 

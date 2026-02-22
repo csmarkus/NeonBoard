@@ -14,8 +14,8 @@ describe('BoardToolbarComponent', () => {
       providers: [provideRouter([])],
     });
     fixture = TestBed.createComponent(BoardToolbarComponent);
-    fixture.componentRef.setInput('projectId', 'p-1');
-    fixture.componentRef.setInput('boardId', 'b-1');
+    fixture.componentRef.setInput('shortId', 'p-short-1');
+    fixture.componentRef.setInput('slug', 'sprint-board');
     fixture.detectChanges();
   });
 
