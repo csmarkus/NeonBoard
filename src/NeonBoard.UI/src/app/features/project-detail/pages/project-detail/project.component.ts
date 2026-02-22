@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
@@ -31,6 +32,8 @@ export class ProjectComponent implements OnInit {
   private drawerService = inject(DrawerService);
   private titleService = inject(Title);
 
+  private destroyRef = inject(DestroyRef);
+
   shortId = signal<string>('');
   projectId = signal<string>('');
   project = signal<Project | null>(null);
@@ -41,7 +44,9 @@ export class ProjectComponent implements OnInit {
   ngOnInit(): void {
     const shortId = this.route.snapshot.paramMap.get('shortId');
     if (shortId) {
-      this.projectService.getProjectByShortId(shortId).subscribe({
+      this.projectService.getProjectByShortId(shortId).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
         next: (project) => {
           this.shortId.set(project.shortId);
           this.projectId.set(project.id);
@@ -58,7 +63,9 @@ export class ProjectComponent implements OnInit {
     }
 
     // Subscribe to board creation to reload boards list
-    this.drawerService.boardCreated$.subscribe(() => {
+    this.drawerService.boardCreated$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
       this.loadBoards();
     });
   }

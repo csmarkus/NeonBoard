@@ -17,7 +17,6 @@ export class BoardSettingsFacade {
   private _originalBoardName = signal<string>('');
   private _boardPrefix = signal<string>('');
   private _originalBoardPrefix = signal<string>('');
-  private _boardSlug = signal<string>('');
   private _boardLabels = signal<Label[]>([]);
   private _isLoading = signal<boolean>(false);
   private _isSaving = signal<boolean>(false);
@@ -27,7 +26,6 @@ export class BoardSettingsFacade {
   readonly originalBoardName = this._originalBoardName.asReadonly();
   readonly boardPrefix = this._boardPrefix.asReadonly();
   readonly originalBoardPrefix = this._originalBoardPrefix.asReadonly();
-  readonly boardSlug = this._boardSlug.asReadonly();
   readonly boardLabels = this._boardLabels.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly isSaving = this._isSaving.asReadonly();
@@ -52,7 +50,6 @@ export class BoardSettingsFacade {
         this._originalBoardName.set(board.name);
         this._boardPrefix.set(board.prefix);
         this._originalBoardPrefix.set(board.prefix);
-        this._boardSlug.set(board.slug);
         this._boardLabels.set(board.labels ?? []);
         this._isLoading.set(false);
       },
@@ -85,7 +82,6 @@ export class BoardSettingsFacade {
         this._boardName.set(board.name);
         this._originalBoardPrefix.set(board.prefix);
         this._boardPrefix.set(board.prefix);
-        this._boardSlug.set(board.slug);
         this._isSaving.set(false);
       }),
       catchError((err) => {

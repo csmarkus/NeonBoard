@@ -1,6 +1,8 @@
-import { Component, inject, signal, OnInit, computed, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { tap, switchMap } from 'rxjs';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
@@ -30,6 +32,7 @@ export class BoardViewComponent implements OnInit {
   private boardService = inject(BoardService);
   private facade = inject(BoardStateFacade);
   private titleService = inject(Title);
+  private destroyRef = inject(DestroyRef);
 
   shortId = signal<string>('');
   slug = signal<string>('');
@@ -54,36 +57,36 @@ export class BoardViewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const shortId = this.route.parent?.snapshot.paramMap.get('shortId');
-    const slug = this.route.snapshot.paramMap.get('slug') ??
-                 this.route.snapshot.paramMap.get('boardId');
+    const shortId = this.route.parent?.snapshot.paramMap.get('shortId') ?? '';
+    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
 
-    // Subscribe to slug changes (when navigating between boards)
-    this.route.paramMap.subscribe(params => {
+    this.shortId.set(shortId);
+
+    // Subscribe to slug param changes for when navigating between boards
+    this.route.paramMap.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(params => {
       const currentSlug = params.get('slug');
       if (currentSlug) {
         this.slug.set(currentSlug);
       }
     });
 
-    if (shortId) {
-      this.shortId.set(shortId);
-      this.projectService.getProjectByShortId(shortId).subscribe({
-        next: (project) => {
+    if (shortId && slug) {
+      this.projectService.getProjectByShortId(shortId).pipe(
+        tap(project => {
           this.projectId.set(project.id);
           this.projectName.set(project.name);
-          // Now resolve slug → boardId
-          if (slug) {
-            this.boardService.getBoardsByProject(project.id).subscribe({
-              next: (boards) => {
-                const board = boards.find(b => b.slug === slug);
-                if (board) {
-                  this.boardId.set(board.id);
-                }
-              }
-            });
+        }),
+        switchMap(project => this.boardService.getBoardsByProject(project.id)),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
+        next: (boards) => {
+          const board = boards.find(b => b.slug === slug);
+          if (board) {
+            this.boardId.set(board.id);
           }
-        },
+        }
       });
     }
   }

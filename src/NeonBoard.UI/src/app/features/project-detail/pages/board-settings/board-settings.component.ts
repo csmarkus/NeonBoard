@@ -1,7 +1,8 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, tap, switchMap } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -37,6 +38,7 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   private boardService = inject(BoardService);
   facade = inject(BoardSettingsFacade);
   private titleService = inject(Title);
+  private destroyRef = inject(DestroyRef);
 
   shortId = signal('');
   slug = signal('');
@@ -64,28 +66,26 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   }
 
   ngOnInit(): void {
-    const shortId = this.route.parent?.snapshot.paramMap.get('shortId');
-    const slug = this.route.snapshot.paramMap.get('slug');
+    const shortId = this.route.parent?.snapshot.paramMap.get('shortId') ?? '';
+    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
 
+    if (shortId) this.shortId.set(shortId);
     if (slug) this.slug.set(slug);
 
-    if (shortId) {
-      this.shortId.set(shortId);
-      this.projectService.getProjectByShortId(shortId).subscribe({
-        next: (project) => {
+    if (shortId && slug) {
+      this.projectService.getProjectByShortId(shortId).pipe(
+        tap(project => {
           this.projectId.set(project.id);
           this.projectName.set(project.name);
-          // Resolve slug → boardId
-          if (slug) {
-            this.boardService.getBoardsByProject(project.id).subscribe({
-              next: (boards) => {
-                const board = boards.find(b => b.slug === slug);
-                if (board) {
-                  this.boardId.set(board.id);
-                  this.facade.loadBoardSettings(project.id, board.id);
-                }
-              }
-            });
+        }),
+        switchMap(project => this.boardService.getBoardsByProject(project.id)),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
+        next: (boards) => {
+          const board = boards.find(b => b.slug === slug);
+          if (board) {
+            this.boardId.set(board.id);
+            this.facade.loadBoardSettings(this.projectId(), board.id);
           }
         }
       });
@@ -117,7 +117,9 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   }
 
   saveChanges(): void {
-    this.facade.saveBoardSettings(this.projectId(), this.boardId()).subscribe({
+    this.facade.saveBoardSettings(this.projectId(), this.boardId()).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: (board) => {
         // If slug changed (board was renamed), navigate to new URL
         if (board.slug !== this.slug()) {

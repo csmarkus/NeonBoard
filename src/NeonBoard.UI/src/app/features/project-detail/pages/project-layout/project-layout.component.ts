@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
@@ -49,12 +50,15 @@ export class ProjectLayoutComponent implements OnInit {
 
   shortId = signal<string>('');
   projectId = signal<string>('');
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('shortId');
     if (id) {
       this.shortId.set(id);
-      this.projectService.getProjectByShortId(id).subscribe({
+      this.projectService.getProjectByShortId(id).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
         next: (project) => this.projectId.set(project.id),
       });
     }
