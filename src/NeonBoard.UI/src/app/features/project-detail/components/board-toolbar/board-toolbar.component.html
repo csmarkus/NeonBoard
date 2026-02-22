@@ -1,9 +1,56 @@
 <div class="bg-void px-6 py-3 border-b border-subtle flex items-center gap-4 shrink-0">
   <div class="flex items-center gap-2">
     <span class="text-sm text-muted">Filter:</span>
-    <button class="px-2.5 py-1 text-sm text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors">
-      All cards
-    </button>
+
+    @if (hasLabels()) {
+      <div class="relative flex items-center gap-1">
+        <button
+          (click)="toggleDropdown($event)"
+          [attr.aria-haspopup]="true"
+          [attr.aria-expanded]="isDropdownOpen()"
+          [class]="isFilterActive()
+            ? 'px-2.5 py-1 text-sm text-accent bg-accent/10 rounded-md hover:bg-accent/20 transition-colors'
+            : 'px-2.5 py-1 text-sm text-secondary bg-surface-elevated rounded-md hover:text-primary transition-colors'">
+          {{ filterButtonText() }}
+        </button>
+
+        @if (isFilterActive()) {
+          <button
+            (click)="clearFilter($event)"
+            class="p-1 text-muted hover:text-primary transition-colors"
+            aria-label="Clear label filter">
+            <fa-icon [icon]="faXmark" class="text-xs"></fa-icon>
+          </button>
+        }
+
+        @if (isDropdownOpen()) {
+          <div class="absolute top-full left-0 mt-1 bg-surface-elevated border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-40">
+            @for (label of labels(); track label.id) {
+              <button
+                (click)="toggleLabel(label.id, $event)"
+                [attr.aria-pressed]="isLabelSelected(label.id)"
+                class="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-surface-overlay transition-colors text-left">
+                <span [class]="getLabelDotClass(label.color)"></span>
+                <span
+                  class="text-sm"
+                  [class]="isLabelSelected(label.id) ? 'text-primary font-medium' : 'text-secondary'">
+                  {{ label.name }}
+                </span>
+                @if (isLabelSelected(label.id)) {
+                  <span class="ml-auto text-accent text-xs" aria-hidden="true">✓</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <button
+        disabled
+        class="px-2.5 py-1 text-sm text-secondary bg-surface-elevated rounded-md opacity-50 cursor-not-allowed">
+        All cards
+      </button>
+    }
   </div>
 
   <a
