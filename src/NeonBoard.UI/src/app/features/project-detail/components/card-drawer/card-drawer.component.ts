@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { CardService } from '../../services/card.service';
 import { DrawerService } from '../../services/drawer.service';
 import { Card } from '../../models/card.model';
@@ -10,7 +11,7 @@ import { getLabelColorClasses } from '../../models/label.model';
 
 @Component({
   selector: 'app-card-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ConfirmationModalComponent],
   templateUrl: './card-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -35,6 +36,7 @@ export class CardDrawerComponent {
   error = signal<string | null>(null);
   isSaving = signal(false);
   isDeleting = signal(false);
+  showDeleteModal = signal(false);
   showLabelPicker = signal(false);
   togglingLabelId = signal<string | null>(null);
 
@@ -202,10 +204,13 @@ export class CardDrawerComponent {
     this.showLabelPicker.update(v => !v);
   }
 
-  deleteCard(): void {
+  requestDeleteCard(): void {
     if (!this.isEditMode()) return;
-    if (!confirm('Are you sure you want to delete this card?')) return;
+    this.showDeleteModal.set(true);
+  }
 
+  confirmDeleteCard(): void {
+    this.showDeleteModal.set(false);
     this.isDeleting.set(true);
     this.error.set(null);
 
@@ -222,6 +227,10 @@ export class CardDrawerComponent {
         this.isDeleting.set(false);
       }
     });
+  }
+
+  cancelDeleteCard(): void {
+    this.showDeleteModal.set(false);
   }
 
   private resetForm(): void {
