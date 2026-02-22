@@ -186,12 +186,11 @@ describe('CardDrawerComponent', () => {
     it('calls cardService.deleteCard and emits cardDeleted output', () => {
       fixture.componentRef.setInput('card', baseCard);
       TestBed.flushEffects();
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
 
       let cardDeletedEmitted = false;
       fixture.componentInstance.cardDeleted.subscribe(() => (cardDeletedEmitted = true));
 
-      component.deleteCard();
+      component.confirmDeleteCard();
 
       expect(mockCardService.deleteCard).toHaveBeenCalledWith('p-1', 'b-1', 'card-1');
       expect(cardDeletedEmitted).toBe(true);
