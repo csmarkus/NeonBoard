@@ -213,19 +213,31 @@ public sealed class Board : Entity, IAggregateRoot
     public void MoveCard(Guid cardId, Guid targetColumnId, int targetPosition)
     {
         var card = FindCard(cardId);
-        var targetColumn = FindColumn(targetColumnId);
+        FindColumn(targetColumnId);
 
         if (targetPosition < 0)
             throw new DomainException(DomainMessages.BoardTargetPositionNegative);
 
         var sourceColumnId = card.ColumnId;
 
-        card.Move(targetColumnId, Position.Create(targetPosition));
+        card.Move(targetColumnId, Position.Create(int.MaxValue));
 
-        ResequenceCardsInColumn(sourceColumnId);
         if (sourceColumnId != targetColumnId)
         {
-            ResequenceCardsInColumn(targetColumnId);
+            ResequenceCardsInColumn(sourceColumnId);
+        }
+
+        var cardsInTarget = GetCardsInColumn(targetColumnId)
+            .Where(c => c.Id != cardId)
+            .OrderBy(c => c.Position.Value)
+            .ToList();
+
+        var insertAt = Math.Min(targetPosition, cardsInTarget.Count);
+        cardsInTarget.Insert(insertAt, card);
+
+        for (var i = 0; i < cardsInTarget.Count; i++)
+        {
+            cardsInTarget[i].Move(targetColumnId, Position.Create(i));
         }
 
         UpdatedAt = DateTime.UtcNow;

@@ -237,6 +237,51 @@ public class BoardCardTests
     }
 
     [Fact]
+    public void MoveCard_ToFirstPositionInSameColumn_ShouldPlaceCardAtPositionZero()
+    {
+        var board = new BoardBuilder()
+            .WithColumn("To Do")
+            .WithCard("To Do", "Card A")
+            .WithCard("To Do", "Card B")
+            .WithCard("To Do", "Card C")
+            .Build();
+        var columnId = board.Columns[0].Id;
+        var cardC = board.Cards.Single(c => c.Content.Title == "Card C");
+
+        board.MoveCard(cardC.Id, columnId, 0);
+
+        var orderedCards = board.Cards.OrderBy(c => c.Position.Value).ToList();
+        orderedCards[0].Content.Title.Should().Be("Card C");
+        orderedCards[0].Position.Value.Should().Be(0);
+        orderedCards[1].Content.Title.Should().Be("Card A");
+        orderedCards[1].Position.Value.Should().Be(1);
+        orderedCards[2].Content.Title.Should().Be("Card B");
+        orderedCards[2].Position.Value.Should().Be(2);
+    }
+
+    [Fact]
+    public void MoveCard_ToFirstPositionInDifferentColumn_ShouldPlaceCardAtPositionZero()
+    {
+        var board = new BoardBuilder()
+            .WithColumns("To Do", "Done")
+            .WithCard("To Do", "Card A")
+            .WithCard("Done", "Card B")
+            .WithCard("Done", "Card C")
+            .Build();
+        var targetColumnId = board.Columns[1].Id;
+        var cardA = board.Cards.Single(c => c.Content.Title == "Card A");
+
+        board.MoveCard(cardA.Id, targetColumnId, 0);
+
+        var doneCards = board.Cards.Where(c => c.ColumnId == targetColumnId)
+            .OrderBy(c => c.Position.Value).ToList();
+        doneCards[0].Content.Title.Should().Be("Card A");
+        doneCards[0].Position.Value.Should().Be(0);
+        doneCards[1].Position.Value.Should().Be(1);
+        doneCards[2].Position.Value.Should().Be(2);
+    }
+
+    [Fact]
     public void AddCard_ShouldAssignCardNumber()
     {
         var board = new BoardBuilder().WithColumn("Todo").Build();
