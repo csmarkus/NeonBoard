@@ -42,6 +42,7 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
             .ToList();
 
         var cards = board.Cards
+            .Where(c => !c.IsArchived)
             .Select(c => new CardDto(
                 c.Id,
                 c.CardNumber,
@@ -57,7 +58,8 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
                     .OrderBy(label => label.Name)
                     .ToList(),
                 c.CreatedAt,
-                c.UpdatedAt))
+                c.UpdatedAt,
+                c.ArchivedAt))
             .ToList();
 
         return new BoardDetailsDto(

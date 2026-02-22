@@ -37,6 +37,7 @@ public class AddCardHandler : IRequestHandler<AddCardCommand, CardDto>
             card.Position.Value,
             [],
             card.CreatedAt,
-            card.UpdatedAt);
+            card.UpdatedAt,
+            card.ArchivedAt);
     }
 }

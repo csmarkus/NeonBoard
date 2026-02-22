@@ -12,4 +12,5 @@ public record CardDto(
     int Position,
     List<LabelDto> Labels,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    DateTime? ArchivedAt);
