@@ -262,6 +262,33 @@ public sealed class Board : Entity, IAggregateRoot
         AddDomainEvent(new CardDeletedEvent(Id, cardId, columnId));
     }
 
+    public void ArchiveCard(Guid cardId)
+    {
+        var card = FindCard(cardId);
+        var columnId = card.ColumnId;
+
+        card.Archive();
+        ResequenceCardsInColumn(columnId);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new CardArchivedEvent(Id, cardId, columnId));
+    }
+
+    public void RestoreCard(Guid cardId)
+    {
+        var card = FindCard(cardId);
+        var columnId = card.ColumnId;
+
+        var activeCardsInColumn = GetCardsInColumn(columnId);
+        var restorePosition = Position.Create(activeCardsInColumn.Count);
+
+        card.Restore();
+        card.Move(columnId, restorePosition);
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new CardRestoredEvent(Id, cardId, columnId));
+    }
+
     #endregion
 
     #region Label Operations
@@ -356,7 +383,7 @@ public sealed class Board : Entity, IAggregateRoot
 
     private List<Card> GetCardsInColumn(Guid columnId)
     {
-        return _cards.Where(c => c.ColumnId == columnId).ToList();
+        return _cards.Where(c => c.ColumnId == columnId && !c.IsArchived).ToList();
     }
 
     private void ResequenceCardsInColumn(Guid columnId)

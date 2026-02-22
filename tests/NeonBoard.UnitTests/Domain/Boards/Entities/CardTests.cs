@@ -39,4 +39,70 @@ public class CardTests
 
         act.Should().Throw<DomainException>();
     }
+
+    [Fact]
+    public void Archive_ShouldSetArchivedAt()
+    {
+        var content = CardContent.Create("Test Card", "Description");
+        var position = Position.Create(0);
+        var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
+
+        card.Archive();
+
+        card.IsArchived.Should().BeTrue();
+        card.ArchivedAt.Should().NotBeNull();
+        card.ArchivedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public void Restore_ShouldClearArchivedAt()
+    {
+        var content = CardContent.Create("Test Card", "Description");
+        var position = Position.Create(0);
+        var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
+        card.Archive();
+
+        card.Restore();
+
+        card.IsArchived.Should().BeFalse();
+        card.ArchivedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void IsArchived_WhenNotArchived_ShouldBeFalse()
+    {
+        var content = CardContent.Create("Test Card", "Description");
+        var position = Position.Create(0);
+        var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
+
+        card.IsArchived.Should().BeFalse();
+        card.ArchivedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public void Archive_WhenAlreadyArchived_ShouldThrowDomainException()
+    {
+        var content = CardContent.Create("Test Card", "Description");
+        var position = Position.Create(0);
+        var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
+        card.Archive();
+
+        var act = () => card.Archive();
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardAlreadyArchived);
+    }
+
+    [Fact]
+    public void Restore_WhenNotArchived_ShouldThrowDomainException()
+    {
+        var content = CardContent.Create("Test Card", "Description");
+        var position = Position.Create(0);
+        var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
+
+        var act = () => card.Restore();
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardNotArchived);
+    }
 }

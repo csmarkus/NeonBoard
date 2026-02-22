@@ -77,6 +77,12 @@ export class BoardStateFacade {
         this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
       }
     });
+
+    this.drawerService.cardArchived$.subscribe(() => {
+      if (this._currentProjectId() && this._currentBoardId()) {
+        this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
+      }
+    });
   }
 
   loadBoard(projectId: string, boardId: string, showLoading = true): void {

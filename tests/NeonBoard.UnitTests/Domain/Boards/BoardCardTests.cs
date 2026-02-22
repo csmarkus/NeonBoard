@@ -321,4 +321,156 @@ public class BoardCardTests
         card2.CardNumber.Should().Be(2);
         board.NextCardNumber.Should().Be(3);
     }
+    [Fact]
+    public void ArchiveCard_ShouldMarkCardAsArchived()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").WithCard("To Do", "My Card").Build();
+        var cardId = board.Cards[0].Id;
+
+        board.ArchiveCard(cardId);
+
+        board.Cards.First(c => c.Id == cardId).IsArchived.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ArchiveCard_ShouldResequenceRemainingActiveCards()
+    {
+        var board = new BoardBuilder()
+            .WithColumn("To Do")
+            .WithCard("To Do", "Card 1")
+            .WithCard("To Do", "Card 2")
+            .WithCard("To Do", "Card 3")
+            .Build();
+        var card2Id = board.Cards[1].Id;
+
+        board.ArchiveCard(card2Id);
+
+        var activeCards = board.Cards.Where(c => !c.IsArchived).OrderBy(c => c.Position.Value).ToList();
+        activeCards.Should().HaveCount(2);
+        activeCards[0].Position.Value.Should().Be(0);
+        activeCards[1].Position.Value.Should().Be(1);
+    }
+
+    [Fact]
+    public void ArchiveCard_ShouldRaiseCardArchivedEvent()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").WithCard("To Do", "My Card").Build();
+        var cardId = board.Cards[0].Id;
+        var columnId = board.Cards[0].ColumnId;
+
+        board.ArchiveCard(cardId);
+
+        var evt = board.GetDomainEvents().OfType<CardArchivedEvent>().Single();
+        evt.CardId.Should().Be(cardId);
+        evt.BoardId.Should().Be(board.Id);
+        evt.ColumnId.Should().Be(columnId);
+    }
+
+    [Fact]
+    public void ArchiveCard_AlreadyArchived_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").WithCard("To Do", "My Card").Build();
+        var cardId = board.Cards[0].Id;
+        board.ArchiveCard(cardId);
+        board.ClearDomainEvents();
+
+        var act = () => board.ArchiveCard(cardId);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardAlreadyArchived);
+    }
+
+    [Fact]
+    public void ArchiveCard_NonExistentCard_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var fakeId = Guid.NewGuid();
+
+        var act = () => board.ArchiveCard(fakeId);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardNotFound(fakeId));
+    }
+
+    [Fact]
+    public void RestoreCard_ShouldClearArchivedAt_AndPlaceAtEndOfColumn()
+    {
+        var board = new BoardBuilder()
+            .WithColumn("To Do")
+            .WithCard("To Do", "Card 1")
+            .WithCard("To Do", "Card 2")
+            .Build();
+        var card1Id = board.Cards[0].Id;
+        var columnId = board.Cards[0].ColumnId;
+        board.ArchiveCard(card1Id);
+        board.ClearDomainEvents();
+
+        board.RestoreCard(card1Id);
+
+        var card1 = board.Cards.First(c => c.Id == card1Id);
+        card1.IsArchived.Should().BeFalse();
+        card1.ColumnId.Should().Be(columnId);
+        // Card 2 was resequenced to position 0 after archive; restored card goes to end (position 1)
+        card1.Position.Value.Should().Be(1);
+    }
+
+    [Fact]
+    public void RestoreCard_ShouldRaiseCardRestoredEvent()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").WithCard("To Do", "My Card").Build();
+        var cardId = board.Cards[0].Id;
+        var columnId = board.Cards[0].ColumnId;
+        board.ArchiveCard(cardId);
+        board.ClearDomainEvents();
+
+        board.RestoreCard(cardId);
+
+        var evt = board.GetDomainEvents().OfType<CardRestoredEvent>().Single();
+        evt.CardId.Should().Be(cardId);
+        evt.BoardId.Should().Be(board.Id);
+        evt.ColumnId.Should().Be(columnId);
+    }
+
+    [Fact]
+    public void RestoreCard_NotArchived_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").WithCard("To Do", "My Card").Build();
+        var cardId = board.Cards[0].Id;
+
+        var act = () => board.RestoreCard(cardId);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardNotArchived);
+    }
+
+    [Fact]
+    public void AddCard_ShouldNotCountArchivedCardsForPosition()
+    {
+        var board = new BoardBuilder()
+            .WithColumn("To Do")
+            .WithCard("To Do", "Card 1")
+            .WithCard("To Do", "Card 2")
+            .Build();
+        var columnId = board.Columns[0].Id;
+        board.ArchiveCard(board.Cards[0].Id);
+        board.ClearDomainEvents();
+
+        board.AddCard(columnId, "Card 3", "");
+
+        var newCard = board.Cards.OrderByDescending(c => c.CreatedAt).First();
+        // Only 1 active card in column (Card 2 at pos 0), new card goes to position 1
+        newCard.Position.Value.Should().Be(1);
+    }
+
+    [Fact]
+    public void RestoreCard_NonExistentCard_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var fakeId = Guid.NewGuid();
+
+        var act = () => board.RestoreCard(fakeId);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardNotFound(fakeId));
+    }
 }

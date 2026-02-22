@@ -19,6 +19,10 @@ public sealed class Card : Entity
 
     public DateTime UpdatedAt { get; private set; }
 
+    public DateTime? ArchivedAt { get; private set; }
+
+    public bool IsArchived => ArchivedAt.HasValue;
+
     private Card()
     {
     }
@@ -71,6 +75,24 @@ public sealed class Card : Entity
             throw new DomainException(DomainMessages.CardLabelNotAssigned);
 
         LabelIds = LabelIds.Where(id => id != labelId).ToList();
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    internal void Archive()
+    {
+        if (IsArchived)
+            throw new DomainException(DomainMessages.CardAlreadyArchived);
+
+        ArchivedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    internal void Restore()
+    {
+        if (!IsArchived)
+            throw new DomainException(DomainMessages.CardNotArchived);
+
+        ArchivedAt = null;
         UpdatedAt = DateTime.UtcNow;
     }
 }

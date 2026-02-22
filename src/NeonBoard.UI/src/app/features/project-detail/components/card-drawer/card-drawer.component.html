@@ -140,7 +140,24 @@
       </div>
 
       <!-- Danger zone -->
-      <div class="pt-4 border-t border-subtle">
+      <div class="pt-4 border-t border-subtle flex gap-3">
+        @if (card()?.archivedAt) {
+          <app-button
+            variant="secondary"
+            (click)="restoreCard()"
+            [disabled]="isArchiving()"
+          >
+            {{ isArchiving() ? 'Restoring...' : 'Restore card' }}
+          </app-button>
+        } @else {
+          <app-button
+            variant="secondary"
+            (click)="archiveCard()"
+            [disabled]="isArchiving()"
+          >
+            {{ isArchiving() ? 'Archiving...' : 'Archive card' }}
+          </app-button>
+        }
         <app-button
           variant="danger"
           (click)="requestDeleteCard()"
