@@ -2,7 +2,7 @@ import { initTestEnvironment } from '../../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { convertToParamMap } from '@angular/router';
-import { of, Subject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { BoardViewComponent } from './board-view.component';
 import { ActivatedRoute } from '@angular/router';
@@ -27,10 +27,10 @@ describe('BoardViewComponent', () => {
   let component: BoardViewComponent;
   let mockFacade: { board: ReturnType<typeof signal> };
   let mockTitle: { setTitle: ReturnType<typeof vi.fn> };
-  let paramMap$: Subject<ReturnType<typeof convertToParamMap>>;
+  let paramMap$: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
 
   beforeEach(() => {
-    paramMap$ = new Subject();
+    paramMap$ = new BehaviorSubject(convertToParamMap({ slug: 'sprint-board' }));
     mockFacade = { board: signal(null) };
     mockTitle = { setTitle: vi.fn() };
 
