@@ -1,5 +1,6 @@
 # NeonBoard
 
+[![Build](https://img.shields.io/github/actions/workflow/status/csmarkus/neonboard/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/yourusername/neonboard/actions/workflows/ci.yml)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&style=for-the-badge)](https://dotnet.microsoft.com/)
 [![Angular](https://img.shields.io/badge/Angular-18+-DD0031?logo=angular&style=for-the-badge)](https://angular.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white&style=for-the-badge)](https://www.postgresql.org/)
@@ -20,9 +21,9 @@ NeonBoard provides an intuitive interface for managing projects using Kanban boa
 
 - **Project Management**: Organize multiple projects with dedicated boards
 - **Kanban Boards**: Visual workflow management with drag-and-drop functionality
-- **Card Management**: Create and manage task cards with titles and descriptions
+- **Card Management**: Create and manage task cards with titles, descriptions, and labels
 - **Column Customization**: Define workflow stages with custom columns
-- **Real-time Updates**: Responsive UI with immediate feedback
+- **Labels**: Tag cards with colour-coded labels per board
 - **Secure Authentication**: Auth0 integration for user management
 
 ## Technology Stack
@@ -40,7 +41,9 @@ NeonBoard provides an intuitive interface for managing projects using Kanban boa
 - Angular 18+
 - TypeScript
 - Standalone components with signals
+- Tailwind CSS
 - Reactive forms
+- Vite dev server / Vitest
 
 ### Development & Deployment
 - .NET Aspire (local orchestration)
@@ -207,18 +210,21 @@ docker-compose up -d
 ```bash
 dotnet ef migrations add MigrationName \
   --project src/NeonBoard.Infrastructure \
-  --startup-project src/NeonBoard.AppHost
+  --startup-project src/NeonBoard.Api
 ```
 
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all .NET tests
 dotnet test
 
 # Run specific test project
 dotnet test tests/NeonBoard.UnitTests
 dotnet test tests/NeonBoard.IntegrationTests
+
+# Run Angular tests
+cd src/NeonBoard.UI && npx vitest run
 ```
 
 ### Code Structure
@@ -268,36 +274,6 @@ NeonBoard/
 ├── docker-compose.yml                 # Docker Compose setup
 └── README.md                          # This file
 ```
-
-## API Endpoints
-
-All endpoints require authentication via Auth0 JWT tokens.
-
-### Projects
-- `POST /api/projects` - Create a new project
-- `GET /api/projects` - List all projects for current user
-- `GET /api/projects/{id}` - Get project details
-- `PUT /api/projects/{id}` - Update project
-- `DELETE /api/projects/{id}` - Delete project
-
-### Boards
-- `POST /api/boards` - Create a new board
-- `GET /api/boards/{id}` - Get board with columns and cards
-- `PUT /api/boards/{id}` - Update board
-- `DELETE /api/boards/{id}` - Delete board
-
-### Columns
-- `POST /api/columns` - Add column to board
-- `PUT /api/columns/{id}` - Update column
-- `DELETE /api/columns/{id}` - Delete column
-- `PUT /api/columns/{id}/reorder` - Reorder column
-
-### Cards
-- `POST /api/cards` - Create card in column
-- `GET /api/cards/{id}` - Get card details
-- `PUT /api/cards/{id}` - Update card
-- `DELETE /api/cards/{id}` - Delete card
-- `PUT /api/cards/{id}/move` - Move card to different column/position
 
 ## Contributing
 
