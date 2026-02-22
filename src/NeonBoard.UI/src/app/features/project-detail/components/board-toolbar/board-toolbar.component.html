@@ -24,6 +24,19 @@
           <fa-icon [icon]="faXmark" class="text-xs"></fa-icon>
         </button>
 
+        @if (isFilterActive()) {
+          <div class="flex items-center gap-1.5 ml-1 pl-2 border-l border-subtle">
+            @for (label of selectedLabels(); track label.id) {
+              <button
+                (click)="toggleLabel(label.id, $event)"
+                [class]="getLabelChipClass(label.color)"
+                [attr.aria-label]="'Remove ' + label.name + ' filter'">
+                {{ label.name }}
+              </button>
+            }
+          </div>
+        }
+
         @if (isDropdownOpen()) {
           <div class="absolute top-full left-0 mt-1 bg-surface-elevated border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-40">
             @for (label of labels(); track label.id) {

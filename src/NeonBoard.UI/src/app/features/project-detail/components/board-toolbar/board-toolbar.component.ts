@@ -27,6 +27,11 @@ export class BoardToolbarComponent {
     return `w-2.5 h-2.5 rounded-full flex-shrink-0 border ${bg} ${border}`;
   }
 
+  getLabelChipClass(color: string): string {
+    const { bg, text, border } = getLabelColorClasses(color);
+    return `inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded border ${bg} ${text} ${border}`;
+  }
+
   isDropdownOpen = signal(false);
 
   labels = this.facade.labels;
@@ -34,6 +39,10 @@ export class BoardToolbarComponent {
   isFilterActive = this.facade.isFilterActive;
 
   hasLabels = computed(() => this.labels().length > 0);
+
+  selectedLabels = computed(() =>
+    this.labels().filter(l => this.selectedLabelIds().has(l.id))
+  );
 
   filterButtonText = computed(() => {
     const count = this.selectedLabelIds().size;
