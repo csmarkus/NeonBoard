@@ -117,4 +117,25 @@ public class ProjectTests
 
         project.Description.Should().BeEmpty();
     }
+
+    [Fact]
+    public void Create_ShouldGenerateShortId()
+    {
+        var project = Project.Create("Test Project", "Description", Guid.NewGuid());
+
+        project.ShortId.Should().NotBeNullOrWhiteSpace();
+        project.ShortId.Should().HaveLength(7);
+    }
+
+    [Fact]
+    public void Create_ShortId_ShouldOnlyContainUnambiguousCharacters()
+    {
+        var ambiguousChars = new[] { '0', '1', 'O', 'I', 'l' };
+
+        for (int i = 0; i < 20; i++)
+        {
+            var project = Project.Create($"Test Project {i}", "Description", Guid.NewGuid());
+            project.ShortId.Should().NotContainAny(ambiguousChars.Select(c => c.ToString()).ToArray());
+        }
+    }
 }

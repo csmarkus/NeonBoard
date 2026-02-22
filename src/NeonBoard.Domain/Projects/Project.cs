@@ -10,6 +10,8 @@ public sealed class Project : Entity, IAggregateRoot
 
     public string Name { get; private set; } = default!;
 
+    public string ShortId { get; private set; } = default!;
+
     public string Description { get; private set; } = default!;
 
     public Guid OwnerId { get; private set; }
@@ -31,6 +33,7 @@ public sealed class Project : Entity, IAggregateRoot
         var project = new Project
         {
             Id = Guid.NewGuid(),
+            ShortId = Url62.Generate(7, unambiguous: true),
             Name = name,
             Description = description ?? string.Empty,
             OwnerId = ownerId,
