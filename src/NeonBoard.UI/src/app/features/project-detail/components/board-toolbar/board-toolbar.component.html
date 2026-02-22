@@ -14,14 +14,15 @@
           {{ filterButtonText() }}
         </button>
 
-        @if (isFilterActive()) {
-          <button
-            (click)="clearFilter($event)"
-            class="p-1 text-muted hover:text-primary transition-colors"
-            aria-label="Clear label filter">
-            <fa-icon [icon]="faXmark" class="text-xs"></fa-icon>
-          </button>
-        }
+        <button
+          (click)="clearFilter($event)"
+          class="p-1 text-muted hover:text-primary transition-colors"
+          [class.invisible]="!isFilterActive()"
+          [class.pointer-events-none]="!isFilterActive()"
+          [attr.aria-hidden]="!isFilterActive() || null"
+          aria-label="Clear label filter">
+          <fa-icon [icon]="faXmark" class="text-xs"></fa-icon>
+        </button>
 
         @if (isDropdownOpen()) {
           <div class="absolute top-full left-0 mt-1 bg-surface-elevated border border-subtle rounded-lg shadow-lg py-1 z-10 min-w-40">
