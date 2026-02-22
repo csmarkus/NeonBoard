@@ -53,7 +53,7 @@ describe('BoardCanvasComponent', () => {
   let mockFacade: {
     board: ReturnType<typeof signal>;
     columns: ReturnType<typeof signal<Column[]>>;
-    cardsByColumn: ReturnType<typeof signal>;
+    filteredCardsByColumn: ReturnType<typeof signal>;
     labels: ReturnType<typeof signal>;
     isLoading: ReturnType<typeof signal<boolean>>;
     error: ReturnType<typeof signal>;
@@ -71,7 +71,7 @@ describe('BoardCanvasComponent', () => {
     mockFacade = {
       board: signal(null),
       columns: signal<Column[]>([]),
-      cardsByColumn: signal({}),
+      filteredCardsByColumn: signal({}),
       labels: signal([]),
       isLoading: signal(false),
       error: signal(null),

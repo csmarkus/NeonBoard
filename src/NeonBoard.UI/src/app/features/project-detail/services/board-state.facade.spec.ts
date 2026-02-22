@@ -128,6 +128,31 @@ describe('BoardStateFacade', () => {
       expect(facade.isLoading()).toBe(false);
       expect(facade.board()).toBeNull();
     });
+
+    it('should clear selected label filters when navigating to a different board', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+      facade.toggleLabelFilter('label-1');
+      expect(facade.isFilterActive()).toBe(true);
+
+      facade.loadBoard('project-1', 'board-2');
+
+      expect(facade.isFilterActive()).toBe(false);
+      expect(facade.selectedLabelIds().size).toBe(0);
+    });
+
+    it('should not clear selected label filters when reloading the same board', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+      facade.toggleLabelFilter('label-1');
+      expect(facade.isFilterActive()).toBe(true);
+
+      facade.loadBoard('project-1', 'board-1', false);
+
+      expect(facade.isFilterActive()).toBe(true);
+    });
   });
 
   describe('reorderColumns', () => {

@@ -1,4 +1,4 @@
-import { Component, input, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { BoardStateFacade } from '../../services/board-state.facade';
@@ -15,6 +15,7 @@ import { Card } from '../../models/card.model';
   },
   templateUrl: './board-canvas.component.html',
   styleUrl: './board-canvas.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardCanvasComponent {
   private facade = inject(BoardStateFacade);

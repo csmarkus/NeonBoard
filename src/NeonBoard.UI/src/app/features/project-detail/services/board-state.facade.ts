@@ -80,8 +80,12 @@ export class BoardStateFacade {
   }
 
   loadBoard(projectId: string, boardId: string, showLoading = true): void {
+    const boardChanged = this._currentBoardId() !== boardId;
     this._currentProjectId.set(projectId);
     this._currentBoardId.set(boardId);
+    if (boardChanged) {
+      this._selectedLabelIds.set(new Set());
+    }
 
     if (showLoading) {
       this._isLoading.set(true);
