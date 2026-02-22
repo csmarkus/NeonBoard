@@ -29,6 +29,13 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(p => p.UpdatedAt)
             .IsRequired();
 
+        builder.Property(p => p.ShortId)
+            .HasMaxLength(7)
+            .IsRequired();
+
+        builder.HasIndex(p => p.ShortId)
+            .IsUnique();
+
         builder.HasIndex(p => p.OwnerId);
     }
 }

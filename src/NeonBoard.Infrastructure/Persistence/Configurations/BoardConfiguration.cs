@@ -19,6 +19,13 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(b => b.Slug)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        builder.HasIndex(b => new { b.ProjectId, b.Slug })
+            .IsUnique();
+
         builder.OwnsOne(b => b.Prefix, prefix =>
         {
             prefix.Property(p => p.Value)
