@@ -28,7 +28,7 @@ export class BoardCanvasComponent {
 
   board = this.facade.board;
   columns = this.facade.columns;
-  cardsByColumn = this.facade.cardsByColumn;
+  cardsByColumn = this.facade.filteredCardsByColumn;
   labels = this.facade.labels;
   isLoading = this.facade.isLoading;
   error = this.facade.error;
