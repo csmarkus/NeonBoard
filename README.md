@@ -1,6 +1,6 @@
 # NeonBoard
 
-[![Build](https://img.shields.io/github/actions/workflow/status/csmarkus/neonboard/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/yourusername/neonboard/actions/workflows/ci.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/csmarkus/neonboard/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/csmarkus/neonboard/actions/workflows/ci.yml)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&style=for-the-badge)](https://dotnet.microsoft.com/)
 [![Angular](https://img.shields.io/badge/Angular-18+-DD0031?logo=angular&style=for-the-badge)](https://angular.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white&style=for-the-badge)](https://www.postgresql.org/)

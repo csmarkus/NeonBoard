@@ -3,11 +3,13 @@
 ## Project Overview
 NeonBoard is a Kanban project tracking application built with .NET 10 and Angular. Users can create projects, add boards to projects, and manage cards across columns within those boards.
 
-**MVP Scope:**
+**Current Feature Set:**
 - Single user per project (no collaboration features)
-- Basic card management (title and description only)
-- Drag-and-drop card positioning between columns
-- Project and board organization
+- Card management: title, description, labels
+- Board prefixes and human-readable card display IDs (e.g. `SPR-1`)
+- Drag-and-drop card and column positioning
+- Board settings: rename, prefix, label management, delete
+- Human-readable URLs: `/p/{shortId}/b/{slug}` (projects use a 7-char base62 short ID, boards use a name-derived slug)
 
 ## Architecture
 
@@ -34,7 +36,7 @@ src/
 
 ### Technology Stack
 - **Backend:** .NET 10, C# 13, Minimal APIs
-- **Frontend:** Angular 18+
+- **Frontend:** Angular 18+, Tailwind CSS, Vitest
 - **Database:** PostgreSQL 16
 - **ORM:** Entity Framework Core 10
 - **Patterns:** DDD, CQRS, Clean Architecture, Vertical Slice Architecture
@@ -52,8 +54,8 @@ src/
 Each aggregate has a single root entity that controls access to child entities:
 
 1. **User Aggregate** - Simple identity
-2. **Project Aggregate** - Project metadata
-3. **Board Aggregate** - Owns Columns and Cards (main aggregate)
+2. **Project Aggregate** - Project metadata; has a `ShortId` (7-char base62, unambiguous alphabet) for URL routing
+3. **Board Aggregate** - Owns Columns, Cards, and Labels (main aggregate); has a `Slug` derived from its name, updated on rename
 
 **Rule:** Only modify entities through their aggregate root. For example, you cannot directly modify a Card - you must go through the Board aggregate.
 
@@ -312,7 +314,7 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
 - Run on startup in Production with advisory lock (prevents concurrent migrations)
 - Create migrations from command line:
 ```bash
-  dotnet ef migrations add MigrationName --project src/NeonBoard.Infrastructure --startup-project src/NeonBoard.AppHost
+  dotnet ef migrations add MigrationName --project src/NeonBoard.Infrastructure --startup-project src/NeonBoard.Api
 ```
 
 ## API Layer (Minimal APIs)
@@ -329,45 +331,48 @@ public static class BoardEndpoints
 {
     public static void MapBoardEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/boards")
+        // Board endpoints are nested under projects
+        var group = app.MapGroup("/api/projects/{projectId:guid}/boards")
             .WithTags("Boards")
             .RequireAuthorization()
-            .WithOpenApi();
+            .AddEndpointFilter<ProjectOwnershipFilter>();
 
         group.MapPost("/", CreateBoard)
             .WithName("CreateBoard")
             .Produces<BoardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
-        group.MapGet("/{id:guid}", GetBoard)
-            .WithName("GetBoard")
+        group.MapGet("/{boardId:guid}", GetBoardDetails)
+            .WithName("GetBoardDetails")
             .Produces<BoardDetailsDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> CreateBoard(
+        Guid projectId,
         CreateBoardRequest request,
         IMediator mediator,
         CancellationToken ct)
     {
-        var command = new CreateBoardCommand(request.ProjectId, request.Name);
+        var command = new CreateBoardCommand(projectId, request.Name, request.Prefix);
         var result = await mediator.Send(command, ct);
-        return Results.Created($"/api/boards/{result.Id}", result);
+        return Results.Created($"/api/projects/{projectId}/boards/{result.Id}", result);
     }
 
-    private static async Task<IResult> GetBoard(
-        Guid id,
+    private static async Task<IResult> GetBoardDetails(
+        Guid projectId,
+        Guid boardId,
         IMediator mediator,
         CancellationToken ct)
     {
-        var query = new GetBoardQuery(id);
+        var query = new GetBoardDetailsQuery(projectId, boardId);
         var result = await mediator.Send(query, ct);
         return Results.Ok(result);
     }
 }
 
 // Request models (API layer only, not Application commands)
-public record CreateBoardRequest(Guid ProjectId, string Name);
+public record CreateBoardRequest(string Name, string? Prefix);
 ```
 
 ### Global Exception Handling
@@ -494,21 +499,25 @@ public class BoardTests
 public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
 {
     private readonly HttpClient _client;
-    
+    private readonly NeonBoardWebApplicationFactory _factory;
+
     [Fact]
     public async Task CreateBoard_ReturnsCreatedBoard()
     {
         // Arrange
-        var request = new { ProjectId = Guid.NewGuid(), Name = "Test Board" };
-        
+        var project = await _factory.CreateProjectAsync<ProjectDto>(_client);
+
         // Act
-        var response = await _client.PostAsJsonAsync("/api/boards", request);
-        
+        var response = await _client.PostAsJsonAsync(
+            $"/api/projects/{project.Id}/boards",
+            new { Name = "Test Board" });
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var board = await response.Content.ReadFromJsonAsync<BoardDto>();
         board.Should().NotBeNull();
-        board.Name.Should().Be("Test Board");
+        board!.Name.Should().Be("Test Board");
+        board.Slug.Should().Be("test-board");
     }
 }
 ```
@@ -524,7 +533,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
 
 ### Creating a Migration
 ```bash
-dotnet ef migrations add MigrationName --project src/NeonBoard.Infrastructure --startup-project src/NeonBoard.AppHost
+dotnet ef migrations add MigrationName --project src/NeonBoard.Infrastructure --startup-project src/NeonBoard.Api
 ```
 
 ### Running Locally with Aspire
@@ -552,7 +561,7 @@ docker build -t neonboard:latest .
 ### Folder Structure (Strict!)
 ```
 Domain/
-  Common/           # Base classes, interfaces
+  Common/           # Base classes, interfaces, and utilities (Url62, SlugHelper)
   {Aggregate}/      # One folder per aggregate
     {Aggregate}.cs  # Aggregate root
     Entities/       # Child entities
@@ -620,11 +629,11 @@ Before implementing a feature, verify:
 - Index foreign keys and commonly queried fields
 - Keep aggregates small (don't load entire object graphs)
 
-### Security Notes (To Be Implemented)
-- JWT authentication required for all endpoints
-- User can only access their own projects/boards
-- Validate user ownership in command handlers
-- Use `ICurrentUserService` to get authenticated user ID
+### Security Notes
+- JWT authentication is implemented via Auth0 — all endpoints require authorization
+- `ICurrentUserService` provides the authenticated user's ID to command handlers
+- Project ownership is enforced via `ProjectOwnershipFilter` — requests for projects not owned by the current user return 403
+- Never skip the ownership filter on project-scoped endpoints
 
 ## When in Doubt
 - Follow existing patterns in the codebase
