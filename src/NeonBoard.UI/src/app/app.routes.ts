@@ -12,7 +12,7 @@ export const routes: Routes = [
     data: { animation: 'ProjectsPage' }
   },
   {
-    path: 'project/:projectId',
+    path: 'p/:shortId',
     loadComponent: () => import('./features/project-detail/pages/project-layout/project-layout.component').then(m => m.ProjectLayoutComponent),
     canActivate: [authGuard],
     children: [
@@ -22,12 +22,12 @@ export const routes: Routes = [
         data: { animation: 'ProjectPage' }
       },
       {
-        path: 'b/:boardId',
+        path: 'b/:slug',
         loadComponent: () => import('./features/project-detail/pages/board-view/board-view.component').then(m => m.BoardViewComponent),
         data: { animation: 'BoardPage' }
       },
       {
-        path: 'b/:boardId/settings',
+        path: 'b/:slug/settings',
         loadComponent: () => import('./features/project-detail/pages/board-settings/board-settings.component').then(m => m.BoardSettingsComponent),
         canDeactivate: [unsavedChangesGuard],
         data: { animation: 'BoardSettingsPage' }

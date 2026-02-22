@@ -5,6 +5,7 @@ import { Label } from './label.model';
 export interface Board {
   id: string;
   name: string;
+  slug: string;
   prefix: string;
   projectId: string;
   createdAt: string;
@@ -15,6 +16,7 @@ export interface Board {
 export interface BoardDetails {
   id: string;
   name: string;
+  slug: string;
   prefix: string;
   projectId: string;
   createdAt: string;
