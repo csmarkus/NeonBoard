@@ -6,13 +6,12 @@ public static class Url62
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private const string AlphabetUnambiguous =
         "23456789abcdefghkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
-    private static readonly Random random = new();
 
     public static string Generate(int length, bool unambiguous = false)
     {
         string alphabet = unambiguous ? AlphabetUnambiguous : Alphabet;
 
         return string.Concat(Enumerable.Range(0, length)
-            .Select(_ => alphabet[random.Next(alphabet.Length)]));
+            .Select(_ => alphabet[Random.Shared.Next(alphabet.Length)]));
     }
 }
