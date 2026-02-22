@@ -128,6 +128,31 @@ describe('BoardStateFacade', () => {
       expect(facade.isLoading()).toBe(false);
       expect(facade.board()).toBeNull();
     });
+
+    it('should clear selected label filters when navigating to a different board', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+      facade.toggleLabelFilter('label-1');
+      expect(facade.isFilterActive()).toBe(true);
+
+      facade.loadBoard('project-1', 'board-2');
+
+      expect(facade.isFilterActive()).toBe(false);
+      expect(facade.selectedLabelIds().size).toBe(0);
+    });
+
+    it('should not clear selected label filters when reloading the same board', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+      facade.toggleLabelFilter('label-1');
+      expect(facade.isFilterActive()).toBe(true);
+
+      facade.loadBoard('project-1', 'board-1', false);
+
+      expect(facade.isFilterActive()).toBe(true);
+    });
   });
 
   describe('reorderColumns', () => {
@@ -297,6 +322,128 @@ describe('BoardStateFacade', () => {
       cardDeleted$.next();
 
       expect(boardService.getBoardDetails).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('toggleLabelFilter', () => {
+    it('should add a label id to selectedLabelIds', () => {
+      facade.toggleLabelFilter('label-1');
+      expect(facade.selectedLabelIds().has('label-1')).toBe(true);
+    });
+
+    it('should remove a label id when toggled a second time', () => {
+      facade.toggleLabelFilter('label-1');
+      facade.toggleLabelFilter('label-1');
+      expect(facade.selectedLabelIds().has('label-1')).toBe(false);
+    });
+
+    it('should support multiple selected labels independently', () => {
+      facade.toggleLabelFilter('label-1');
+      facade.toggleLabelFilter('label-2');
+      expect(facade.selectedLabelIds().has('label-1')).toBe(true);
+      expect(facade.selectedLabelIds().has('label-2')).toBe(true);
+    });
+  });
+
+  describe('clearLabelFilter', () => {
+    it('should clear all selected labels', () => {
+      facade.toggleLabelFilter('label-1');
+      facade.toggleLabelFilter('label-2');
+      facade.clearLabelFilter();
+      expect(facade.selectedLabelIds().size).toBe(0);
+    });
+  });
+
+  describe('isFilterActive computed', () => {
+    it('should be false when no labels are selected', () => {
+      expect(facade.isFilterActive()).toBe(false);
+    });
+
+    it('should be true when at least one label is selected', () => {
+      facade.toggleLabelFilter('label-1');
+      expect(facade.isFilterActive()).toBe(true);
+    });
+
+    it('should return false after clearing', () => {
+      facade.toggleLabelFilter('label-1');
+      facade.clearLabelFilter();
+      expect(facade.isFilterActive()).toBe(false);
+    });
+  });
+
+  describe('filteredCardsByColumn computed', () => {
+    it('should return the same result as cardsByColumn when no filter is active', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
+      expect(facade.filteredCardsByColumn()).toEqual(facade.cardsByColumn());
+    });
+
+    it('should show only cards that have a selected label', () => {
+      const mockBoard = createMockBoardDetails({
+        cards: [
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '' },
+          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '' },
+        ],
+      });
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
+      facade.toggleLabelFilter('label-1');
+
+      expect(facade.filteredCardsByColumn()['col-1'].map(c => c.id)).toEqual(['card-1']);
+    });
+
+    it('should return an empty array for a column where no cards match', () => {
+      const mockBoard = createMockBoardDetails({
+        cards: [
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' },
+        ],
+      });
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
+      facade.toggleLabelFilter('label-1');
+
+      expect(facade.filteredCardsByColumn()['col-1']).toEqual([]);
+    });
+
+    it('should match cards with any of the selected labels (OR logic)', () => {
+      const mockBoard = createMockBoardDetails({
+        cards: [
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '' },
+          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 1, labels: [{ id: 'label-2', name: 'Feature', color: 'blue' }], createdAt: '', updatedAt: '' },
+          { id: 'card-3', cardNumber: 3, displayId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-1', position: 2, labels: [], createdAt: '', updatedAt: '' },
+        ],
+        labels: [
+          { id: 'label-1', name: 'Bug', color: 'red' },
+          { id: 'label-2', name: 'Feature', color: 'blue' },
+        ],
+      });
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
+      facade.toggleLabelFilter('label-1');
+      facade.toggleLabelFilter('label-2');
+
+      expect(facade.filteredCardsByColumn()['col-1'].map(c => c.id)).toEqual(['card-1', 'card-2']);
+    });
+
+    it('should show all cards again after clearing the filter', () => {
+      const mockBoard = createMockBoardDetails({
+        cards: [
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '' },
+          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '' },
+        ],
+      });
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
+      facade.toggleLabelFilter('label-1');
+      facade.clearLabelFilter();
+
+      expect(facade.filteredCardsByColumn()['col-1'].map(c => c.id)).toEqual(['card-1', 'card-2']);
     });
   });
 });

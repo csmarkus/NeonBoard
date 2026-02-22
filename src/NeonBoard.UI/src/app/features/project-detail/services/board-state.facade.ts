@@ -22,13 +22,16 @@ export class BoardStateFacade {
   private _error = signal<string | null>(null);
   private _currentProjectId = signal<string>('');
   private _currentBoardId = signal<string>('');
+  private _selectedLabelIds = signal<Set<string>>(new Set());
 
   readonly board = this._board.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly error = this._error.asReadonly();
+  readonly selectedLabelIds = this._selectedLabelIds.asReadonly();
 
   readonly columns = computed(() => this._board()?.columns ?? []);
   readonly labels = computed(() => this._board()?.labels ?? []);
+  readonly isFilterActive = computed(() => this._selectedLabelIds().size > 0);
 
   readonly cardsByColumn = computed(() => {
     const cards = this._board()?.cards ?? [];
@@ -51,6 +54,17 @@ export class BoardStateFacade {
     return result;
   });
 
+  readonly filteredCardsByColumn = computed(() => {
+    const ids = this._selectedLabelIds();
+    if (ids.size === 0) return this.cardsByColumn();
+    return Object.fromEntries(
+      Object.entries(this.cardsByColumn()).map(([colId, cards]) => [
+        colId,
+        cards.filter(c => c.labels.some(l => ids.has(l.id)))
+      ])
+    );
+  });
+
   constructor() {
     this.drawerService.cardUpdated$.subscribe(() => {
       if (this._currentProjectId() && this._currentBoardId()) {
@@ -66,8 +80,12 @@ export class BoardStateFacade {
   }
 
   loadBoard(projectId: string, boardId: string, showLoading = true): void {
+    const boardChanged = this._currentBoardId() !== boardId;
     this._currentProjectId.set(projectId);
     this._currentBoardId.set(boardId);
+    if (boardChanged) {
+      this._selectedLabelIds.set(new Set());
+    }
 
     if (showLoading) {
       this._isLoading.set(true);
@@ -174,5 +192,21 @@ export class BoardStateFacade {
 
   openCardDrawer(card: Card, projectId: string, boardId: string): void {
     this.drawerService.openCardDrawer(card, projectId, boardId);
+  }
+
+  toggleLabelFilter(labelId: string): void {
+    this._selectedLabelIds.update(ids => {
+      const next = new Set(ids);
+      if (next.has(labelId)) {
+        next.delete(labelId);
+      } else {
+        next.add(labelId);
+      }
+      return next;
+    });
+  }
+
+  clearLabelFilter(): void {
+    this._selectedLabelIds.set(new Set());
   }
 }
