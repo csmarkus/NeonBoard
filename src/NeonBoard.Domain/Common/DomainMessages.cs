@@ -37,6 +37,8 @@ public static class DomainMessages
     public const string CardNumberInvalid = "Card number must be a positive integer.";
     public const string CardLabelAlreadyAssigned = "This label is already assigned to the card.";
     public const string CardLabelNotAssigned = "This label is not assigned to the card.";
+    public const string CardAlreadyArchived = "Card is already archived.";
+    public const string CardNotArchived = "Card is not archived.";
 
     #endregion
 
