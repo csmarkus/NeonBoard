@@ -31,6 +31,8 @@ public class ProjectEndpointsTests : IClassFixture<NeonBoardWebApplicationFactor
         project.Description.Should().Be("My project description");
         project.OwnerId.Should().Be(_factory.TestUserId);
         project.Id.Should().NotBeEmpty();
+        project.ShortId.Should().NotBeNullOrWhiteSpace();
+        project.ShortId.Should().HaveLength(7);
         response.Headers.Location.Should().NotBeNull();
     }
 
@@ -74,6 +76,8 @@ public class ProjectEndpointsTests : IClassFixture<NeonBoardWebApplicationFactor
         project.Should().NotBeNull();
         project!.Id.Should().Be(created.Id);
         project.Name.Should().Be(created.Name);
+        project.ShortId.Should().NotBeNullOrWhiteSpace();
+        project.ShortId.Should().HaveLength(7);
     }
 
     [Fact]
@@ -102,6 +106,7 @@ public class ProjectEndpointsTests : IClassFixture<NeonBoardWebApplicationFactor
         updated!.Name.Should().Be("Updated Name");
         updated.Description.Should().Be("Updated description");
         updated.Id.Should().Be(created.Id);
+        updated.ShortId.Should().Be(created.ShortId);
     }
 
     [Fact]

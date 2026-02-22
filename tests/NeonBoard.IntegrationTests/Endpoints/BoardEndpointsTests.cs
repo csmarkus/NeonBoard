@@ -33,6 +33,8 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         board!.Name.Should().Be("Sprint Board");
         board.ProjectId.Should().Be(project.Id);
         board.Id.Should().NotBeEmpty();
+        board.Slug.Should().NotBeNullOrWhiteSpace();
+        board.Slug.Should().Be("sprint-board");
     }
 
     [Fact]
@@ -63,6 +65,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         boards.Should().HaveCount(2);
         boards.Should().Contain(b => b.Name == "Board A");
         boards.Should().Contain(b => b.Name == "Board B");
+        boards.Should().OnlyContain(b => !string.IsNullOrWhiteSpace(b.Slug));
     }
 
     [Fact]
@@ -80,6 +83,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         var details = await response.Content.ReadFromJsonAsync<BoardDetailsDto>();
         details.Should().NotBeNull();
         details!.Id.Should().Be(board.Id);
+        details.Slug.Should().NotBeNullOrWhiteSpace();
         details.Columns.Should().HaveCount(1);
         details.Columns[0].Name.Should().Be("To Do");
         details.Cards.Should().HaveCount(1);
@@ -112,6 +116,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         board.Should().NotBeNull();
         board!.Name.Should().Be("Sprint Board");
         board.Prefix.Should().Be("SPR");
+        board.Slug.Should().Be("sprint-board");
     }
 
     [Fact]
@@ -129,6 +134,7 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         board.Should().NotBeNull();
         board!.Prefix.Should().NotBeNullOrWhiteSpace();
         board.Prefix.Should().Be("SB");
+        board.Slug.Should().Be("sprint-board");
     }
 
     [Fact]
@@ -163,5 +169,6 @@ public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
         var updated = await response.Content.ReadFromJsonAsync<BoardDto>();
         updated.Should().NotBeNull();
         updated!.Prefix.Should().Be("NEW");
+        updated.Slug.Should().Be("my-board");
     }
 }
