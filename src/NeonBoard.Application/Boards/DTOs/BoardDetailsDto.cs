@@ -7,6 +7,7 @@ namespace NeonBoard.Application.Boards.DTOs;
 public record BoardDetailsDto(
     Guid Id,
     string Name,
+    string Slug,
     string Prefix,
     Guid ProjectId,
     DateTime CreatedAt,

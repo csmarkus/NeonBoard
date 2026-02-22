@@ -19,6 +19,7 @@ public class GetProjectsByUserHandler : IRequestHandler<GetProjectsByUserQuery, 
 
         return projects.Select(p => new ProjectDto(
             p.Id,
+            p.ShortId,
             p.Name,
             p.Description,
             p.OwnerId,

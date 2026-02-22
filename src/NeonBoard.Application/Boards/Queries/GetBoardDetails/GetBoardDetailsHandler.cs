@@ -63,6 +63,7 @@ public class GetBoardDetailsHandler : IRequestHandler<GetBoardDetailsQuery, Boar
         return new BoardDetailsDto(
             board.Id,
             board.Name,
+            board.Slug,
             board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,

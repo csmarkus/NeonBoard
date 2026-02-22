@@ -45,6 +45,7 @@ public class UpdateBoardSettingsHandler : IRequestHandler<UpdateBoardSettingsCom
         return new BoardDto(
             board.Id,
             board.Name,
+            board.Slug,
             board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,

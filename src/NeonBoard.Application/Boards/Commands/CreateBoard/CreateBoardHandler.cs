@@ -23,6 +23,7 @@ public class CreateBoardHandler : IRequestHandler<CreateBoardCommand, BoardDto>
         return new BoardDto(
             board.Id,
             board.Name,
+            board.Slug,
             board.Prefix.Value,
             board.ProjectId,
             board.CreatedAt,

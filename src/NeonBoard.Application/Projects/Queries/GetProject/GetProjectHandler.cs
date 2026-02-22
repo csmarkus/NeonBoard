@@ -24,6 +24,7 @@ public class GetProjectHandler : IRequestHandler<GetProjectQuery, ProjectDto>
 
         return new ProjectDto(
             project.Id,
+            project.ShortId,
             project.Name,
             project.Description,
             project.OwnerId,

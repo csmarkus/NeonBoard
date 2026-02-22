@@ -25,6 +25,7 @@ public class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Projec
 
         return new ProjectDto(
             project.Id,
+            project.ShortId,
             project.Name,
             project.Description,
             project.OwnerId,
