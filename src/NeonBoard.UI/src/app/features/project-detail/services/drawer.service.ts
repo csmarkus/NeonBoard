@@ -21,10 +21,12 @@ export class DrawerService {
   private cardUpdatedSubject = new Subject<void>();
   private cardDeletedSubject = new Subject<void>();
   private boardCreatedSubject = new Subject<void>();
+  private cardArchivedSubject = new Subject<void>();
 
   cardUpdated$ = this.cardUpdatedSubject.asObservable();
   cardDeleted$ = this.cardDeletedSubject.asObservable();
   boardCreated$ = this.boardCreatedSubject.asObservable();
+  cardArchived$ = this.cardArchivedSubject.asObservable();
 
   openCreateBoardDrawer(projectId: string): void {
     this.createBoardProjectId.set(projectId);
@@ -62,5 +64,9 @@ export class DrawerService {
 
   notifyBoardCreated(): void {
     this.boardCreatedSubject.next();
+  }
+
+  notifyCardArchived(): void {
+    this.cardArchivedSubject.next();
   }
 }
