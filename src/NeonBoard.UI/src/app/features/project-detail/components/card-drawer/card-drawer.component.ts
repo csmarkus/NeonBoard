@@ -5,6 +5,7 @@ import { DrawerComponent } from '../../../../shared/components/drawer/drawer.com
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
 import { CardService } from '../../services/card.service';
 import { DrawerService } from '../../services/drawer.service';
 import { Card } from '../../models/card.model';
@@ -12,7 +13,7 @@ import { getLabelClassString } from '../../models/label.model';
 
 @Component({
   selector: 'app-card-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ConfirmationModalComponent, ErrorBannerComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ConfirmationModalComponent, ErrorBannerComponent, InputComponent],
   templateUrl: './card-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -11,23 +11,20 @@
     <div class="space-y-4">
       <div>
         <label class="block text-sm text-secondary mb-1.5">Board name</label>
-        <input
-          type="text"
+        <app-input
           [(ngModel)]="newBoardName"
           placeholder="Enter board name..."
           (keyup.enter)="createBoard()"
-          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
         />
       </div>
 
       <div>
         <label class="block text-sm text-secondary mb-1.5">Prefix (optional)</label>
-        <input
-          type="text"
+        <app-input
           [(ngModel)]="newBoardPrefix"
-          maxlength="5"
+          [maxlength]="5"
           (keyup.enter)="createBoard()"
-          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 uppercase"
+          extraClass="uppercase"
         />
         <span class="text-xs text-muted mt-1">2-5 uppercase letters for card IDs. Auto-generated if left blank.</span>
       </div>

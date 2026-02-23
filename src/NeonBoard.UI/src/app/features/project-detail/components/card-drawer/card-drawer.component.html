@@ -32,13 +32,11 @@
       <!-- Title section (auto-saves on blur/enter) -->
       <div>
         <label class="block text-sm font-medium text-secondary mb-1.5">Title</label>
-        <input
-          type="text"
+        <app-input
           [ngModel]="cardTitle()"
           (ngModelChange)="cardTitle.set($event)"
-          (blur)="saveTitle()"
+          (focusout)="saveTitle()"
           (keyup.enter)="saveTitle()"
-          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
         />
       </div>
 
@@ -114,13 +112,13 @@
       <!-- Description section -->
       <div>
         <label class="block text-sm font-medium text-secondary mb-1.5">Description</label>
-        <textarea
+        <app-input
+          element="textarea"
           [ngModel]="cardDescription()"
           (ngModelChange)="cardDescription.set($event)"
           placeholder="Add more details..."
-          rows="5"
-          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
-        ></textarea>
+          [rows]="5"
+        />
         @if (descriptionChanged()) {
           <div class="mt-2">
             <app-button
@@ -168,24 +166,22 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm text-secondary mb-1.5">Title</label>
-          <input
-            type="text"
+          <app-input
             [ngModel]="cardTitle()"
             (ngModelChange)="cardTitle.set($event)"
             placeholder="Enter card title..."
-            class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
           />
         </div>
 
         <div>
           <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
-          <textarea
+          <app-input
+            element="textarea"
             [ngModel]="cardDescription()"
             (ngModelChange)="cardDescription.set($event)"
             placeholder="Add more details..."
-            rows="4"
-            class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
-          ></textarea>
+            [rows]="4"
+          />
         </div>
       </div>
 

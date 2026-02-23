@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ProjectService } from '../../services/project.service';
 import { Project } from '../../models/project.model';
 
 @Component({
   selector: 'app-create-project-drawer',
   standalone: true,
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
   templateUrl: './create-project-drawer.component.html',
 })
 export class CreateProjectDrawerComponent {

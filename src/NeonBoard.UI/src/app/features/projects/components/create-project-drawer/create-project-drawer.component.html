@@ -11,22 +11,20 @@
     <div class="space-y-4">
       <div>
         <label class="block text-sm text-secondary mb-1.5">Project name</label>
-        <input
-          type="text"
+        <app-input
           [(ngModel)]="newProjectName"
           placeholder="Enter project name..."
-          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
         />
       </div>
 
       <div>
         <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
-        <textarea
+        <app-input
+          element="textarea"
           [(ngModel)]="newProjectDescription"
           placeholder="What is this project about?"
-          rows="3"
-          class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-none"
-        ></textarea>
+          [rows]="3"
+        />
       </div>
     </div>
 

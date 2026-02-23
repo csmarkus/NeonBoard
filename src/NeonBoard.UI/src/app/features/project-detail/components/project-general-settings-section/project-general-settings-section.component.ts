@@ -1,23 +1,23 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
+import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SettingsSectionComponent } from '../../../../shared/components/settings-section/settings-section.component';
 
 @Component({
   selector: 'app-project-general-settings-section',
-  imports: [SettingsSectionComponent],
+  imports: [FormsModule, InputComponent, SettingsSectionComponent],
   templateUrl: './project-general-settings-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectGeneralSettingsSectionComponent {
   facade = inject(ProjectSettingsFacade);
 
-  onNameInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.facade.updateProjectName(input.value);
+  onNameInput(value: string): void {
+    this.facade.updateProjectName(value);
   }
 
-  onDescriptionInput(event: Event): void {
-    const textarea = event.target as HTMLTextAreaElement;
-    this.facade.updateProjectDescription(textarea.value);
+  onDescriptionInput(value: string): void {
+    this.facade.updateProjectDescription(value);
   }
 }

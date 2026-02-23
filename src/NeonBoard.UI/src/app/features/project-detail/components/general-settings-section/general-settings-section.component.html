@@ -2,26 +2,25 @@
   <div class="space-y-4">
     <div>
       <label for="board-name" class="block text-sm font-medium text-primary mb-1.5">Board name</label>
-      <input
-        id="board-name"
-        type="text"
-        [value]="facade.boardName()"
-        (input)="onNameInput($event)"
-        maxlength="100"
-        class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150" />
+      <app-input
+        inputId="board-name"
+        [ngModel]="facade.boardName()"
+        (ngModelChange)="onNameInput($event)"
+        [maxlength]="100"
+      />
       <span class="text-xs text-muted mt-1.5">{{ facade.boardName().length }} / 100</span>
     </div>
 
     <div>
       <label for="board-prefix" class="block text-sm font-medium text-primary mb-1.5">Board prefix</label>
-      <input
-        id="board-prefix"
-        type="text"
-        [value]="facade.boardPrefix()"
-        (input)="onPrefixInput($event)"
-        maxlength="5"
+      <app-input
+        inputId="board-prefix"
+        [ngModel]="facade.boardPrefix()"
+        (ngModelChange)="onPrefixChange($event)"
+        [maxlength]="5"
         placeholder="e.g. DEV"
-        class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 uppercase" />
+        extraClass="uppercase"
+      />
       <span class="text-xs text-muted mt-1.5">2-5 uppercase letters. Used for card IDs (e.g. DEV-1, DEV-2).</span>
     </div>
   </div>
