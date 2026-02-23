@@ -3,12 +3,13 @@ import { RouterOutlet, ChildrenOutletContexts, Router, NavigationEnd } from '@an
 import { filter } from 'rxjs/operators';
 import { routeAnimations } from './animations/route-animations';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
+import { ToastContainerComponent } from './shared/components/toast-container/toast-container.component';
 import { LoadingService } from './core/services/loading.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, LoadingOverlayComponent],
+  imports: [RouterOutlet, LoadingOverlayComponent, ToastContainerComponent],
   templateUrl: './app.html',
   animations: [routeAnimations]
 })
