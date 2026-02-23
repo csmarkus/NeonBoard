@@ -1,12 +1,13 @@
-import { Component, input, output, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output } from '@angular/core';
 import { GradientAccentComponent, GradientVariant } from '../gradient-accent/gradient-accent.component';
 
 @Component({
   selector: 'app-modal',
-  standalone: true,
-  imports: [CommonModule, GradientAccentComponent],
+  imports: [GradientAccentComponent],
   templateUrl: './modal.component.html',
+  host: {
+    '(document:keydown.escape)': 'onEscapeKey()',
+  },
 })
 export class ModalComponent {
   open = input.required<boolean>();
@@ -21,7 +22,6 @@ export class ModalComponent {
     }
   }
 
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.open()) {
       this.close.emit();
