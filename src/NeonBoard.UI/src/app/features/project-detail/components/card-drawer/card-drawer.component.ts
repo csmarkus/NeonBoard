@@ -6,14 +6,15 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { CardLabelPickerComponent } from './card-label-picker/card-label-picker.component';
+import { CardActionsComponent } from './card-actions/card-actions.component';
 import { CardService } from '../../services/card.service';
 import { DrawerService } from '../../services/drawer.service';
 import { Card } from '../../models/card.model';
-import { getLabelClassString } from '../../models/label.model';
 
 @Component({
   selector: 'app-card-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ConfirmationModalComponent, ErrorBannerComponent, InputComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ConfirmationModalComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent],
   templateUrl: './card-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -72,22 +73,6 @@ export class CardDrawerComponent {
   descriptionChanged = computed(() =>
     this.cardDescription() !== this.originalDescription()
   );
-
-  assignedLabels = computed(() => {
-    const ids = this.cardLabelIds();
-    const allLabels = this.drawerService.boardLabels();
-    return allLabels.filter(l => ids.includes(l.id)).sort((a, b) => a.name.localeCompare(b.name));
-  });
-
-  sortedBoardLabels = computed(() => {
-    return this.drawerService.boardLabels().slice().sort((a, b) => a.name.localeCompare(b.name));
-  });
-
-  isLabelAssigned(labelId: string): boolean {
-    return this.cardLabelIds().includes(labelId);
-  }
-
-  getLabelClasses = getLabelClassString;
 
   onClose(): void {
     this.resetForm();
@@ -168,7 +153,7 @@ export class CardDrawerComponent {
     if (!this.isEditMode() || this.togglingLabelId()) return;
 
     const cardId = this.card()!.id;
-    const isAssigned = this.isLabelAssigned(labelId);
+    const isAssigned = this.cardLabelIds().includes(labelId);
     this.togglingLabelId.set(labelId);
 
     if (isAssigned) {
