@@ -10,9 +10,9 @@ import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
-import { GeneralSettingsSectionComponent } from '../../components/general-settings-section/general-settings-section.component';
-import { LabelManagementSectionComponent } from '../../components/label-management-section/label-management-section.component';
-import { DangerZoneSectionComponent } from '../../components/danger-zone-section/danger-zone-section.component';
+import { GeneralSettingsSectionComponent } from '../../components/settings/general-settings-section/general-settings-section.component';
+import { LabelManagementSectionComponent } from '../../components/settings/label-management-section/label-management-section.component';
+import { DangerZoneSectionComponent } from '../../components/settings/danger-zone-section/danger-zone-section.component';
 
 @Component({
   selector: 'app-board-settings',

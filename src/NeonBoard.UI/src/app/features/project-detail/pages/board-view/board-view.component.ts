@@ -7,8 +7,8 @@ import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { BoardToolbarComponent } from '../../components/board-toolbar/board-toolbar.component';
-import { BoardCanvasComponent } from '../../components/board-canvas/board-canvas.component';
+import { BoardToolbarComponent } from '../../components/board/board-toolbar/board-toolbar.component';
+import { BoardCanvasComponent } from '../../components/board/board-canvas/board-canvas.component';
 import { BoardStateFacade } from '../../services/board-state.facade';
 
 @Component({

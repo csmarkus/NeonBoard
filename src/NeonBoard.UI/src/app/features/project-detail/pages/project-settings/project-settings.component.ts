@@ -9,8 +9,8 @@ import { ConfirmationModalComponent } from '../../../../shared/components/confir
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { ProjectService } from '../../../projects/services/project.service';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
-import { ProjectGeneralSettingsSectionComponent } from '../../components/project-general-settings-section/project-general-settings-section.component';
-import { DangerZoneSectionComponent } from '../../components/danger-zone-section/danger-zone-section.component';
+import { ProjectGeneralSettingsSectionComponent } from '../../components/settings/project-general-settings-section/project-general-settings-section.component';
+import { DangerZoneSectionComponent } from '../../components/settings/danger-zone-section/danger-zone-section.component';
 
 @Component({
   selector: 'app-project-settings',

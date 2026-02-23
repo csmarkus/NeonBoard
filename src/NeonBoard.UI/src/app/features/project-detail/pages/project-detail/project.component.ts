@@ -9,7 +9,7 @@ import { BoardService } from '../../services/board.service';
 import { DrawerService } from '../../services/drawer.service';
 import { Project } from '../../../projects/models/project.model';
 import { Board } from '../../models/board.model';
-import { BoardCardComponent } from '../../components/board-card/board-card.component';
+import { BoardCardComponent } from '../../components/project/board-card/board-card.component';
 
 @Component({
   selector: 'app-project',

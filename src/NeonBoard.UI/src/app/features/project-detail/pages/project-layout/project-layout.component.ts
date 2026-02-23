@@ -3,8 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
-import { CreateBoardDrawerComponent } from '../../components/create-board-drawer/create-board-drawer.component';
-import { CardDrawerComponent } from '../../components/card-drawer/card-drawer.component';
+import { CreateBoardDrawerComponent } from '../../components/project/create-board-drawer/create-board-drawer.component';
+import { CardDrawerComponent } from '../../components/board/card-drawer/card-drawer.component';
 import { DrawerService } from '../../services/drawer.service';
 import { ProjectService } from '../../../projects/services/project.service';
 
