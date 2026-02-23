@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { UserMenuComponent } from '../../../../layout/user-menu/user-menu.component';
@@ -10,7 +10,6 @@ import { Project } from '../../models/project.model';
 
 @Component({
   selector: 'app-projects',
-  standalone: true,
   imports: [
     CommonModule,
     ButtonComponent,
@@ -19,64 +18,59 @@ import { Project } from '../../models/project.model';
     CreateProjectDrawerComponent,
   ],
   templateUrl: './projects.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsComponent implements OnInit {
   private projectService = inject(ProjectService);
   private loadingService = inject(LoadingService);
-  private cdr = inject(ChangeDetectorRef);
 
-  projects: Project[] = [];
-  showCreateDrawer = false;
-  error: string | null = null;
+  projects = signal<Project[]>([]);
+  showCreateDrawer = signal(false);
+  error = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadProjects();
   }
 
   loadProjects(): void {
-    this.error = null;
+    this.error.set(null);
     this.loadingService.show();
 
     this.projectService.getProjects().subscribe({
       next: (projects) => {
-        this.projects = projects;
+        this.projects.set(projects);
         this.loadingService.hide();
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading projects:', err);
-        this.error = 'Failed to load projects. Please try again.';
+        this.error.set('Failed to load projects. Please try again.');
         this.loadingService.hide();
-        this.cdr.detectChanges();
       }
     });
   }
 
   openCreateDrawer(): void {
-    this.showCreateDrawer = true;
+    this.showCreateDrawer.set(true);
   }
 
   closeCreateDrawer(): void {
-    this.showCreateDrawer = false;
+    this.showCreateDrawer.set(false);
   }
 
   onProjectCreated(project: Project): void {
-    this.projects.unshift(project);
-    this.cdr.detectChanges();
+    this.projects.update(list => [project, ...list]);
   }
 
   onProjectDelete(project: Project): void {
-    this.error = null;
+    this.error.set(null);
 
     this.projectService.deleteProject(project.id).subscribe({
       next: () => {
-        this.projects = this.projects.filter(p => p.id !== project.id);
-        this.cdr.detectChanges();
+        this.projects.update(list => list.filter(p => p.id !== project.id));
       },
       error: (err) => {
         console.error('Error deleting project:', err);
-        this.error = 'Failed to delete project. Please try again.';
-        this.cdr.detectChanges();
+        this.error.set('Failed to delete project. Please try again.');
       }
     });
   }

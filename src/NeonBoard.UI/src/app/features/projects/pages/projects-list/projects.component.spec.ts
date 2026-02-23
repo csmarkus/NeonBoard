@@ -55,40 +55,40 @@ describe('ProjectsComponent', () => {
 
     expect(mockLoadingService.show).toHaveBeenCalled();
     expect(mockLoadingService.hide).toHaveBeenCalled();
-    expect(component.projects).toEqual(projects);
+    expect(component.projects()).toEqual(projects);
   });
 
   it('openCreateDrawer sets showCreateDrawer to true', () => {
     component.openCreateDrawer();
-    expect(component.showCreateDrawer).toBe(true);
+    expect(component.showCreateDrawer()).toBe(true);
   });
 
   it('closeCreateDrawer sets showCreateDrawer to false', () => {
-    component.showCreateDrawer = true;
+    component.showCreateDrawer.set(true);
     component.closeCreateDrawer();
-    expect(component.showCreateDrawer).toBe(false);
+    expect(component.showCreateDrawer()).toBe(false);
   });
 
   it('onProjectCreated prepends the new project to the list', () => {
     const existing = makeProject('p-1');
     const newProject = makeProject('p-2', 'New Project');
-    component.projects = [existing];
+    component.projects.set([existing]);
 
     component.onProjectCreated(newProject);
 
-    expect(component.projects[0]).toEqual(newProject);
-    expect(component.projects[1]).toEqual(existing);
+    expect(component.projects()[0]).toEqual(newProject);
+    expect(component.projects()[1]).toEqual(existing);
   });
 
   it('onProjectDelete removes the project from the list by id', () => {
     const p1 = makeProject('p-1');
     const p2 = makeProject('p-2');
-    component.projects = [p1, p2];
+    component.projects.set([p1, p2]);
     mockProjectService.deleteProject.mockReturnValue(of(undefined));
 
     component.onProjectDelete(p1);
 
-    expect(component.projects).toEqual([p2]);
+    expect(component.projects()).toEqual([p2]);
   });
 
   it('sets error when ProjectService.getProjects fails', () => {
@@ -96,7 +96,7 @@ describe('ProjectsComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.error).toBeTruthy();
+    expect(component.error()).toBeTruthy();
     expect(mockLoadingService.hide).toHaveBeenCalled();
   });
 });

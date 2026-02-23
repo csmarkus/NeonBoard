@@ -18,13 +18,13 @@
   <!-- Main content -->
   <main class="max-w-6xl mx-auto px-8 py-8">
     <!-- Error message -->
-    @if (error) {
+    @if (error()) {
       <div class="mb-6 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-        <p class="text-sm text-red-400">{{ error }}</p>
+        <p class="text-sm text-red-400">{{ error() }}</p>
       </div>
     }
 
-    @if (projects.length > 0) {
+    @if (projects().length > 0) {
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-xl font-semibold text-primary">Projects</h2>
@@ -37,7 +37,7 @@
 
       <!-- Projects grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @for (project of projects; track project.id; let i = $index) {
+        @for (project of projects(); track project.id; let i = $index) {
           <app-project-card
             [project]="project"
             [index]="i"
@@ -66,7 +66,7 @@
 
   <!-- Create project drawer -->
   <app-create-project-drawer
-    [open]="showCreateDrawer"
+    [open]="showCreateDrawer()"
     (close)="closeCreateDrawer()"
     (projectCreated)="onProjectCreated($event)"
   ></app-create-project-drawer>
