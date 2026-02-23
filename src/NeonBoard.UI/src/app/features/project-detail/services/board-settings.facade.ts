@@ -3,6 +3,7 @@ import { Observable, EMPTY } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { BoardService } from './board.service';
 import { LabelService } from './label.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Board } from '../models/board.model';
 import { Label } from '../models/label.model';
 
@@ -12,6 +13,7 @@ import { Label } from '../models/label.model';
 export class BoardSettingsFacade {
   private boardService = inject(BoardService);
   private labelService = inject(LabelService);
+  private toastService = inject(ToastService);
 
   private _boardName = signal<string>('');
   private _originalBoardName = signal<string>('');
@@ -83,10 +85,12 @@ export class BoardSettingsFacade {
         this._originalBoardPrefix.set(board.prefix);
         this._boardPrefix.set(board.prefix);
         this._isSaving.set(false);
+        this.toastService.success('Board settings saved');
       }),
       catchError((err) => {
         console.error('Error saving board settings:', err);
         this._isSaving.set(false);
+        this.toastService.error('Failed to save board settings');
         return EMPTY;
       })
     );

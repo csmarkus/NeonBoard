@@ -6,6 +6,7 @@ import { BoardSettingsFacade } from './board-settings.facade';
 initTestEnvironment();
 import { BoardService } from './board.service';
 import { LabelService } from './label.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 
 function createMockBoardDetails(overrides: Partial<BoardDetails> = {}): BoardDetails {
@@ -39,6 +40,7 @@ describe('BoardSettingsFacade', () => {
     updateLabel: ReturnType<typeof vi.fn>;
     removeLabel: ReturnType<typeof vi.fn>;
   };
+  let toastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     boardService = {
@@ -51,12 +53,14 @@ describe('BoardSettingsFacade', () => {
       updateLabel: vi.fn(),
       removeLabel: vi.fn(),
     };
+    toastService = { success: vi.fn(), error: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         BoardSettingsFacade,
         { provide: BoardService, useValue: boardService },
         { provide: LabelService, useValue: labelService },
+        { provide: ToastService, useValue: toastService },
       ],
     });
 
@@ -197,6 +201,30 @@ describe('BoardSettingsFacade', () => {
       facade.saveBoardSettings('project-1', 'board-1').subscribe();
 
       expect(boardService.updateBoardSettings).toHaveBeenCalledTimes(1);
+    });
+
+    it('should show success toast on save', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoardSettings('project-1', 'board-1');
+      facade.updateBoardName('Updated Name');
+      boardService.updateBoardSettings.mockReturnValue(of({ id: 'board-1', name: 'Updated Name', prefix: 'TST', slug: 'updated-name' }));
+
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
+
+      expect(toastService.success).toHaveBeenCalledWith('Board settings saved');
+    });
+
+    it('should show error toast on save failure', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoardSettings('project-1', 'board-1');
+      facade.updateBoardName('Updated Name');
+      boardService.updateBoardSettings.mockReturnValue(throwError(() => new Error('fail')));
+
+      facade.saveBoardSettings('project-1', 'board-1').subscribe();
+
+      expect(toastService.error).toHaveBeenCalledWith('Failed to save board settings');
     });
   });
 
