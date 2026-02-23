@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable, EMPTY } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../projects/services/project.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Project } from '../../projects/models/project.model';
 
 @Injectable({
@@ -9,6 +10,7 @@ import { Project } from '../../projects/models/project.model';
 })
 export class ProjectSettingsFacade {
   private projectService = inject(ProjectService);
+  private toastService = inject(ToastService);
 
   private _projectName = signal<string>('');
   private _originalProjectName = signal<string>('');
@@ -73,10 +75,12 @@ export class ProjectSettingsFacade {
         this._originalProjectDescription.set(project.description);
         this._projectDescription.set(project.description);
         this._isSaving.set(false);
+        this.toastService.success('Project settings saved');
       }),
       catchError((err) => {
         console.error('Error saving project settings:', err);
         this._isSaving.set(false);
+        this.toastService.error('Failed to save project settings');
         return EMPTY;
       })
     );
