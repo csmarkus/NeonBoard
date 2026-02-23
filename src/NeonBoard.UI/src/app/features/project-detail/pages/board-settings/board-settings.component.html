@@ -42,8 +42,11 @@
       <hr class="border-subtle my-12" />
 
       <app-danger-zone-section
+        entityName="board"
+        deleteDescription="All columns and cards will be permanently removed."
+        deleteMessage="Are you sure you want to delete this board? All columns and cards will be permanently removed. This action cannot be undone."
         [isDeleting]="isDeleting()"
-        (deleteBoard)="onDeleteBoard()" />
+        (delete)="onDeleteBoard()" />
     </div>
   </main>
 }

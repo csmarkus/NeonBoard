@@ -10,7 +10,7 @@ import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard
 import { ProjectService } from '../../../projects/services/project.service';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
 import { ProjectGeneralSettingsSectionComponent } from '../../components/project-general-settings-section/project-general-settings-section.component';
-import { ProjectDangerZoneSectionComponent } from '../../components/project-danger-zone-section/project-danger-zone-section.component';
+import { DangerZoneSectionComponent } from '../../components/danger-zone-section/danger-zone-section.component';
 
 @Component({
   selector: 'app-project-settings',
@@ -20,7 +20,7 @@ import { ProjectDangerZoneSectionComponent } from '../../components/project-dang
     ButtonComponent,
     ConfirmationModalComponent,
     ProjectGeneralSettingsSectionComponent,
-    ProjectDangerZoneSectionComponent,
+    DangerZoneSectionComponent,
   ],
   host: {
     class: 'flex flex-col h-full'
