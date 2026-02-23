@@ -22,6 +22,12 @@ export const routes: Routes = [
         data: { animation: 'ProjectPage' }
       },
       {
+        path: 'settings',
+        loadComponent: () => import('./features/project-detail/pages/project-settings/project-settings.component').then(m => m.ProjectSettingsComponent),
+        canDeactivate: [unsavedChangesGuard],
+        data: { animation: 'ProjectSettingsPage' }
+      },
+      {
         path: 'b/:slug',
         loadComponent: () => import('./features/project-detail/pages/board-view/board-view.component').then(m => m.BoardViewComponent),
         data: { animation: 'BoardPage' }

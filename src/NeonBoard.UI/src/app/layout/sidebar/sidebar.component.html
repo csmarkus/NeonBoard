@@ -83,15 +83,19 @@
           }
         </li>
         <li>
-          <button
-            [class]="facade.getNavItemClasses(false)"
+          <a
+            [routerLink]="['/p', shortId(), 'settings']"
+            routerLinkActive="active"
+            #settingsLink="routerLinkActive"
+            [class]="facade.getNavItemClasses(settingsLink.isActive)"
+            [attr.aria-current]="settingsLink.isActive ? 'page' : null"
             [attr.aria-label]="facade.collapsed() ? 'Settings' : null"
           >
             <fa-icon [icon]="icons.cog" class="w-4 text-center"></fa-icon>
             @if (!facade.collapsed()) {
               <span class="text-sm font-semibold">Settings</span>
             }
-          </button>
+          </a>
         </li>
       </ul>
     </nav>

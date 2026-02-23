@@ -1,0 +1,33 @@
+<section class="grid grid-cols-[220px_1fr] gap-12">
+  <div>
+    <h2 class="text-base font-semibold text-primary">General</h2>
+    <p class="text-sm text-muted mt-1">Manage your project settings.</p>
+  </div>
+
+  <div class="space-y-4">
+    <div>
+      <label for="project-name" class="block text-sm font-medium text-primary mb-1.5">Project name</label>
+      <input
+        id="project-name"
+        type="text"
+        [value]="facade.projectName()"
+        (input)="onNameInput($event)"
+        maxlength="100"
+        class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150" />
+      <span class="text-xs text-muted mt-1.5">{{ facade.projectName().length }} / 100</span>
+    </div>
+
+    <div>
+      <label for="project-description" class="block text-sm font-medium text-primary mb-1.5">Description</label>
+      <textarea
+        id="project-description"
+        [value]="facade.projectDescription()"
+        (input)="onDescriptionInput($event)"
+        maxlength="1000"
+        rows="4"
+        placeholder="What is this project about?"
+        class="w-full px-3 py-2 text-sm bg-surface text-primary placeholder:text-muted border border-dim rounded-lg hover:border-secondary/30 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors duration-150 resize-y"></textarea>
+      <span class="text-xs text-muted mt-1.5">{{ facade.projectDescription().length }} / 1000</span>
+    </div>
+  </div>
+</section>

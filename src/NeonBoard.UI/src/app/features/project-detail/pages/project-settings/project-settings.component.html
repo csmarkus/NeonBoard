@@ -1,0 +1,52 @@
+@if (facade.isLoading()) {
+  <div class="flex-1 flex items-center justify-center">
+    <div class="text-center">
+      <div class="inline-block w-8 h-8 border-4 border-accent/20 border-t-accent rounded-full animate-spin mb-4"></div>
+      <p class="text-sm text-muted">Loading project settings...</p>
+    </div>
+  </div>
+} @else {
+  <app-page-header [breadcrumbs]="breadcrumbs()">
+    <app-button
+      variant="primary"
+      size="sm"
+      [disabled]="!facade.hasChanges() || facade.isSaving() || !facade.projectName().trim()"
+      (click)="saveChanges()">
+      {{ facade.isSaving() ? 'Saving...' : 'Save changes' }}
+    </app-button>
+  </app-page-header>
+
+  <main class="flex-1 overflow-y-auto">
+    <div class="max-w-4xl mx-auto py-8 px-6">
+      <a
+        [routerLink]="['/p', shortId()]"
+        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to project
+      </a>
+
+      <h2 class="text-lg font-semibold text-primary mt-8 mb-12">Project settings</h2>
+
+      <app-project-general-settings-section />
+
+      <hr class="border-subtle my-12" />
+
+      <app-project-danger-zone-section
+        [isDeleting]="isDeleting()"
+        (deleteProject)="onDeleteProject()" />
+    </div>
+  </main>
+}
+
+<app-confirmation-modal
+  [open]="showDiscardModal()"
+  title="Unsaved Changes"
+  message="You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
+  confirmText="Discard"
+  cancelText="Keep editing"
+  variant="danger"
+  gradientVariant="pink"
+  (confirm)="onConfirmDiscard()"
+  (cancel)="onCancelDiscard()" />
