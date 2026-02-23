@@ -1,19 +1,17 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md';
 
 @Component({
   selector: 'app-button',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './button.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonComponent {
-  @Input() variant: ButtonVariant = 'secondary';
-  @Input() size: ButtonSize = 'md';
-  @Input() disabled = false;
+  variant = input<ButtonVariant>('secondary');
+  size = input<ButtonSize>('md');
+  disabled = input(false);
 
   private variantStyles: Record<ButtonVariant, string> = {
     primary: 'bg-accent text-void font-medium hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 focus:ring-offset-void',
@@ -27,7 +25,7 @@ export class ButtonComponent {
     md: 'px-4 py-2 text-sm',
   };
 
-  get buttonClasses(): string {
-    return `inline-flex items-center justify-center gap-2 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${this.variantStyles[this.variant]} ${this.sizeStyles[this.size]}`;
-  }
+  buttonClasses = computed(() =>
+    `inline-flex items-center justify-center gap-2 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${this.variantStyles[this.variant()]} ${this.sizeStyles[this.size()]}`
+  );
 }

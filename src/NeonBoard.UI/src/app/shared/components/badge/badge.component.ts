@@ -1,16 +1,14 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 
 type BadgeVariant = 'default' | 'cyan' | 'amber' | 'violet' | 'green';
 
 @Component({
   selector: 'app-badge',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './badge.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BadgeComponent {
-  @Input() variant: BadgeVariant = 'default';
+  variant = input<BadgeVariant>('default');
 
   private variantStyles: Record<BadgeVariant, string> = {
     default: 'bg-surface-elevated text-secondary',
@@ -20,7 +18,7 @@ export class BadgeComponent {
     green: 'bg-status-done/15 text-status-done',
   };
 
-  get badgeClasses(): string {
-    return `inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md ${this.variantStyles[this.variant]}`;
-  }
+  badgeClasses = computed(() =>
+    `inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md ${this.variantStyles[this.variant()]}`
+  );
 }
