@@ -1,9 +1,4 @@
-<section class="grid grid-cols-[220px_1fr] gap-12">
-  <div>
-    <h2 class="text-base font-semibold text-primary">Labels</h2>
-    <p class="text-sm text-muted mt-1">Manage labels for cards on this board.</p>
-  </div>
-
+<app-settings-section title="Labels" description="Manage labels for cards on this board.">
   <div class="space-y-6">
     @if (facade.sortedLabels().length) {
       <div class="space-y-3">
@@ -60,7 +55,7 @@
       </div>
     </div>
   </div>
-</section>
+</app-settings-section>
 
 <app-confirmation-modal
   [open]="showDeleteModal()"

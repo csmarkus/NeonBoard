@@ -1,9 +1,10 @@
 import { Component, input, inject } from '@angular/core';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
+import { SettingsSectionComponent } from '../../../../shared/components/settings-section/settings-section.component';
 
 @Component({
   selector: 'app-general-settings-section',
-  imports: [],
+  imports: [SettingsSectionComponent],
   templateUrl: './general-settings-section.component.html',
 })
 export class GeneralSettingsSectionComponent {

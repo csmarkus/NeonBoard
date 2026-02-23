@@ -4,11 +4,12 @@ import { BoardSettingsFacade } from '../../services/board-settings.facade';
 import { LabelListItemComponent } from '../label-list-item/label-list-item.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { SettingsSectionComponent } from '../../../../shared/components/settings-section/settings-section.component';
 import { Label, LABEL_COLORS } from '../../models/label.model';
 
 @Component({
   selector: 'app-label-management-section',
-  imports: [FormsModule, LabelListItemComponent, ButtonComponent, ConfirmationModalComponent],
+  imports: [FormsModule, LabelListItemComponent, ButtonComponent, ConfirmationModalComponent, SettingsSectionComponent],
   templateUrl: './label-management-section.component.html',
 })
 export class LabelManagementSectionComponent {

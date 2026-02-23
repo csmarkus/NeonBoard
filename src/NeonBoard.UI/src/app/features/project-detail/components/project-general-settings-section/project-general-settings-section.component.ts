@@ -1,9 +1,10 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
+import { SettingsSectionComponent } from '../../../../shared/components/settings-section/settings-section.component';
 
 @Component({
   selector: 'app-project-general-settings-section',
-  imports: [],
+  imports: [SettingsSectionComponent],
   templateUrl: './project-general-settings-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
