@@ -5,7 +5,7 @@ import { LabelListItemComponent } from '../label-list-item/label-list-item.compo
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SettingsSectionComponent } from '../../../../shared/components/settings-section/settings-section.component';
-import { Label, LABEL_COLORS } from '../../models/label.model';
+import { Label, LABEL_COLORS, getColorSwatchClass as getColorSwatch } from '../../models/label.model';
 
 @Component({
   selector: 'app-label-management-section',
@@ -28,22 +28,7 @@ export class LabelManagementSectionComponent {
 
   labelColors = LABEL_COLORS;
 
-  getColorSwatchClass(color: string): string {
-    const map: Record<string, string> = {
-      red: 'bg-red-500',
-      orange: 'bg-orange-500',
-      yellow: 'bg-yellow-600',
-      lime: 'bg-lime-500',
-      cyan: 'bg-cyan-500',
-      blue: 'bg-blue-500',
-      purple: 'bg-purple-500',
-      violet: 'bg-violet-500',
-      magenta: 'bg-fuchsia-500',
-      pink: 'bg-pink-500',
-      grey: 'bg-gray-500',
-    };
-    return map[color] ?? 'bg-gray-500';
-  }
+  getColorSwatchClass = getColorSwatch;
 
   startEdit(label: Label): void {
     this.editingLabelId.set(label.id);

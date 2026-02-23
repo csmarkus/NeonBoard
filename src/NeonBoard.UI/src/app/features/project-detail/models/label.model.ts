@@ -36,3 +36,25 @@ export function getLabelColorClasses(color: string): { bg: string; text: string;
   };
   return colorMap[color] ?? { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30' };
 }
+
+export function getLabelClassString(color: string): string {
+  const classes = getLabelColorClasses(color);
+  return `${classes.bg} ${classes.text} ${classes.border}`;
+}
+
+export function getColorSwatchClass(color: string): string {
+  const map: Record<string, string> = {
+    red: 'bg-red-500',
+    orange: 'bg-orange-500',
+    yellow: 'bg-yellow-600',
+    lime: 'bg-lime-500',
+    cyan: 'bg-cyan-500',
+    blue: 'bg-blue-500',
+    purple: 'bg-purple-500',
+    violet: 'bg-violet-500',
+    magenta: 'bg-fuchsia-500',
+    pink: 'bg-pink-500',
+    grey: 'bg-gray-500',
+  };
+  return map[color] ?? 'bg-gray-500';
+}

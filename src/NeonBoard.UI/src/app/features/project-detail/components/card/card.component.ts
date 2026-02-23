@@ -1,6 +1,6 @@
 import { Component, input, output, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Card } from '../../models/card.model';
-import { getLabelColorClasses } from '../../models/label.model';
+import { getLabelClassString } from '../../models/label.model';
 import { DrawerService } from '../../services/drawer.service';
 
 @Component({
@@ -19,8 +19,5 @@ export class CardComponent {
     return labels.slice().sort((a, b) => a.name.localeCompare(b.name));
   });
 
-  getLabelClasses(color: string): string {
-    const classes = getLabelColorClasses(color);
-    return `${classes.bg} ${classes.text} ${classes.border}`;
-  }
+  getLabelClasses = getLabelClassString;
 }

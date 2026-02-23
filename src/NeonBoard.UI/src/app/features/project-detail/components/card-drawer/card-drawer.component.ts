@@ -7,7 +7,7 @@ import { ConfirmationModalComponent } from '../../../../shared/components/confir
 import { CardService } from '../../services/card.service';
 import { DrawerService } from '../../services/drawer.service';
 import { Card } from '../../models/card.model';
-import { getLabelColorClasses } from '../../models/label.model';
+import { getLabelClassString } from '../../models/label.model';
 
 @Component({
   selector: 'app-card-drawer',
@@ -85,10 +85,7 @@ export class CardDrawerComponent {
     return this.cardLabelIds().includes(labelId);
   }
 
-  getLabelClasses(color: string): string {
-    const classes = getLabelColorClasses(color);
-    return `${classes.bg} ${classes.text} ${classes.border}`;
-  }
+  getLabelClasses = getLabelClassString;
 
   onClose(): void {
     this.resetForm();

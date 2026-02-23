@@ -1,6 +1,6 @@
 import { Component, input, output, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Label, LABEL_COLORS, getLabelColorClasses } from '../../models/label.model';
+import { Label, LABEL_COLORS, getLabelClassString, getColorSwatchClass as getColorSwatch } from '../../models/label.model';
 
 @Component({
   selector: 'app-label-list-item',
@@ -33,27 +33,9 @@ export class LabelListItemComponent {
     });
   }
 
-  getLabelClasses(color: string): string {
-    const classes = getLabelColorClasses(color);
-    return `${classes.bg} ${classes.text} ${classes.border}`;
-  }
+  getLabelClasses = getLabelClassString;
 
-  getColorSwatchClass(color: string): string {
-    const map: Record<string, string> = {
-      red: 'bg-red-500',
-      orange: 'bg-orange-500',
-      yellow: 'bg-yellow-600',
-      lime: 'bg-lime-500',
-      cyan: 'bg-cyan-500',
-      blue: 'bg-blue-500',
-      purple: 'bg-purple-500',
-      violet: 'bg-violet-500',
-      magenta: 'bg-fuchsia-500',
-      pink: 'bg-pink-500',
-      grey: 'bg-gray-500',
-    };
-    return map[color] ?? 'bg-gray-500';
-  }
+  getColorSwatchClass = getColorSwatch;
 
   onEdit(): void {
     this.edit.emit(this.label());
