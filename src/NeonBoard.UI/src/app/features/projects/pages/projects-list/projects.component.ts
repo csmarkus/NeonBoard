@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { UserMenuComponent } from '../../../../layout/user-menu/user-menu.component';
 import { ProjectCardComponent } from '../../components/project-card/project-card.component';
 import { CreateProjectDrawerComponent } from '../../components/create-project-drawer/create-project-drawer.component';
@@ -13,6 +14,7 @@ import { Project } from '../../models/project.model';
   imports: [
     CommonModule,
     ButtonComponent,
+    ErrorBannerComponent,
     UserMenuComponent,
     ProjectCardComponent,
     CreateProjectDrawerComponent,

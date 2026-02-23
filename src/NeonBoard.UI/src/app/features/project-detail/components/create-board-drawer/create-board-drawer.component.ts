@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { BoardService } from '../../services/board.service';
 import { Board, CreateBoardRequest } from '../../models/board.model';
 
 @Component({
   selector: 'app-create-board-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent],
   templateUrl: './create-board-drawer.component.html',
 })
 export class CreateBoardDrawerComponent {
