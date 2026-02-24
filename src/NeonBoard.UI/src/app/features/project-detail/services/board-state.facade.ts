@@ -3,6 +3,7 @@ import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
 import { DrawerService } from './drawer.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 import { Column } from '../models/column.model';
 import { Card } from '../models/card.model';
@@ -16,6 +17,7 @@ export class BoardStateFacade {
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
+  private toastService = inject(ToastService);
 
   private _board = signal<BoardDetails | null>(null);
   private _isLoading = signal<boolean>(false);
@@ -23,11 +25,17 @@ export class BoardStateFacade {
   private _currentProjectId = signal<string>('');
   private _currentBoardId = signal<string>('');
   private _selectedLabelIds = signal<Set<string>>(new Set());
+  private _showArchivePanel = signal<boolean>(false);
+  private _archivedCards = signal<Card[]>([]);
+  private _isLoadingArchive = signal<boolean>(false);
 
   readonly board = this._board.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly error = this._error.asReadonly();
   readonly selectedLabelIds = this._selectedLabelIds.asReadonly();
+  readonly showArchivePanel = this._showArchivePanel.asReadonly();
+  readonly archivedCards = this._archivedCards.asReadonly();
+  readonly isLoadingArchive = this._isLoadingArchive.asReadonly();
 
   readonly columns = computed(() => this._board()?.columns ?? []);
   readonly labels = computed(() => this._board()?.labels ?? []);
@@ -75,12 +83,18 @@ export class BoardStateFacade {
     this.drawerService.cardDeleted$.subscribe(() => {
       if (this._currentProjectId() && this._currentBoardId()) {
         this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
+        if (this._showArchivePanel()) {
+          this.loadArchivedCards();
+        }
       }
     });
 
     this.drawerService.cardArchived$.subscribe(() => {
       if (this._currentProjectId() && this._currentBoardId()) {
         this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
+        if (this._showArchivePanel()) {
+          this.loadArchivedCards();
+        }
       }
     });
   }
@@ -214,5 +228,73 @@ export class BoardStateFacade {
 
   clearLabelFilter(): void {
     this._selectedLabelIds.set(new Set());
+  }
+
+  openArchivePanel(): void {
+    this._showArchivePanel.set(true);
+    this.loadArchivedCards();
+  }
+
+  closeArchivePanel(): void {
+    this._showArchivePanel.set(false);
+  }
+
+  openArchivedCardInDrawer(card: Card): void {
+    this.closeArchivePanel();
+    this.drawerService.openCardDrawer(card, this._currentProjectId(), this._currentBoardId());
+  }
+
+  restoreArchivedCard(cardId: string): void {
+    const projectId = this._currentProjectId();
+    const boardId = this._currentBoardId();
+    if (!projectId || !boardId) return;
+
+    this.cardService.restoreCard(projectId, boardId, cardId).subscribe({
+      next: () => {
+        this._archivedCards.update(cards => cards.filter(c => c.id !== cardId));
+        this.loadBoard(projectId, boardId, false);
+        this.toastService.success('Card restored');
+      },
+      error: (err) => {
+        console.error('Error restoring card:', err);
+        this.toastService.error('Failed to restore card');
+      }
+    });
+  }
+
+  deleteArchivedCard(cardId: string): void {
+    const projectId = this._currentProjectId();
+    const boardId = this._currentBoardId();
+    if (!projectId || !boardId) return;
+
+    this.cardService.deleteCard(projectId, boardId, cardId).subscribe({
+      next: () => {
+        this._archivedCards.update(cards => cards.filter(c => c.id !== cardId));
+        this.toastService.success('Card deleted');
+      },
+      error: (err) => {
+        console.error('Error deleting card:', err);
+        this.toastService.error('Failed to delete card');
+      }
+    });
+  }
+
+  private loadArchivedCards(): void {
+    const projectId = this._currentProjectId();
+    const boardId = this._currentBoardId();
+    if (!projectId || !boardId) return;
+
+    this._isLoadingArchive.set(true);
+
+    this.cardService.getArchivedCards(projectId, boardId).subscribe({
+      next: (cards) => {
+        this._archivedCards.set(cards);
+        this._isLoadingArchive.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading archived cards:', err);
+        this._isLoadingArchive.set(false);
+      }
+    });
   }
 }

@@ -41,6 +41,12 @@ export class CardService {
     );
   }
 
+  getArchivedCards(projectId: string, boardId: string): Observable<Card[]> {
+    return this.http.get<Card[]>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/archived`
+    );
+  }
+
   addCardLabel(projectId: string, boardId: string, cardId: string, labelId: string): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/labels/${labelId}`,
