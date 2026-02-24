@@ -42,7 +42,7 @@
 
       <!-- Labels section -->
       @if (drawerService.boardLabels().length) {
-        <app-card-label-picker
+        <app-card-label-picker class="block"
           [boardLabels]="drawerService.boardLabels()"
           [assignedLabelIds]="cardLabelIds()"
           [togglingLabelId]="togglingLabelId()"
