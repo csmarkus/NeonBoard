@@ -10,6 +10,7 @@ using NeonBoard.Application.Cards.Commands.RemoveCardLabel;
 using NeonBoard.Application.Cards.Commands.ArchiveCard;
 using NeonBoard.Application.Cards.Commands.RestoreCard;
 using NeonBoard.Application.Cards.DTOs;
+using NeonBoard.Application.Boards.Queries.GetArchivedCards;
 
 namespace NeonBoard.Api.Endpoints;
 
@@ -26,6 +27,11 @@ public static class CardEndpoints
             .WithName("AddCard")
             .Produces<CardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
+
+        group.MapGet("/archived", GetArchivedCards)
+            .WithName("GetArchivedCards")
+            .Produces<List<CardDto>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPut("/{cardId:guid}", UpdateCard)
             .WithName("UpdateCard")
@@ -75,6 +81,17 @@ public static class CardEndpoints
             request.Description ?? string.Empty);
         var result = await mediator.Send(command, ct);
         return Results.Created($"/api/projects/{projectId}/boards/{boardId}/cards/{result.Id}", result);
+    }
+
+    private static async Task<IResult> GetArchivedCards(
+        Guid projectId,
+        Guid boardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var query = new GetArchivedCardsQuery(projectId, boardId);
+        var result = await mediator.Send(query, ct);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> UpdateCard(
