@@ -26,6 +26,7 @@ describe('BoardSettingsComponent', () => {
   let fixture: ComponentFixture<BoardSettingsComponent>;
   let component: BoardSettingsComponent;
   let mockFacade: {
+    resetState: ReturnType<typeof vi.fn>;
     loadBoardSettings: ReturnType<typeof vi.fn>;
     saveBoardSettings: ReturnType<typeof vi.fn>;
     deleteBoard: ReturnType<typeof vi.fn>;
@@ -43,6 +44,7 @@ describe('BoardSettingsComponent', () => {
 
   beforeEach(() => {
     mockFacade = {
+      resetState: vi.fn(),
       loadBoardSettings: vi.fn(),
       saveBoardSettings: vi.fn().mockReturnValue(of({ id: 'b-1', name: 'Test Board', prefix: 'TST', slug: 'sprint-board' })),
       deleteBoard: vi.fn().mockReturnValue(of(undefined)),
