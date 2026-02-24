@@ -4,8 +4,12 @@ type BadgeVariant = 'default' | 'cyan' | 'amber' | 'violet' | 'green';
 
 @Component({
   selector: 'app-badge',
-  templateUrl: './badge.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <span [class]="badgeClasses()">
+      <ng-content></ng-content>
+    </span>
+  `,
 })
 export class BadgeComponent {
   variant = input<BadgeVariant>('default');

@@ -5,8 +5,15 @@ type ButtonSize = 'sm' | 'md';
 
 @Component({
   selector: 'app-button',
-  templateUrl: './button.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <button
+      [class]="buttonClasses()"
+      [disabled]="disabled()"
+    >
+      <ng-content></ng-content>
+    </button>
+  `,
 })
 export class ButtonComponent {
   variant = input<ButtonVariant>('secondary');

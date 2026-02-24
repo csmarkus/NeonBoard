@@ -1,12 +1,25 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { LoadingService } from '../../../core/services/loading.service';
 
 @Component({
   selector: 'app-loading-overlay',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './loading-overlay.component.html',
+  template: `
+    <div
+      [class]="'fixed inset-0 bg-void flex items-center justify-center transition-opacity duration-200 ' +
+               (isLoading ? 'z-[999] opacity-100' : 'z-[-1] opacity-0 pointer-events-none')"
+    >
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center animate-pulse">
+          <span class="text-accent font-semibold text-lg">N</span>
+        </div>
+        <div class="flex gap-1">
+          <div class="w-2 h-2 rounded-full bg-accent animate-bounce" style="animation-delay: 0ms"></div>
+          <div class="w-2 h-2 rounded-full bg-accent animate-bounce" style="animation-delay: 150ms"></div>
+          <div class="w-2 h-2 rounded-full bg-accent animate-bounce" style="animation-delay: 300ms"></div>
+        </div>
+      </div>
+    </div>
+  `,
 })
 export class LoadingOverlayComponent {
   private loadingService = inject(LoadingService);

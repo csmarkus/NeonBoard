@@ -9,7 +9,26 @@ export interface BreadcrumbItem {
 @Component({
   selector: 'app-page-header',
   imports: [RouterLink],
-  templateUrl: './page-header.component.html',
+  template: `
+    <header class="bg-void border-b border-subtle px-6 py-4 shrink-0">
+      <div class="flex items-center justify-between">
+        <nav class="flex items-center gap-2 text-base">
+          @for (item of breadcrumbs(); track $index; let isLast = $last) {
+            @if (!isLast && item.link) {
+              <a [routerLink]="item.link" class="text-muted hover:text-secondary transition-colors">{{ item.label }}</a>
+              <span class="text-muted/50">/</span>
+            } @else {
+              <h1 class="font-semibold text-primary">{{ item.label }}</h1>
+            }
+          }
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <ng-content />
+        </div>
+      </div>
+    </header>
+  `,
 })
 export class PageHeaderComponent {
   breadcrumbs = input.required<BreadcrumbItem[]>();
