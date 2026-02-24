@@ -72,6 +72,8 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
     if (shortId) this.shortId.set(shortId);
     if (slug) this.slug.set(slug);
 
+    this.facade.resetState();
+
     if (shortId && slug) {
       this.projectService.getProjectByShortId(shortId).pipe(
         tap(project => {

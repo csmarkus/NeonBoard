@@ -42,6 +42,17 @@ export class BoardSettingsFacade {
     return this._boardLabels().slice().sort((a, b) => a.name.localeCompare(b.name));
   });
 
+  resetState(): void {
+    this._boardName.set('');
+    this._originalBoardName.set('');
+    this._boardPrefix.set('');
+    this._originalBoardPrefix.set('');
+    this._boardLabels.set([]);
+    this._isLoading.set(true);
+    this._isSaving.set(false);
+    this._error.set(null);
+  }
+
   loadBoardSettings(projectId: string, boardId: string): void {
     this._isLoading.set(true);
     this._error.set(null);
