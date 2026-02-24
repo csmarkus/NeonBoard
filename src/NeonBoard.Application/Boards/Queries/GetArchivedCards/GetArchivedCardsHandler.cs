@@ -33,23 +33,7 @@ public class GetArchivedCardsHandler : IRequestHandler<GetArchivedCardsQuery, Li
         var cards = board.Cards
             .Where(c => c.IsArchived)
             .OrderByDescending(c => c.ArchivedAt)
-            .Select(c => new CardDto(
-                c.Id,
-                c.CardNumber,
-                $"{board.Prefix.Value}-{c.CardNumber}",
-                c.Content.Title,
-                c.Content.Description,
-                c.ColumnId,
-                c.Position.Value,
-                c.LabelIds
-                    .Select(labelId => labels.FirstOrDefault(l => l.Id == labelId))
-                    .Where(label => label != null)
-                    .Cast<LabelDto>()
-                    .OrderBy(label => label.Name)
-                    .ToList(),
-                c.CreatedAt,
-                c.UpdatedAt,
-                c.ArchivedAt))
+            .Select(c => CardDto.FromCard(c, board.Prefix.Value, labels))
             .ToList();
 
         return cards;
