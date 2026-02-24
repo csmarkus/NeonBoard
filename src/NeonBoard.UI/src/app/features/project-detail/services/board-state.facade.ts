@@ -105,6 +105,9 @@ export class BoardStateFacade {
     this._currentBoardId.set(boardId);
     if (boardChanged) {
       this._selectedLabelIds.set(new Set());
+      this._showArchivePanel.set(false);
+      this._archivedCards.set([]);
+      this._isLoadingArchive.set(false);
     }
 
     if (showLoading) {

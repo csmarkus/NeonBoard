@@ -18,6 +18,7 @@
     <!-- Search -->
     <app-input
       placeholder="Search archived cards..."
+      aria-label="Search archived cards"
       [ngModel]="searchQuery()"
       (ngModelChange)="onSearchChange($event)"
     />
@@ -58,14 +59,16 @@
                 }
               </div>
             </div>
-            <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
               <button
                 (click)="restoreCard(card, $event)"
+                aria-label="Restore card"
                 class="px-2 py-1 text-xs text-accent bg-accent/10 rounded hover:bg-accent/20 transition-colors">
                 Restore
               </button>
               <button
                 (click)="requestDeleteCard(card, $event)"
+                aria-label="Delete card"
                 class="px-2 py-1 text-xs text-danger bg-danger/10 rounded hover:bg-danger/20 transition-colors">
                 Delete
               </button>
