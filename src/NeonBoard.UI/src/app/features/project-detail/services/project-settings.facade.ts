@@ -33,6 +33,16 @@ export class ProjectSettingsFacade {
       this._projectDescription().trim() !== this._originalProjectDescription();
   });
 
+  resetState(): void {
+    this._projectName.set('');
+    this._originalProjectName.set('');
+    this._projectDescription.set('');
+    this._originalProjectDescription.set('');
+    this._isLoading.set(true);
+    this._isSaving.set(false);
+    this._error.set(null);
+  }
+
   loadProjectSettings(projectId: string): void {
     this._isLoading.set(true);
     this._error.set(null);

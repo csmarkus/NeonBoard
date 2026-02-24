@@ -60,6 +60,8 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
   ngOnInit(): void {
     const shortId = this.route.parent?.snapshot.paramMap.get('shortId') ?? '';
 
+    this.facade.resetState();
+
     if (shortId) {
       this.shortId.set(shortId);
 
