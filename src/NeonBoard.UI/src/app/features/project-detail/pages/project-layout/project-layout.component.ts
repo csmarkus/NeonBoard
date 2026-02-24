@@ -5,12 +5,13 @@ import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
 import { CreateBoardDrawerComponent } from '../../components/project/create-board-drawer/create-board-drawer.component';
 import { CardDrawerComponent } from '../../components/board/card-drawer/card-drawer.component';
+import { ArchivePanelComponent } from '../../components/board/archive-panel/archive-panel.component';
 import { DrawerService } from '../../services/drawer.service';
 import { ProjectService } from '../../../projects/services/project.service';
 
 @Component({
   selector: 'app-project-layout',
-  imports: [CommonModule, RouterOutlet, SidebarComponent, CreateBoardDrawerComponent, CardDrawerComponent],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, CreateBoardDrawerComponent, CardDrawerComponent, ArchivePanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block h-screen'
@@ -40,6 +41,8 @@ import { ProjectService } from '../../../projects/services/project.service';
       (cardSaved)="onCardUpdated()"
       (cardDeleted)="onCardDeleted()">
     </app-card-drawer>
+
+    <app-archive-panel />
   `
 })
 export class ProjectLayoutComponent implements OnInit {
