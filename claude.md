@@ -67,41 +67,6 @@ Each aggregate has a single root entity that controls access to child entities:
 - Raise domain events for significant changes
 - Use static factory methods (`Create`) instead of public constructors
 
-**Example Pattern:**
-```csharp
-public sealed class Board : Entity, IAggregateRoot
-{
-    private readonly List<Column> _columns = new();
-    
-    public string Name { get; private set; }
-    public IReadOnlyCollection<Column> Columns => _columns.AsReadOnly();
-    
-    private Board() { } // EF Core
-    
-    private Board(string name)
-    {
-        Id = Guid.NewGuid();
-        Name = name;
-    }
-    
-    public static Board Create(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Board name is required");
-            
-        var board = new Board(name);
-        board.RaiseDomainEvent(new BoardCreatedEvent(board.Id));
-        return board;
-    }
-    
-    public void AddColumn(string columnName)
-    {
-        // Business logic here
-        RaiseDomainEvent(new ColumnAddedEvent(...));
-    }
-}
-```
-
 ### Value Objects
 - No identity (defined by their values)
 - Immutable
@@ -109,69 +74,16 @@ public sealed class Board : Entity, IAggregateRoot
 - Override `GetEqualityComponents()`
 - Use static factory methods for creation
 
-**Example Pattern:**
-```csharp
-public sealed class Position : ValueObject
-{
-    public int Value { get; }
-    
-    private Position(int value)
-    {
-        Value = value;
-    }
-    
-    public static Position Create(int value)
-    {
-        if (value < 0)
-            throw new DomainException("Position cannot be negative");
-        return new Position(value);
-    }
-    
-    protected override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return Value;
-    }
-}
-```
-
 ### Domain Events
 - Immutable records
 - Past tense naming (BoardCreated, not CreateBoard)
 - Include OccurredOn timestamp
 - Raised by aggregates, handled in Application layer
 
-**Pattern:**
-```csharp
-public sealed record BoardCreatedEvent(Guid BoardId, Guid ProjectId, string Name) : IDomainEvent
-{
-    public DateTime OccurredOn { get; } = DateTime.UtcNow;
-}
-```
-
 ## Application Layer (CQRS)
 
 ### Vertical Slice Structure
-Organize by feature, not by technical layer:
-```
-Application/
-└── Boards/
-    ├── Commands/
-    │   ├── CreateBoard/
-    │   │   ├── CreateBoardCommand.cs
-    │   │   ├── CreateBoardHandler.cs
-    │   │   └── CreateBoardValidator.cs
-    │   └── AddCard/
-    │       ├── AddCardCommand.cs
-    │       ├── AddCardHandler.cs
-    │       └── AddCardValidator.cs
-    ├── Queries/
-    │   └── GetBoard/
-    │       ├── GetBoardQuery.cs
-    │       └── GetBoardHandler.cs
-    └── DTOs/
-        ├── BoardDto.cs
-        └── CardDto.cs
-```
+Organize by feature, not by technical layer.
 
 ### Commands (Write Operations)
 - Use `IRequest<TResponse>` from MediatR
@@ -180,72 +92,11 @@ Application/
 - Return DTOs, not domain entities
 - Handlers orchestrate domain operations and persistence
 
-**Pattern:**
-```csharp
-// Command
-public record CreateBoardCommand(Guid ProjectId, string Name) : IRequest<BoardDto>;
-
-// Validator
-public class CreateBoardValidator : AbstractValidator<CreateBoardCommand>
-{
-    public CreateBoardValidator()
-    {
-        RuleFor(x => x.ProjectId).NotEmpty();
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-    }
-}
-
-// Handler
-public class CreateBoardHandler : IRequestHandler<CreateBoardCommand, BoardDto>
-{
-    private readonly IBoardRepository _boardRepository;
-    private readonly IProjectRepository _projectRepository;
-    
-    public async Task<BoardDto> Handle(CreateBoardCommand request, CancellationToken ct)
-    {
-        // 1. Validate project exists
-        var project = await _projectRepository.GetByIdAsync(request.ProjectId, ct);
-        if (project == null)
-            throw new NotFoundException(nameof(Project), request.ProjectId);
-        
-        // 2. Use domain to create board
-        var board = Board.Create(request.Name, request.ProjectId);
-        
-        // 3. Persist (transaction handled by pipeline behavior)
-        await _boardRepository.AddAsync(board, ct);
-        
-        // 4. Return DTO
-        return new BoardDto(board.Id, board.Name, board.ProjectId, board.CreatedAt);
-    }
-}
-```
-
 ### Queries (Read Operations)
 - Use `IRequest<TResponse>` from MediatR
 - Named with "Get" prefix (GetBoard, GetBoardsByProject)
 - Return DTOs optimized for the UI
 - Can bypass domain for performance (query database directly)
-
-**Pattern:**
-```csharp
-public record GetBoardQuery(Guid BoardId) : IRequest<BoardDetailsDto>;
-
-public class GetBoardHandler : IRequestHandler<GetBoardQuery, BoardDetailsDto>
-{
-    private readonly IBoardRepository _boardRepository;
-    
-    public async Task<BoardDetailsDto> Handle(GetBoardQuery request, CancellationToken ct)
-    {
-        var board = await _boardRepository.GetBoardWithDetailsAsync(request.BoardId, ct);
-        
-        if (board == null)
-            throw new NotFoundException(nameof(Board), request.BoardId);
-        
-        // Map to DTO
-        return MapToDto(board);
-    }
-}
-```
 
 ### Pipeline Behaviors
 Automatically applied to all commands/queries via MediatR:
@@ -272,37 +123,6 @@ Order matters! Defined in `Application/DependencyInjection.cs`.
 - Map value objects using `OwnsOne`
 - Ignore domain events (transient, not persisted)
 
-**Example Configuration:**
-```csharp
-public class BoardConfiguration : IEntityTypeConfiguration<Board>
-{
-    public void Configure(EntityTypeBuilder<Board> builder)
-    {
-        builder.ToTable("Boards");
-        builder.HasKey(b => b.Id);
-        builder.Property(b => b.Id).ValueGeneratedNever(); // Guids generated in domain
-        
-        // Owned entities - Columns
-        builder.OwnsMany(b => b.Columns, columnsBuilder =>
-        {
-            columnsBuilder.ToTable("Columns");
-            columnsBuilder.WithOwner().HasForeignKey("BoardId");
-            columnsBuilder.HasKey("Id");
-            
-            // Value object mapping
-            columnsBuilder.OwnsOne(c => c.Position, positionBuilder =>
-            {
-                positionBuilder.Property(p => p.Value)
-                    .HasColumnName("Position")
-                    .IsRequired();
-            });
-        });
-        
-        builder.Ignore(b => b.DomainEvents);
-    }
-}
-```
-
 **Repositories:**
 - One repository per aggregate root
 - Inherit from base `Repository<T>`
@@ -324,56 +144,6 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
 - One endpoint file per aggregate (BoardEndpoints.cs, ProjectEndpoints.cs)
 - Static methods for each endpoint
 - Use extension methods to register: `app.MapBoardEndpoints()`
-
-**Pattern:**
-```csharp
-public static class BoardEndpoints
-{
-    public static void MapBoardEndpoints(this IEndpointRouteBuilder app)
-    {
-        // Board endpoints are nested under projects
-        var group = app.MapGroup("/api/projects/{projectId:guid}/boards")
-            .WithTags("Boards")
-            .RequireAuthorization()
-            .AddEndpointFilter<ProjectOwnershipFilter>();
-
-        group.MapPost("/", CreateBoard)
-            .WithName("CreateBoard")
-            .Produces<BoardDto>(StatusCodes.Status201Created)
-            .ProducesValidationProblem();
-
-        group.MapGet("/{boardId:guid}", GetBoardDetails)
-            .WithName("GetBoardDetails")
-            .Produces<BoardDetailsDto>()
-            .ProducesProblem(StatusCodes.Status404NotFound);
-    }
-
-    private static async Task<IResult> CreateBoard(
-        Guid projectId,
-        CreateBoardRequest request,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        var command = new CreateBoardCommand(projectId, request.Name, request.Prefix);
-        var result = await mediator.Send(command, ct);
-        return Results.Created($"/api/projects/{projectId}/boards/{result.Id}", result);
-    }
-
-    private static async Task<IResult> GetBoardDetails(
-        Guid projectId,
-        Guid boardId,
-        IMediator mediator,
-        CancellationToken ct)
-    {
-        var query = new GetBoardDetailsQuery(projectId, boardId);
-        var result = await mediator.Send(query, ct);
-        return Results.Ok(result);
-    }
-}
-
-// Request models (API layer only, not Application commands)
-public record CreateBoardRequest(string Name, string? Prefix);
-```
 
 ### Global Exception Handling
 - Use `IExceptionHandler` for consistent error responses
@@ -403,30 +173,6 @@ public record CreateBoardRequest(string Name, string? Prefix);
 - Async methods: Suffix with `Async`
 - Interfaces: Prefix with `I`
 
-### Entity/Aggregate Patterns
-```csharp
-public sealed class MyAggregate : Entity, IAggregateRoot
-{
-    private readonly List<MyChild> _children = new();
-    
-    public string Name { get; private set; }
-    public IReadOnlyCollection<MyChild> Children => _children.AsReadOnly();
-    
-    private MyAggregate() { } // For EF Core
-    
-    public static MyAggregate Create(...)
-    {
-        // Validation and creation logic
-    }
-    
-    public void DoSomething(...)
-    {
-        // Business logic
-        RaiseDomainEvent(new SomethingHappenedEvent(...));
-    }
-}
-```
-
 ### Async/Await
 - Always pass `CancellationToken` to async methods
 - Use `ConfigureAwait(false)` only in library code, not in ASP.NET Core
@@ -451,76 +197,11 @@ public sealed class MyAggregate : Entity, IAggregateRoot
 - Use FluentAssertions for readable assertions
 - Use Moq for mocking
 
-**Example:**
-```csharp
-public class BoardTests
-{
-    [Fact]
-    public void Create_ShouldCreateBoardWithValidData()
-    {
-        // Arrange
-        var projectId = Guid.NewGuid();
-        var boardName = "Sprint Board";
-
-        // Act
-        var board = Board.Create(boardName, projectId);
-
-        // Assert
-        board.Should().NotBeNull();
-        board.Name.Should().Be(boardName);
-        board.ProjectId.Should().Be(projectId);
-    }
-    
-    [Fact]
-    public void AddCard_ShouldThrowException_WhenColumnDoesNotExist()
-    {
-        // Arrange
-        var board = Board.Create("Test Board", Guid.NewGuid());
-        var nonExistentColumnId = Guid.NewGuid();
-
-        // Act
-        var act = () => board.AddCard(nonExistentColumnId, "Test Card", "Description");
-
-        // Assert
-        act.Should().Throw<DomainException>()
-            .WithMessage($"Column {nonExistentColumnId} not found in board");
-    }
-}
-```
-
 ### Integration Tests (tests/NeonBoard.IntegrationTests/)
 - Test API endpoints end-to-end
 - Use `WebApplicationFactory` with in-memory database
 - Test full request/response cycle
 - Verify database state after operations
-
-**Example:**
-```csharp
-public class BoardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
-{
-    private readonly HttpClient _client;
-    private readonly NeonBoardWebApplicationFactory _factory;
-
-    [Fact]
-    public async Task CreateBoard_ReturnsCreatedBoard()
-    {
-        // Arrange
-        var project = await _factory.CreateProjectAsync<ProjectDto>(_client);
-
-        // Act
-        var response = await _client.PostAsJsonAsync(
-            $"/api/projects/{project.Id}/boards",
-            new { Name = "Test Board" });
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var board = await response.Content.ReadFromJsonAsync<BoardDto>();
-        board.Should().NotBeNull();
-        board!.Name.Should().Be("Test Board");
-        board.Slug.Should().Be("test-board");
-    }
-}
-```
 
 ## Common Tasks
 
@@ -558,38 +239,6 @@ docker build -t neonboard:latest .
 - Match folder structure
 - Example: `NeonBoard.Application.Boards.Commands.CreateBoard`
 
-### Folder Structure (Strict!)
-```
-Domain/
-  Common/           # Base classes, interfaces, and utilities (Url62, SlugHelper)
-  {Aggregate}/      # One folder per aggregate
-    {Aggregate}.cs  # Aggregate root
-    Entities/       # Child entities
-    ValueObjects/   # Value objects
-    Events/         # Domain events
-
-Application/
-  Common/           # Shared interfaces, behaviors, exceptions
-  {Feature}/        # One folder per feature area
-    Commands/
-      {Command}/    # One folder per command
-    Queries/
-      {Query}/      # One folder per query
-    DTOs/           # Data transfer objects
-
-Infrastructure/
-  Data/
-    Configurations/ # EF Core configurations
-    Interceptors/   # EF Core interceptors
-  Repositories/     # Repository implementations
-  Services/         # Service implementations
-
-Api/
-  Endpoints/        # Endpoint definitions
-  Middleware/       # Custom middleware
-  Extensions/       # Extension methods
-```
-
 ## Important Don'ts
 
 ❌ **Don't expose domain entities from API** - Always return DTOs  
@@ -615,25 +264,11 @@ Before implementing a feature, verify:
 
 ## Additional Context
 
-### Why These Choices?
-- **DDD:** Keeps business logic in domain, protects against anemic models
-- **CQRS:** Separates reads/writes, makes code easier to reason about
-- **Clean Architecture:** Enables testing, keeps domain pure
-- **Vertical Slices:** Features are self-contained, easier to navigate
-- **Minimal APIs:** Modern, lightweight, less ceremony than controllers
-- **Aspire:** Great local dev experience, doesn't affect production
-
 ### Performance Considerations
 - Use `.AsNoTracking()` for read-only queries
 - Eager load related entities when needed (`.Include()`)
 - Index foreign keys and commonly queried fields
 - Keep aggregates small (don't load entire object graphs)
-
-### Security Notes
-- JWT authentication is implemented via Auth0 — all endpoints require authorization
-- `ICurrentUserService` provides the authenticated user's ID to command handlers
-- Project ownership is enforced via `ProjectOwnershipFilter` — requests for projects not owned by the current user return 403
-- Never skip the ownership filter on project-scoped endpoints
 
 ## When in Doubt
 - Follow existing patterns in the codebase
