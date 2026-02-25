@@ -1,6 +1,5 @@
 import { Component, input, output, inject, signal, effect, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormField, form, required } from '@angular/forms/signals';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { ErrorBannerComponent } from '../../../../../shared/components/error-banner/error-banner.component';
@@ -14,7 +13,7 @@ import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-card-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent],
+  imports: [FormField, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent],
   templateUrl: './card-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -33,10 +32,15 @@ export class CardDrawerComponent {
   protected drawerService = inject(DrawerService);
   private modalService = inject(ModalService);
 
-  cardTitle = signal('');
-  cardDescription = signal('');
-  originalTitle = signal('');
-  originalDescription = signal('');
+  cardModel = signal({ title: '', description: '' });
+  cardForm = form(this.cardModel, (f) => {
+    required(f.title, { message: 'Card title is required' });
+  });
+
+  // Track the last-saved values for auto-save comparison
+  savedTitle = signal('');
+  savedDescription = signal('');
+
   error = signal<string | null>(null);
   isSaving = signal(false);
   isDeleting = signal(false);
@@ -50,16 +54,14 @@ export class CardDrawerComponent {
     effect(() => {
       const existingCard = this.card();
       if (existingCard) {
-        this.cardTitle.set(existingCard.title);
-        this.cardDescription.set(existingCard.description);
-        this.originalTitle.set(existingCard.title);
-        this.originalDescription.set(existingCard.description);
+        this.cardModel.set({ title: existingCard.title, description: existingCard.description });
+        this.savedTitle.set(existingCard.title);
+        this.savedDescription.set(existingCard.description);
         this.cardLabelIds.set(existingCard.labels?.map(l => l.id) ?? []);
       } else {
-        this.cardTitle.set('');
-        this.cardDescription.set('');
-        this.originalTitle.set('');
-        this.originalDescription.set('');
+        this.cardModel.set({ title: '', description: '' });
+        this.savedTitle.set('');
+        this.savedDescription.set('');
         this.cardLabelIds.set([]);
       }
       this.showLabelPicker.set(false);
@@ -67,11 +69,9 @@ export class CardDrawerComponent {
   }
 
   isEditMode = computed(() => this.card() !== null);
-
   drawerTitle = computed(() => this.isEditMode() ? 'Card Details' : 'Add Card');
-
   descriptionChanged = computed(() =>
-    this.cardDescription() !== this.originalDescription()
+    this.cardModel().description !== this.savedDescription()
   );
 
   onClose(): void {
@@ -81,16 +81,16 @@ export class CardDrawerComponent {
 
   saveTitle(): void {
     if (!this.isEditMode()) return;
-    const title = this.cardTitle().trim();
-    if (!title || title === this.originalTitle()) return;
+    const title = this.cardModel().title.trim();
+    if (!title || title === this.savedTitle()) return;
 
     const cardId = this.card()!.id;
     this.cardService.updateCard(
       this.projectId(), this.boardId(), cardId,
-      { title, description: this.originalDescription() }
+      { title, description: this.savedDescription() }
     ).subscribe({
       next: () => {
-        this.originalTitle.set(title);
+        this.savedTitle.set(title);
         this.cardSaved.emit();
       },
       error: () => {
@@ -104,12 +104,13 @@ export class CardDrawerComponent {
 
     this.isSaving.set(true);
     const cardId = this.card()!.id;
+    const description = this.cardModel().description;
     this.cardService.updateCard(
       this.projectId(), this.boardId(), cardId,
-      { title: this.originalTitle(), description: this.cardDescription() }
+      { title: this.savedTitle(), description }
     ).subscribe({
       next: () => {
-        this.originalDescription.set(this.cardDescription());
+        this.savedDescription.set(description);
         this.isSaving.set(false);
         this.cardSaved.emit();
       },
@@ -121,7 +122,7 @@ export class CardDrawerComponent {
   }
 
   addCard(): void {
-    if (!this.cardTitle().trim()) return;
+    if (this.cardForm().invalid()) return;
 
     const targetColumnId = this.columnId();
     if (!targetColumnId) {
@@ -132,9 +133,10 @@ export class CardDrawerComponent {
     this.isSaving.set(true);
     this.error.set(null);
 
+    const { title, description } = this.cardModel();
     this.cardService.addCard(
       this.projectId(), this.boardId(),
-      { columnId: targetColumnId, title: this.cardTitle(), description: this.cardDescription() }
+      { columnId: targetColumnId, title: title.trim(), description }
     ).subscribe({
       next: () => {
         this.cardSaved.emit();
@@ -258,10 +260,9 @@ export class CardDrawerComponent {
   }
 
   private resetForm(): void {
-    this.cardTitle.set('');
-    this.cardDescription.set('');
-    this.originalTitle.set('');
-    this.originalDescription.set('');
+    this.cardModel.set({ title: '', description: '' });
+    this.savedTitle.set('');
+    this.savedDescription.set('');
     this.error.set(null);
     this.showLabelPicker.set(false);
     this.cardLabelIds.set([]);

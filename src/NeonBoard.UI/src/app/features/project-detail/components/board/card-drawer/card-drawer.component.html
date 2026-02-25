@@ -24,8 +24,7 @@
       <div>
         <label class="block text-sm font-medium text-secondary mb-1.5">Title</label>
         <app-input
-          [ngModel]="cardTitle()"
-          (ngModelChange)="cardTitle.set($event)"
+          [formField]="cardForm.title"
           (focusout)="saveTitle()"
           (keyup.enter)="saveTitle()"
         />
@@ -48,8 +47,7 @@
         <label class="block text-sm font-medium text-secondary mb-1.5">Description</label>
         <app-input
           element="textarea"
-          [ngModel]="cardDescription()"
-          (ngModelChange)="cardDescription.set($event)"
+          [formField]="cardForm.description"
           placeholder="Add more details..."
           [rows]="5"
         />
@@ -83,8 +81,7 @@
         <div>
           <label class="block text-sm text-secondary mb-1.5">Title</label>
           <app-input
-            [ngModel]="cardTitle()"
-            (ngModelChange)="cardTitle.set($event)"
+            [formField]="cardForm.title"
             placeholder="Enter card title..."
           />
         </div>
@@ -93,8 +90,7 @@
           <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
           <app-input
             element="textarea"
-            [ngModel]="cardDescription()"
-            (ngModelChange)="cardDescription.set($event)"
+            [formField]="cardForm.description"
             placeholder="Add more details..."
             [rows]="4"
           />
@@ -105,7 +101,7 @@
         <app-button
           variant="primary"
           (click)="addCard()"
-          [disabled]="isSaving() || !cardTitle().trim()"
+          [disabled]="isSaving() || cardForm().invalid()"
         >
           {{ isSaving() ? 'Adding...' : 'Add Card' }}
         </app-button>

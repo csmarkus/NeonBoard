@@ -83,12 +83,12 @@ describe('CardDrawerComponent', () => {
       expect(component.isEditMode()).toBe(false);
     });
 
-    it('effect populates cardTitle and cardDescription from card input', () => {
+    it('effect populates cardModel from card input', () => {
       fixture.componentRef.setInput('card', baseCard);
       TestBed.flushEffects();
 
-      expect(component.cardTitle()).toBe('Original Title');
-      expect(component.cardDescription()).toBe('Original Desc');
+      expect(component.cardModel().title).toBe('Original Title');
+      expect(component.cardModel().description).toBe('Original Desc');
     });
   });
 
@@ -99,7 +99,7 @@ describe('CardDrawerComponent', () => {
     });
 
     it('calls cardService.updateCard when title has changed and is non-empty', () => {
-      component.cardTitle.set('Updated Title');
+      component.cardModel.set({ title: 'Updated Title', description: 'Original Desc' });
 
       component.saveTitle();
 
@@ -110,14 +110,13 @@ describe('CardDrawerComponent', () => {
     });
 
     it('does NOT call cardService.updateCard when title is unchanged', () => {
-      // cardTitle is already 'Original Title' from effect
       component.saveTitle();
 
       expect(mockCardService.updateCard).not.toHaveBeenCalled();
     });
 
     it('does NOT call cardService.updateCard when title is blank', () => {
-      component.cardTitle.set('   ');
+      component.cardModel.set({ title: '   ', description: 'Original Desc' });
 
       component.saveTitle();
 
@@ -129,7 +128,7 @@ describe('CardDrawerComponent', () => {
     it('calls cardService.updateCard with current description value', () => {
       fixture.componentRef.setInput('card', baseCard);
       TestBed.flushEffects();
-      component.cardDescription.set('New Description');
+      component.cardModel.set({ title: 'Original Title', description: 'New Description' });
 
       component.saveDescription();
 
@@ -168,7 +167,7 @@ describe('CardDrawerComponent', () => {
       fixture.componentRef.setInput('card', null);
       fixture.componentRef.setInput('columnId', 'col-1');
       TestBed.flushEffects();
-      component.cardTitle.set('My New Card');
+      component.cardModel.set({ title: 'My New Card', description: '' });
 
       let cardSavedEmitted = false;
       fixture.componentInstance.cardSaved.subscribe(() => (cardSavedEmitted = true));
