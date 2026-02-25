@@ -1,17 +1,16 @@
 import { initTestEnvironment } from '../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { InputComponent } from './input.component';
 
 initTestEnvironment();
 
 @Component({
-  imports: [FormsModule, InputComponent],
-  template: `<app-input [(ngModel)]="value" />`,
+  imports: [InputComponent],
+  template: `<app-input [(value)]="testValue" />`,
 })
 class TestHostComponent {
-  value = '';
+  testValue = signal('');
 }
 
 describe('InputComponent', () => {
@@ -41,45 +40,31 @@ describe('InputComponent', () => {
     expect(textarea).toBeTruthy();
   });
 
-  it('writeValue updates the displayed value', () => {
-    fixture.detectChanges();
-    component.writeValue('hello');
+  it('displays the value from the model signal', () => {
+    component.value.set('hello');
     fixture.detectChanges();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     expect(input.value).toBe('hello');
   });
 
-  it('writeValue handles null gracefully', () => {
-    component.writeValue(null as unknown as string);
-    expect(component.value()).toBe('');
-  });
-
-  it('onInput calls registered onChange callback', () => {
-    const spy = vi.fn();
-    component.registerOnChange(spy);
+  it('updates the value model on input event', () => {
     fixture.detectChanges();
-
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     input.value = 'typed';
     input.dispatchEvent(new Event('input'));
-
-    expect(spy).toHaveBeenCalledWith('typed');
+    expect(component.value()).toBe('typed');
   });
 
-  it('onBlur calls registered onTouched callback', () => {
-    const spy = vi.fn();
-    component.registerOnTouched(spy);
+  it('sets touched to true on blur', () => {
     fixture.detectChanges();
-
+    expect(component.touched()).toBe(false);
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     input.dispatchEvent(new Event('blur'));
-
-    expect(spy).toHaveBeenCalled();
+    expect(component.touched()).toBe(true);
   });
 
-  it('setDisabledState disables the input', () => {
-    fixture.detectChanges();
-    component.setDisabledState(true);
+  it('disables the input when disabled input is true', () => {
+    fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     expect(input.disabled).toBe(true);
@@ -108,7 +93,7 @@ describe('InputComponent', () => {
   });
 });
 
-describe('InputComponent with ngModel', () => {
+describe('InputComponent with model binding', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
 
@@ -118,24 +103,19 @@ describe('InputComponent with ngModel', () => {
     host = fixture.componentInstance;
   });
 
-  it('syncs value from model to view', async () => {
-    fixture.detectChanges();
-    await fixture.whenStable();
-    host.value = 'from-model';
-    fixture.detectChanges();
-    await fixture.whenStable();
+  it('syncs value from host signal to input', () => {
+    host.testValue.set('from-host');
     fixture.detectChanges();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
-    expect(input.value).toBe('from-model');
+    expect(input.value).toBe('from-host');
   });
 
-  it('syncs value from view to model', async () => {
+  it('syncs value from input back to host signal', () => {
     fixture.detectChanges();
-    await fixture.whenStable();
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
     input.value = 'from-view';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(host.value).toBe('from-view');
+    expect(host.testValue()).toBe('from-view');
   });
 });
