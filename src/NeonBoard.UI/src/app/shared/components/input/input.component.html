@@ -29,5 +29,9 @@
   }
   @if (error()) {
     <span class="text-xs text-danger">{{ error() }}</span>
+  } @else if (touched() && invalid()) {
+    @for (err of errors(); track err.kind) {
+      <span class="text-xs text-danger">{{ err.message }}</span>
+    }
   }
 </div>

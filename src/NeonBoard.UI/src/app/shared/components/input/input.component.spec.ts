@@ -91,6 +91,32 @@ describe('InputComponent', () => {
     const textarea: HTMLTextAreaElement = fixture.nativeElement.querySelector('textarea');
     expect(textarea.className).toContain('resize-y');
   });
+
+  it('displays validation errors when touched and invalid', () => {
+    fixture.componentRef.setInput('invalid', true);
+    fixture.componentRef.setInput('errors', [{ kind: 'required', message: 'Field is required' }]);
+    component.touched.set(true);
+    fixture.detectChanges();
+    const errorSpan = fixture.nativeElement.querySelector('.text-danger');
+    expect(errorSpan).toBeTruthy();
+    expect(errorSpan.textContent.trim()).toBe('Field is required');
+  });
+
+  it('does not display validation errors when not touched', () => {
+    fixture.componentRef.setInput('invalid', true);
+    fixture.componentRef.setInput('errors', [{ kind: 'required', message: 'Field is required' }]);
+    fixture.detectChanges();
+    const errorSpan = fixture.nativeElement.querySelector('.text-danger');
+    expect(errorSpan).toBeNull();
+  });
+
+  it('applies error styles when touched and invalid', () => {
+    fixture.componentRef.setInput('invalid', true);
+    component.touched.set(true);
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    expect(input.className).toContain('border-danger');
+  });
 });
 
 describe('InputComponent with model binding', () => {
