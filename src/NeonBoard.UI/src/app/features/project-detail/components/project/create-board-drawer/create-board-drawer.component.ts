@@ -1,4 +1,5 @@
 import { Component, input, output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { FormField, form, required } from '@angular/forms/signals';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { ErrorBannerComponent } from '../../../../../shared/components/error-banner/error-banner.component';
@@ -8,7 +9,7 @@ import { Board, CreateBoardRequest } from '../../../models/board.model';
 
 @Component({
   selector: 'app-create-board-drawer',
-  imports: [DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
+  imports: [FormField, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
   templateUrl: './create-board-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -20,8 +21,11 @@ export class CreateBoardDrawerComponent {
 
   private boardService = inject(BoardService);
 
-  newBoardName = signal('');
-  newBoardPrefix = signal('');
+  formModel = signal({ name: '', prefix: '' });
+  boardForm = form(this.formModel, (f) => {
+    required(f.name, { message: 'Board name is required' });
+  });
+
   error = signal<string | null>(null);
   isCreating = signal(false);
 
@@ -31,14 +35,15 @@ export class CreateBoardDrawerComponent {
   }
 
   createBoard(): void {
-    if (!this.newBoardName().trim()) return;
+    if (this.boardForm().invalid()) return;
 
     this.isCreating.set(true);
     this.error.set(null);
 
+    const { name, prefix } = this.formModel();
     const request: CreateBoardRequest = {
-      name: this.newBoardName(),
-      ...(this.newBoardPrefix().trim() && { prefix: this.newBoardPrefix().trim().toUpperCase() })
+      name: name.trim(),
+      ...(prefix.trim() && { prefix: prefix.trim().toUpperCase() })
     };
 
     this.boardService.createBoard(this.projectId(), request).subscribe({
@@ -57,8 +62,7 @@ export class CreateBoardDrawerComponent {
   }
 
   private resetForm(): void {
-    this.newBoardName.set('');
-    this.newBoardPrefix.set('');
+    this.formModel.set({ name: '', prefix: '' });
     this.error.set(null);
   }
 }

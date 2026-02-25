@@ -12,7 +12,7 @@
       <div>
         <label class="block text-sm text-secondary mb-1.5">Board name</label>
         <app-input
-          [(value)]="newBoardName"
+          [formField]="boardForm.name"
           placeholder="Enter board name..."
           (keyup.enter)="createBoard()"
         />
@@ -21,7 +21,7 @@
       <div>
         <label class="block text-sm text-secondary mb-1.5">Prefix (optional)</label>
         <app-input
-          [(value)]="newBoardPrefix"
+          [formField]="boardForm.prefix"
           [maxlength]="5"
           (keyup.enter)="createBoard()"
           extraClass="uppercase"
@@ -34,7 +34,7 @@
       <app-button
         variant="primary"
         (click)="createBoard()"
-        [disabled]="isCreating() || !newBoardName().trim()">
+        [disabled]="isCreating() || boardForm().invalid()">
         {{ isCreating() ? 'Creating...' : 'Create Board' }}
       </app-button>
       <app-button
