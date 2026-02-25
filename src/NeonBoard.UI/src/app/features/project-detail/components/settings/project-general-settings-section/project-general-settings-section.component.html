@@ -3,27 +3,27 @@
     <div>
       <label for="project-name" class="block text-sm font-medium text-primary mb-1.5">Project name</label>
       <app-input
+        [formField]="settingsForm.projectName"
         inputId="project-name"
-        [value]="facade.projectName()"
         (valueChange)="onNameInput($event)"
         [maxlength]="100"
       />
-      <span class="text-xs text-muted mt-1.5">{{ facade.projectName().length }} / 100</span>
+      <span class="text-xs text-muted mt-1.5">{{ formModel().projectName.length }} / 100</span>
     </div>
 
     <div>
       <label for="project-description" class="block text-sm font-medium text-primary mb-1.5">Description</label>
       <app-input
+        [formField]="settingsForm.description"
         inputId="project-description"
         element="textarea"
-        [value]="facade.projectDescription()"
         (valueChange)="onDescriptionInput($event)"
         [maxlength]="1000"
         [rows]="4"
         placeholder="What is this project about?"
         resize="y"
       />
-      <span class="text-xs text-muted mt-1.5">{{ facade.projectDescription().length }} / 1000</span>
+      <span class="text-xs text-muted mt-1.5">{{ formModel().description.length }} / 1000</span>
     </div>
   </div>
 </app-settings-section>
