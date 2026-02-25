@@ -1,6 +1,5 @@
-import { Component, Input, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { FormField, form, required } from '@angular/forms/signals';
 import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
@@ -10,22 +9,24 @@ import { Project } from '../../models/project.model';
 
 @Component({
   selector: 'app-create-project-drawer',
-  standalone: true,
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
+  imports: [FormField, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
   templateUrl: './create-project-drawer.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateProjectDrawerComponent {
-  @Input() open = false;
-  @Output() close = new EventEmitter<void>();
-  @Output() projectCreated = new EventEmitter<Project>();
+  open = input(false);
+  close = output<void>();
+  projectCreated = output<Project>();
 
   private projectService = inject(ProjectService);
-  private cdr = inject(ChangeDetectorRef);
 
-  newProjectName = '';
-  newProjectDescription = '';
-  error: string | null = null;
-  isCreating = false;
+  formModel = signal({ name: '', description: '' });
+  projectForm = form(this.formModel, (f) => {
+    required(f.name, { message: 'Project name is required' });
+  });
+
+  error = signal<string | null>(null);
+  isCreating = signal(false);
 
   onClose(): void {
     this.resetForm();
@@ -33,34 +34,32 @@ export class CreateProjectDrawerComponent {
   }
 
   createProject(): void {
-    if (!this.newProjectName.trim()) return;
+    if (this.projectForm().invalid()) return;
 
-    this.isCreating = true;
-    this.error = null;
+    this.isCreating.set(true);
+    this.error.set(null);
 
+    const { name, description } = this.formModel();
     this.projectService.createProject({
-      name: this.newProjectName,
-      description: this.newProjectDescription || ''
+      name: name.trim(),
+      description
     }).subscribe({
       next: (project) => {
         this.projectCreated.emit(project);
         this.resetForm();
-        this.isCreating = false;
+        this.isCreating.set(false);
         this.close.emit();
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error creating project:', err);
-        this.error = 'Failed to create project. Please try again.';
-        this.isCreating = false;
-        this.cdr.detectChanges();
+        this.error.set('Failed to create project. Please try again.');
+        this.isCreating.set(false);
       }
     });
   }
 
   private resetForm(): void {
-    this.newProjectName = '';
-    this.newProjectDescription = '';
-    this.error = null;
+    this.formModel.set({ name: '', description: '' });
+    this.error.set(null);
   }
 }

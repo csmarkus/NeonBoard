@@ -1,4 +1,4 @@
-<app-drawer [open]="open" (close)="onClose()">
+<app-drawer [open]="open()" (close)="onClose()">
   <div class="space-y-6">
     <div>
       <h2 class="text-lg font-semibold text-primary">Create Project</h2>
@@ -6,13 +6,13 @@
     </div>
 
     <!-- Error message -->
-    <app-error-banner [message]="error" />
+    <app-error-banner [message]="error()" />
 
     <div class="space-y-4">
       <div>
         <label class="block text-sm text-secondary mb-1.5">Project name</label>
         <app-input
-          [(ngModel)]="newProjectName"
+          [formField]="projectForm.name"
           placeholder="Enter project name..."
         />
       </div>
@@ -21,7 +21,7 @@
         <label class="block text-sm text-secondary mb-1.5">Description (optional)</label>
         <app-input
           element="textarea"
-          [(ngModel)]="newProjectDescription"
+          [formField]="projectForm.description"
           placeholder="What is this project about?"
           [rows]="3"
         />
@@ -32,13 +32,13 @@
       <app-button
         variant="primary"
         (click)="createProject()"
-        [disabled]="isCreating || !newProjectName.trim()">
-        {{ isCreating ? 'Creating...' : 'Create Project' }}
+        [disabled]="isCreating() || projectForm().invalid()">
+        {{ isCreating() ? 'Creating...' : 'Create Project' }}
       </app-button>
       <app-button
         variant="secondary"
         (click)="onClose()"
-        [disabled]="isCreating">
+        [disabled]="isCreating()">
         Cancel
       </app-button>
     </div>
