@@ -1,10 +1,10 @@
-import { Component, input, output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-add-column-button',
-  imports: [FormsModule],
+  imports: [],
   templateUrl: './add-column-button.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddColumnButtonComponent {
   isAdding = input.required<boolean>();
