@@ -1,6 +1,5 @@
-import { Component, input, output, signal, afterNextRender, inject, Injector, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, signal, afterNextRender, inject, Injector, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { form } from '@angular/forms/signals';
 import { CdkDragDrop, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGripVertical, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -10,9 +9,10 @@ import { CardComponent } from '../card/card.component';
 
 @Component({
   selector: 'app-column',
-  imports: [CommonModule, FormsModule, DragDropModule, FontAwesomeModule, CardComponent],
+  imports: [DragDropModule, FontAwesomeModule, CardComponent],
   templateUrl: './column.component.html',
   styleUrl: './column.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:click)': 'onDocumentClick($event)',
   },
@@ -39,24 +39,28 @@ export class ColumnComponent {
 
   menuOpen = signal(false);
   editingName = signal(false);
-  editingValue = signal('');
   addingCard = signal(false);
-  newCardTitle = signal('');
   draggedCardHeight = signal(0);
+
+  renameModel = signal({ name: '' });
+  renameForm = form(this.renameModel);
+
+  addCardModel = signal({ title: '' });
+  addCardForm = form(this.addCardModel);
 
   startEdit(): void {
     this.editingName.set(true);
-    this.editingValue.set(this.column().name);
+    this.renameModel.set({ name: this.column().name });
     this.menuOpen.set(false);
   }
 
   cancelEdit(): void {
     this.editingName.set(false);
-    this.editingValue.set('');
+    this.renameModel.set({ name: '' });
   }
 
   saveName(): void {
-    const newName = this.editingValue().trim();
+    const newName = this.renameModel().name.trim();
     if (newName && newName !== this.column().name) {
       this.columnRenamed.emit({ columnId: this.column().id, newName });
     }
@@ -104,7 +108,7 @@ export class ColumnComponent {
 
   openAddCard(): void {
     this.addingCard.set(true);
-    this.newCardTitle.set('');
+    this.addCardModel.set({ title: '' });
 
     afterNextRender(() => {
       const textarea = document.querySelector(`#add-card-${this.column().id}`) as HTMLTextAreaElement;
@@ -122,14 +126,24 @@ export class ColumnComponent {
 
   cancelAddCard(): void {
     this.addingCard.set(false);
-    this.newCardTitle.set('');
+    this.addCardModel.set({ title: '' });
   }
 
   saveCard(): void {
-    const title = this.newCardTitle().trim();
+    const title = this.addCardModel().title.trim();
     if (title) {
       this.cardAdded.emit({ columnId: this.column().id, title });
       this.cancelAddCard();
     }
+  }
+
+  onRenameInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.renameModel.set({ name: value });
+  }
+
+  onCardTitleInput(event: Event): void {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.addCardModel.set({ title: value });
   }
 }
