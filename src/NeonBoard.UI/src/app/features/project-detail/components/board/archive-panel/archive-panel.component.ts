@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormField, form } from '@angular/forms/signals';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { ModalService } from '../../../../../core/services/modal.service';
@@ -8,7 +9,7 @@ import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-archive-panel',
-  imports: [DrawerComponent, InputComponent, DatePipe],
+  imports: [FormField, DrawerComponent, InputComponent, DatePipe],
   templateUrl: './archive-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -20,10 +21,11 @@ export class ArchivePanelComponent {
   archivedCards = this.facade.archivedCards;
   isLoading = this.facade.isLoadingArchive;
 
-  searchQuery = signal('');
+  formModel = signal({ searchQuery: '' });
+  searchForm = form(this.formModel);
 
   filteredCards = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
+    const query = this.formModel().searchQuery.toLowerCase().trim();
     const cards = this.archivedCards();
     if (!query) return cards;
     return cards.filter(card =>
@@ -34,11 +36,7 @@ export class ArchivePanelComponent {
 
   onClose(): void {
     this.facade.closeArchivePanel();
-    this.searchQuery.set('');
-  }
-
-  onSearchChange(value: string): void {
-    this.searchQuery.set(value);
+    this.formModel.set({ searchQuery: '' });
   }
 
   viewCard(card: Card): void {

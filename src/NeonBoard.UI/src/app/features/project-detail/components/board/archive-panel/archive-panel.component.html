@@ -8,10 +8,9 @@
 
     <!-- Search -->
     <app-input
+      [formField]="searchForm.searchQuery"
       placeholder="Search archived cards..."
       aria-label="Search archived cards"
-      [value]="searchQuery()"
-      (valueChange)="onSearchChange($event)"
     />
 
     <!-- Loading state -->
@@ -22,8 +21,8 @@
     } @else if (filteredCards().length === 0) {
       <div class="flex items-center justify-center py-8">
         <p class="text-sm text-muted">
-          @if (searchQuery()) {
-            No archived cards matching "{{ searchQuery() }}"
+          @if (formModel().searchQuery) {
+            No archived cards matching "{{ formModel().searchQuery }}"
           } @else {
             No archived cards
           }
