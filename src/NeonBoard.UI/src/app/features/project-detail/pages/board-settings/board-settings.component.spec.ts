@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
+import { ModalService } from '../../../../core/services/modal.service';
 import { Project } from '../../../projects/models/project.model';
 
 initTestEnvironment();
@@ -74,6 +75,7 @@ describe('BoardSettingsComponent', () => {
         { provide: BoardService, useValue: { getBoardsByProject: vi.fn().mockReturnValue(of([{ id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 }])) } },
         { provide: BoardSettingsFacade, useValue: mockFacade },
         { provide: Title, useValue: mockTitle },
+        { provide: ModalService, useValue: { confirm: vi.fn().mockResolvedValue(true) } },
       ],
     });
     TestBed.overrideTemplate(BoardSettingsComponent, '');

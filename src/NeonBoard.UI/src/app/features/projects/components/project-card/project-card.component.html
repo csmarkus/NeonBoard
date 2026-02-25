@@ -33,6 +33,3 @@
     </svg>
   </button>
 </div>
-
-<!-- Delete Confirmation Modal -->
-<app-confirmation-modal [open]="showDeleteConfirmation()" [title]="'Delete Project'" [message]="'Are you sure you want to delete ' + project.name + '? This action cannot be undone.'" [confirmText]="'Delete'" [cancelText]="'Cancel'" [variant]="'danger'" (confirm)="onConfirmDelete()" (cancel)="onCancelDelete()"></app-confirmation-modal>

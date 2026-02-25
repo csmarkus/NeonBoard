@@ -42,14 +42,3 @@
     </div>
   </main>
 }
-
-<app-confirmation-modal
-  [open]="showDiscardModal()"
-  title="Unsaved Changes"
-  message="You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
-  confirmText="Discard"
-  cancelText="Keep editing"
-  variant="danger"
-  gradientVariant="pink"
-  (confirm)="onConfirmDiscard()"
-  (cancel)="onCancelDiscard()" />

@@ -18,13 +18,3 @@
     </div>
   </div>
 </app-settings-section>
-
-<app-confirmation-modal
-  [open]="showDeleteModal()"
-  [title]="'Delete ' + entityName()"
-  [message]="deleteMessage()"
-  [confirmText]="'Delete ' + entityName()"
-  variant="danger"
-  gradientVariant="pink"
-  (confirm)="onConfirmDelete()"
-  (cancel)="closeDeleteModal()" />

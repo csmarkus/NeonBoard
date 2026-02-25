@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { CardDrawerComponent } from './card-drawer.component';
 import { CardService } from '../../../services/card.service';
 import { DrawerService } from '../../../services/drawer.service';
+import { ModalService } from '../../../../../core/services/modal.service';
 import { Card } from '../../../models/card.model';
 
 initTestEnvironment();
@@ -53,6 +54,7 @@ describe('CardDrawerComponent', () => {
       providers: [
         { provide: CardService, useValue: mockCardService },
         { provide: DrawerService, useValue: mockDrawerService },
+        { provide: ModalService, useValue: { confirm: vi.fn().mockResolvedValue(true) } },
       ],
     });
     TestBed.overrideTemplate(CardDrawerComponent, '');
@@ -183,14 +185,14 @@ describe('CardDrawerComponent', () => {
   });
 
   describe('deleteCard', () => {
-    it('calls cardService.deleteCard and emits cardDeleted output', () => {
+    it('calls cardService.deleteCard and emits cardDeleted output', async () => {
       fixture.componentRef.setInput('card', baseCard);
       TestBed.flushEffects();
 
       let cardDeletedEmitted = false;
       fixture.componentInstance.cardDeleted.subscribe(() => (cardDeletedEmitted = true));
 
-      component.confirmDeleteCard();
+      await component.requestDeleteCard();
 
       expect(mockCardService.deleteCard).toHaveBeenCalledWith('p-1', 'b-1', 'card-1');
       expect(cardDeletedEmitted).toBe(true);

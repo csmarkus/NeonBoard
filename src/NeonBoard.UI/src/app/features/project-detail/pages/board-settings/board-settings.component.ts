@@ -2,11 +2,11 @@ import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, e
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Observable, Subject, tap, switchMap } from 'rxjs';
+import { Observable, from, tap, switchMap } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
+import { ModalService } from '../../../../core/services/modal.service';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
@@ -20,7 +20,6 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
     RouterLink,
     PageHeaderComponent,
     ButtonComponent,
-    ConfirmationModalComponent,
     GeneralSettingsSectionComponent,
     LabelManagementSectionComponent,
     DangerZoneSectionComponent,
@@ -40,21 +39,20 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   private titleService = inject(Title);
   private destroyRef = inject(DestroyRef);
 
+  private modalService = inject(ModalService);
+
   shortId = signal('');
   slug = signal('');
   projectId = signal('');
   boardId = signal('');
   projectName = signal('');
   isDeleting = signal(false);
-  showDiscardModal = signal(false);
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
     { label: this.projectName(), link: ['/p', this.shortId()] },
     { label: this.facade.originalBoardName(), link: ['/p', this.shortId(), 'b', this.slug()] },
     { label: 'Settings' }
   ]);
-
-  private discardSubject: Subject<boolean> | null = null;
 
   constructor() {
     effect(() => {
@@ -99,23 +97,12 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   }
 
   confirmDiscard(): Observable<boolean> {
-    this.discardSubject = new Subject<boolean>();
-    this.showDiscardModal.set(true);
-    return this.discardSubject.asObservable();
-  }
-
-  onConfirmDiscard(): void {
-    this.showDiscardModal.set(false);
-    this.discardSubject?.next(true);
-    this.discardSubject?.complete();
-    this.discardSubject = null;
-  }
-
-  onCancelDiscard(): void {
-    this.showDiscardModal.set(false);
-    this.discardSubject?.next(false);
-    this.discardSubject?.complete();
-    this.discardSubject = null;
+    return from(this.modalService.confirm({
+      title: 'Unsaved Changes',
+      message: 'You have unsaved changes. Are you sure you want to leave? Your changes will be lost.',
+      confirmText: 'Discard',
+      cancelText: 'Keep editing',
+    }));
   }
 
   saveChanges(): void {

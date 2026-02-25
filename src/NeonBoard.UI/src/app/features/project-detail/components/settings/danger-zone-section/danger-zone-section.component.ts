@@ -1,15 +1,17 @@
-import { Component, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
-import { ConfirmationModalComponent } from '../../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SettingsSectionComponent } from '../../../../../shared/components/settings-section/settings-section.component';
+import { ModalService } from '../../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-danger-zone-section',
-  imports: [ButtonComponent, ConfirmationModalComponent, SettingsSectionComponent],
+  imports: [ButtonComponent, SettingsSectionComponent],
   templateUrl: './danger-zone-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DangerZoneSectionComponent {
+  private modalService = inject(ModalService);
+
   entityName = input.required<string>();
   deleteDescription = input.required<string>();
   deleteMessage = input.required<string>();
@@ -17,18 +19,14 @@ export class DangerZoneSectionComponent {
 
   delete = output<void>();
 
-  showDeleteModal = signal(false);
-
-  openDeleteModal(): void {
-    this.showDeleteModal.set(true);
-  }
-
-  closeDeleteModal(): void {
-    this.showDeleteModal.set(false);
-  }
-
-  onConfirmDelete(): void {
-    this.showDeleteModal.set(false);
-    this.delete.emit();
+  async openDeleteModal(): Promise<void> {
+    const confirmed = await this.modalService.confirm({
+      title: `Delete ${this.entityName()}`,
+      message: this.deleteMessage(),
+      confirmText: `Delete ${this.entityName()}`,
+    });
+    if (confirmed) {
+      this.delete.emit();
+    }
   }
 }

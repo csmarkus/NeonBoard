@@ -1,22 +1,21 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Project } from '../../models/project.model';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { GradientAccentComponent } from '../../../../shared/components/gradient-accent/gradient-accent.component';
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-project-card',
-  standalone: true,
-  imports: [CommonModule, RouterLink, ConfirmationModalComponent, GradientAccentComponent],
+  imports: [CommonModule, RouterLink, GradientAccentComponent],
   templateUrl: './project-card.component.html',
 })
 export class ProjectCardComponent {
+  private modalService = inject(ModalService);
+
   @Input({ required: true }) project!: Project;
   @Input({ required: true }) index!: number;
   @Output() delete = new EventEmitter<Project>();
-
-  showDeleteConfirmation = signal(false);
 
   getRelativeTime(dateString: string): string {
     const date = new Date(dateString);
@@ -35,18 +34,16 @@ export class ProjectCardComponent {
     return date.toLocaleDateString();
   }
 
-  onDelete(event: Event): void {
+  async onDelete(event: Event): Promise<void> {
     event.stopPropagation();
     event.preventDefault();
-    this.showDeleteConfirmation.set(true);
-  }
-
-  onConfirmDelete(): void {
-    this.showDeleteConfirmation.set(false);
-    this.delete.emit(this.project);
-  }
-
-  onCancelDelete(): void {
-    this.showDeleteConfirmation.set(false);
+    const confirmed = await this.modalService.confirm({
+      title: 'Delete Project',
+      message: `Are you sure you want to delete "${this.project.name}"? All boards, columns, and cards will be permanently removed.`,
+      confirmText: 'Delete',
+    });
+    if (confirmed) {
+      this.delete.emit(this.project);
+    }
   }
 }

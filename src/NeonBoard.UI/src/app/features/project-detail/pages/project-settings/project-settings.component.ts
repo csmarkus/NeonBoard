@@ -2,11 +2,11 @@ import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, e
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Observable, Subject } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
+import { ModalService } from '../../../../core/services/modal.service';
 import { ProjectService } from '../../../projects/services/project.service';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
 import { ProjectGeneralSettingsSectionComponent } from '../../components/settings/project-general-settings-section/project-general-settings-section.component';
@@ -18,7 +18,6 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
     RouterLink,
     PageHeaderComponent,
     ButtonComponent,
-    ConfirmationModalComponent,
     ProjectGeneralSettingsSectionComponent,
     DangerZoneSectionComponent,
   ],
@@ -32,6 +31,7 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private projectService = inject(ProjectService);
+  private modalService = inject(ModalService);
   facade = inject(ProjectSettingsFacade);
   private titleService = inject(Title);
   private destroyRef = inject(DestroyRef);
@@ -39,14 +39,11 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
   shortId = signal('');
   projectId = signal('');
   isDeleting = signal(false);
-  showDiscardModal = signal(false);
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
     { label: this.facade.originalProjectName(), link: ['/p', this.shortId()] },
     { label: 'Settings' }
   ]);
-
-  private discardSubject: Subject<boolean> | null = null;
 
   constructor() {
     effect(() => {
@@ -81,23 +78,12 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
   }
 
   confirmDiscard(): Observable<boolean> {
-    this.discardSubject = new Subject<boolean>();
-    this.showDiscardModal.set(true);
-    return this.discardSubject.asObservable();
-  }
-
-  onConfirmDiscard(): void {
-    this.showDiscardModal.set(false);
-    this.discardSubject?.next(true);
-    this.discardSubject?.complete();
-    this.discardSubject = null;
-  }
-
-  onCancelDiscard(): void {
-    this.showDiscardModal.set(false);
-    this.discardSubject?.next(false);
-    this.discardSubject?.complete();
-    this.discardSubject = null;
+    return from(this.modalService.confirm({
+      title: 'Unsaved Changes',
+      message: 'You have unsaved changes. Are you sure you want to leave? Your changes will be lost.',
+      confirmText: 'Discard',
+      cancelText: 'Keep editing',
+    }));
   }
 
   saveChanges(): void {

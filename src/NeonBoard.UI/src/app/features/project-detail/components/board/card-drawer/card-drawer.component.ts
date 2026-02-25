@@ -3,18 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
-import { ConfirmationModalComponent } from '../../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ErrorBannerComponent } from '../../../../../shared/components/error-banner/error-banner.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { CardLabelPickerComponent } from './card-label-picker/card-label-picker.component';
 import { CardActionsComponent } from './card-actions/card-actions.component';
 import { CardService } from '../../../services/card.service';
 import { DrawerService } from '../../../services/drawer.service';
+import { ModalService } from '../../../../../core/services/modal.service';
 import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-card-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ConfirmationModalComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent],
   templateUrl: './card-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -31,6 +31,7 @@ export class CardDrawerComponent {
 
   private cardService = inject(CardService);
   protected drawerService = inject(DrawerService);
+  private modalService = inject(ModalService);
 
   cardTitle = signal('');
   cardDescription = signal('');
@@ -40,7 +41,6 @@ export class CardDrawerComponent {
   isSaving = signal(false);
   isDeleting = signal(false);
   isArchiving = signal(false);
-  showDeleteModal = signal(false);
   showLabelPicker = signal(false);
   togglingLabelId = signal<string | null>(null);
 
@@ -189,33 +189,32 @@ export class CardDrawerComponent {
     this.showLabelPicker.update(v => !v);
   }
 
-  requestDeleteCard(): void {
+  async requestDeleteCard(): Promise<void> {
     if (!this.isEditMode()) return;
-    this.showDeleteModal.set(true);
-  }
 
-  confirmDeleteCard(): void {
-    this.showDeleteModal.set(false);
-    this.isDeleting.set(true);
-    this.error.set(null);
-
-    const cardId = this.card()!.id;
-    this.cardService.deleteCard(this.projectId(), this.boardId(), cardId).subscribe({
-      next: () => {
-        this.cardDeleted.emit();
-        this.resetForm();
-        this.isDeleting.set(false);
-        this.close.emit();
-      },
-      error: () => {
-        this.error.set('Failed to delete card. Please try again.');
-        this.isDeleting.set(false);
-      }
+    const confirmed = await this.modalService.confirm({
+      title: 'Delete Card',
+      message: 'Are you sure you want to delete this card? This action cannot be undone.',
+      confirmText: 'Delete',
     });
-  }
+    if (confirmed) {
+      this.isDeleting.set(true);
+      this.error.set(null);
 
-  cancelDeleteCard(): void {
-    this.showDeleteModal.set(false);
+      const cardId = this.card()!.id;
+      this.cardService.deleteCard(this.projectId(), this.boardId(), cardId).subscribe({
+        next: () => {
+          this.cardDeleted.emit();
+          this.resetForm();
+          this.isDeleting.set(false);
+          this.close.emit();
+        },
+        error: () => {
+          this.error.set('Failed to delete card. Please try again.');
+          this.isDeleting.set(false);
+        }
+      });
+    }
   }
 
   archiveCard(): void {
