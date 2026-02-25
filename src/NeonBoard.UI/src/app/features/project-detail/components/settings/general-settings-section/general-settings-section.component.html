@@ -3,19 +3,19 @@
     <div>
       <label for="board-name" class="block text-sm font-medium text-primary mb-1.5">Board name</label>
       <app-input
+        [formField]="settingsForm.boardName"
         inputId="board-name"
-        [value]="facade.boardName()"
         (valueChange)="onNameInput($event)"
         [maxlength]="100"
       />
-      <span class="text-xs text-muted mt-1.5">{{ facade.boardName().length }} / 100</span>
+      <span class="text-xs text-muted mt-1.5">{{ formModel().boardName.length }} / 100</span>
     </div>
 
     <div>
       <label for="board-prefix" class="block text-sm font-medium text-primary mb-1.5">Board prefix</label>
       <app-input
+        [formField]="settingsForm.boardPrefix"
         inputId="board-prefix"
-        [value]="facade.boardPrefix()"
         (valueChange)="onPrefixChange($event)"
         [maxlength]="5"
         placeholder="e.g. DEV"
