@@ -1,5 +1,5 @@
-import { Component, input, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, input, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { form } from '@angular/forms/signals';
 import { BoardSettingsFacade } from '../../../services/board-settings.facade';
 import { LabelListItemComponent } from '../label-list-item/label-list-item.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
@@ -9,8 +9,9 @@ import { Label, LABEL_COLORS, getColorSwatchClass as getColorSwatch } from '../.
 
 @Component({
   selector: 'app-label-management-section',
-  imports: [FormsModule, LabelListItemComponent, ButtonComponent, SettingsSectionComponent],
+  imports: [LabelListItemComponent, ButtonComponent, SettingsSectionComponent],
   templateUrl: './label-management-section.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LabelManagementSectionComponent {
   facade = inject(BoardSettingsFacade);
@@ -20,7 +21,8 @@ export class LabelManagementSectionComponent {
   boardId = input.required<string>();
 
   editingLabelId = signal<string | null>(null);
-  newLabelName = signal('');
+  newLabelModel = signal({ name: '' });
+  newLabelForm = form(this.newLabelModel);
   newLabelColor = signal<string>(LABEL_COLORS[0]);
   isAddingLabel = signal(false);
   isSavingLabel = signal(false);
@@ -55,13 +57,18 @@ export class LabelManagementSectionComponent {
     }
   }
 
+  onNameInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.newLabelModel.set({ name: value });
+  }
+
   addLabel(): void {
-    const name = this.newLabelName().trim();
+    const name = this.newLabelModel().name.trim();
     if (!name || this.isAddingLabel()) return;
 
     this.isAddingLabel.set(true);
     this.facade.addLabel(this.projectId(), this.boardId(), name, this.newLabelColor());
-    this.newLabelName.set('');
+    this.newLabelModel.set({ name: '' });
     this.newLabelColor.set(LABEL_COLORS[0]);
     this.isAddingLabel.set(false);
   }

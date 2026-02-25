@@ -25,8 +25,8 @@
           <input
             id="new-label-name"
             type="text"
-            [ngModel]="newLabelName()"
-            (ngModelChange)="newLabelName.set($event)"
+            [value]="newLabelModel().name"
+            (input)="onNameInput($event)"
             (keyup.enter)="addLabel()"
             placeholder="e.g. Bug, Feature, Urgent..."
             maxlength="50"
@@ -35,7 +35,7 @@
         <app-button
           variant="primary"
           size="sm"
-          [disabled]="isAddingLabel() || !newLabelName().trim()"
+          [disabled]="isAddingLabel() || !newLabelModel().name.trim()"
           (click)="addLabel()">
           {{ isAddingLabel() ? 'Adding...' : 'Add' }}
         </app-button>
