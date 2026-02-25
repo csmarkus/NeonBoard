@@ -2,8 +2,8 @@
   <div class="flex items-center gap-2 bg-surface border border-dim rounded-lg p-3">
     <input
       type="text"
-      [ngModel]="editName()"
-      (ngModelChange)="editName.set($event)"
+      [value]="editModel().name"
+      (input)="onEditNameInput($event)"
       (keyup.enter)="onSave()"
       (keyup.escape)="onCancel()"
       maxlength="50"
@@ -19,7 +19,7 @@
     </div>
     <button
       (click)="onSave()"
-      [disabled]="isSaving() || !editName().trim()"
+      [disabled]="isSaving() || !editModel().name.trim()"
       class="px-2 py-1 text-xs bg-accent text-white rounded hover:bg-accent/90 disabled:opacity-50 transition-colors">
       Save
     </button>
