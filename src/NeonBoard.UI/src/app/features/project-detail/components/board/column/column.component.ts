@@ -2,13 +2,15 @@ import { Component, input, output, signal, afterNextRender, inject, Injector, El
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faGripVertical, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { Column } from '../../../models/column.model';
 import { Card } from '../../../models/card.model';
 import { CardComponent } from '../card/card.component';
 
 @Component({
   selector: 'app-column',
-  imports: [CommonModule, FormsModule, DragDropModule, CardComponent],
+  imports: [CommonModule, FormsModule, DragDropModule, FontAwesomeModule, CardComponent],
   templateUrl: './column.component.html',
   styleUrl: './column.component.css',
   host: {
@@ -18,6 +20,10 @@ import { CardComponent } from '../card/card.component';
 export class ColumnComponent {
   private injector = inject(Injector);
   private elementRef = inject(ElementRef);
+
+  faGripVertical = faGripVertical;
+  faCheck = faCheck;
+  faXmark = faXmark;
 
   column = input.required<Column>();
   cards = input.required<Card[]>();

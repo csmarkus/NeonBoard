@@ -1,8 +1,11 @@
 import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faXmark, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { Label, getLabelClassString } from '../../../../models/label.model';
 
 @Component({
   selector: 'app-card-label-picker',
+  imports: [FontAwesomeModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div>
@@ -18,9 +21,7 @@ import { Label, getLabelClassString } from '../../../../models/label.model';
             [attr.aria-label]="'Remove label ' + label.name"
           >
             {{ label.name }}
-            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+            <fa-icon [icon]="faXmark" class="text-xs opacity-60"></fa-icon>
           </button>
         }
 
@@ -54,9 +55,7 @@ import { Label, getLabelClassString } from '../../../../models/label.model';
                     : 'border-dim')"
               >
                 @if (isLabelAssigned(label.id)) {
-                  <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <fa-icon [icon]="faCheck" class="text-xs text-white"></fa-icon>
                 }
               </div>
               <span
@@ -70,6 +69,9 @@ import { Label, getLabelClassString } from '../../../../models/label.model';
   `,
 })
 export class CardLabelPickerComponent {
+  faXmark = faXmark;
+  faCheck = faCheck;
+
   boardLabels = input.required<Label[]>();
   assignedLabelIds = input.required<string[]>();
   togglingLabelId = input<string | null>(null);

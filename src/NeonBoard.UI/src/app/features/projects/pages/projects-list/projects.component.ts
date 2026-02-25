@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faFolder } from '@fortawesome/free-solid-svg-icons';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner.component';
 import { UserMenuComponent } from '../../../../layout/user-menu/user-menu.component';
@@ -13,6 +15,7 @@ import { Project } from '../../models/project.model';
   selector: 'app-projects',
   imports: [
     CommonModule,
+    FontAwesomeModule,
     ButtonComponent,
     ErrorBannerComponent,
     UserMenuComponent,
@@ -25,6 +28,8 @@ import { Project } from '../../models/project.model';
 export class ProjectsComponent implements OnInit {
   private projectService = inject(ProjectService);
   private loadingService = inject(LoadingService);
+
+  faFolder = faFolder;
 
   projects = signal<Project[]>([]);
   showCreateDrawer = signal(false);

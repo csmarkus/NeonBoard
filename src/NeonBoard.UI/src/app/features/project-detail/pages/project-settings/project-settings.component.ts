@@ -2,6 +2,8 @@ import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, e
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { Observable, from } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -16,6 +18,7 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
   selector: 'app-project-settings',
   imports: [
     RouterLink,
+    FontAwesomeModule,
     PageHeaderComponent,
     ButtonComponent,
     ProjectGeneralSettingsSectionComponent,
@@ -34,6 +37,8 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
   private modalService = inject(ModalService);
   facade = inject(ProjectSettingsFacade);
   private titleService = inject(Title);
+
+  faChevronLeft = faChevronLeft;
   private destroyRef = inject(DestroyRef);
 
   shortId = signal('');

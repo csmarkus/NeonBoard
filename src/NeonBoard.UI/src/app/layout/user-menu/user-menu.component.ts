@@ -1,15 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-user-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   templateUrl: './user-menu.component.html',
 })
 export class UserMenuComponent {
   protected auth = inject(AuthService);
+  faRightFromBracket = faRightFromBracket;
   showUserMenu = false;
 
   toggleUserMenu(): void {

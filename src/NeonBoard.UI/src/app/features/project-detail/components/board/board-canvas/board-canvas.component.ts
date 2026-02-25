@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { ColumnComponent } from '../column/column.component';
 import { AddColumnButtonComponent } from '../add-column-button/add-column-button.component';
@@ -9,7 +11,7 @@ import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-board-canvas',
-  imports: [CommonModule, NgStyle, DragDropModule, ColumnComponent, AddColumnButtonComponent],
+  imports: [CommonModule, NgStyle, DragDropModule, FontAwesomeModule, ColumnComponent, AddColumnButtonComponent],
   host: {
     class: 'flex-1 flex flex-col'
   },
@@ -19,6 +21,8 @@ import { Card } from '../../../models/card.model';
 })
 export class BoardCanvasComponent {
   private facade = inject(BoardStateFacade);
+
+  faTriangleExclamation = faTriangleExclamation;
 
   projectId = input.required<string>();
   boardId = input.required<string>();

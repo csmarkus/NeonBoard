@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faTriangleExclamation, faTableColumns } from '@fortawesome/free-solid-svg-icons';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
@@ -15,6 +17,7 @@ import { BoardCardComponent } from '../../components/project/board-card/board-ca
   selector: 'app-project',
   imports: [
     CommonModule,
+    FontAwesomeModule,
     ButtonComponent,
     BoardCardComponent,
   ],
@@ -33,6 +36,9 @@ export class ProjectComponent implements OnInit {
   private titleService = inject(Title);
 
   private destroyRef = inject(DestroyRef);
+
+  faTriangleExclamation = faTriangleExclamation;
+  faTableColumns = faTableColumns;
 
   shortId = signal<string>('');
   projectId = signal<string>('');

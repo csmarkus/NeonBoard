@@ -1,17 +1,21 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { Project } from '../../models/project.model';
 import { GradientAccentComponent } from '../../../../shared/components/gradient-accent/gradient-accent.component';
 import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-project-card',
-  imports: [CommonModule, RouterLink, GradientAccentComponent],
+  imports: [CommonModule, RouterLink, FontAwesomeModule, GradientAccentComponent],
   templateUrl: './project-card.component.html',
 })
 export class ProjectCardComponent {
   private modalService = inject(ModalService);
+
+  faTrashCan = faTrashCan;
 
   @Input({ required: true }) project!: Project;
   @Input({ required: true }) index!: number;

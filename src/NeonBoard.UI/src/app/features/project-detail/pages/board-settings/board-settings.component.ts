@@ -2,6 +2,8 @@ import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, e
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { Observable, from, tap, switchMap } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -18,6 +20,7 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
   selector: 'app-board-settings',
   imports: [
     RouterLink,
+    FontAwesomeModule,
     PageHeaderComponent,
     ButtonComponent,
     GeneralSettingsSectionComponent,
@@ -37,6 +40,8 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   private boardService = inject(BoardService);
   facade = inject(BoardSettingsFacade);
   private titleService = inject(Title);
+
+  faChevronLeft = faChevronLeft;
   private destroyRef = inject(DestroyRef);
 
   private modalService = inject(ModalService);
