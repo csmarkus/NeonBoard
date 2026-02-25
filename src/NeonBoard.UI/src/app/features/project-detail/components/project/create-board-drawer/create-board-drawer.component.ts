@@ -1,6 +1,4 @@
-import { Component, input, output, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { ErrorBannerComponent } from '../../../../../shared/components/error-banner/error-banner.component';
@@ -10,8 +8,9 @@ import { Board, CreateBoardRequest } from '../../../models/board.model';
 
 @Component({
   selector: 'app-create-board-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
+  imports: [DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent],
   templateUrl: './create-board-drawer.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateBoardDrawerComponent {
   open = input.required<boolean>();
@@ -20,12 +19,11 @@ export class CreateBoardDrawerComponent {
   boardCreated = output<Board>();
 
   private boardService = inject(BoardService);
-  private cdr = inject(ChangeDetectorRef);
 
-  newBoardName = '';
-  newBoardPrefix = '';
-  error: string | null = null;
-  isCreating = false;
+  newBoardName = signal('');
+  newBoardPrefix = signal('');
+  error = signal<string | null>(null);
+  isCreating = signal(false);
 
   onClose(): void {
     this.resetForm();
@@ -33,36 +31,34 @@ export class CreateBoardDrawerComponent {
   }
 
   createBoard(): void {
-    if (!this.newBoardName.trim()) return;
+    if (!this.newBoardName().trim()) return;
 
-    this.isCreating = true;
-    this.error = null;
+    this.isCreating.set(true);
+    this.error.set(null);
 
     const request: CreateBoardRequest = {
-      name: this.newBoardName,
-      ...(this.newBoardPrefix.trim() && { prefix: this.newBoardPrefix.trim().toUpperCase() })
+      name: this.newBoardName(),
+      ...(this.newBoardPrefix().trim() && { prefix: this.newBoardPrefix().trim().toUpperCase() })
     };
 
     this.boardService.createBoard(this.projectId(), request).subscribe({
       next: (board) => {
         this.boardCreated.emit(board);
         this.resetForm();
-        this.isCreating = false;
+        this.isCreating.set(false);
         this.close.emit();
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error creating board:', err);
-        this.error = 'Failed to create board. Please try again.';
-        this.isCreating = false;
-        this.cdr.detectChanges();
+        this.error.set('Failed to create board. Please try again.');
+        this.isCreating.set(false);
       }
     });
   }
 
   private resetForm(): void {
-    this.newBoardName = '';
-    this.newBoardPrefix = '';
-    this.error = null;
+    this.newBoardName.set('');
+    this.newBoardPrefix.set('');
+    this.error.set(null);
   }
 }

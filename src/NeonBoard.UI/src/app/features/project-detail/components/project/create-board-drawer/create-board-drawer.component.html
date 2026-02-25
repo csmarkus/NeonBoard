@@ -6,13 +6,13 @@
     </div>
 
     <!-- Error message -->
-    <app-error-banner [message]="error" />
+    <app-error-banner [message]="error()" />
 
     <div class="space-y-4">
       <div>
         <label class="block text-sm text-secondary mb-1.5">Board name</label>
         <app-input
-          [(ngModel)]="newBoardName"
+          [(value)]="newBoardName"
           placeholder="Enter board name..."
           (keyup.enter)="createBoard()"
         />
@@ -21,7 +21,7 @@
       <div>
         <label class="block text-sm text-secondary mb-1.5">Prefix (optional)</label>
         <app-input
-          [(ngModel)]="newBoardPrefix"
+          [(value)]="newBoardPrefix"
           [maxlength]="5"
           (keyup.enter)="createBoard()"
           extraClass="uppercase"
@@ -34,13 +34,13 @@
       <app-button
         variant="primary"
         (click)="createBoard()"
-        [disabled]="isCreating || !newBoardName.trim()">
-        {{ isCreating ? 'Creating...' : 'Create Board' }}
+        [disabled]="isCreating() || !newBoardName().trim()">
+        {{ isCreating() ? 'Creating...' : 'Create Board' }}
       </app-button>
       <app-button
         variant="secondary"
         (click)="onClose()"
-        [disabled]="isCreating">
+        [disabled]="isCreating()">
         Cancel
       </app-button>
     </div>

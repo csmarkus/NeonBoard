@@ -10,8 +10,8 @@
     <app-input
       placeholder="Search archived cards..."
       aria-label="Search archived cards"
-      [ngModel]="searchQuery()"
-      (ngModelChange)="onSearchChange($event)"
+      [value]="searchQuery()"
+      (valueChange)="onSearchChange($event)"
     />
 
     <!-- Loading state -->

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { ModalService } from '../../../../../core/services/modal.service';
@@ -9,7 +8,7 @@ import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-archive-panel',
-  imports: [FormsModule, DrawerComponent, InputComponent, DatePipe],
+  imports: [DrawerComponent, InputComponent, DatePipe],
   templateUrl: './archive-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,12 +1,11 @@
 import { Component, input, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { BoardSettingsFacade } from '../../../services/board-settings.facade';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SettingsSectionComponent } from '../../../../../shared/components/settings-section/settings-section.component';
 
 @Component({
   selector: 'app-general-settings-section',
-  imports: [FormsModule, InputComponent, SettingsSectionComponent],
+  imports: [InputComponent, SettingsSectionComponent],
   templateUrl: './general-settings-section.component.html',
 })
 export class GeneralSettingsSectionComponent {

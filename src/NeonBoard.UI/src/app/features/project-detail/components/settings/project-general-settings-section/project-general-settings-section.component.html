@@ -4,8 +4,8 @@
       <label for="project-name" class="block text-sm font-medium text-primary mb-1.5">Project name</label>
       <app-input
         inputId="project-name"
-        [ngModel]="facade.projectName()"
-        (ngModelChange)="onNameInput($event)"
+        [value]="facade.projectName()"
+        (valueChange)="onNameInput($event)"
         [maxlength]="100"
       />
       <span class="text-xs text-muted mt-1.5">{{ facade.projectName().length }} / 100</span>
@@ -16,8 +16,8 @@
       <app-input
         inputId="project-description"
         element="textarea"
-        [ngModel]="facade.projectDescription()"
-        (ngModelChange)="onDescriptionInput($event)"
+        [value]="facade.projectDescription()"
+        (valueChange)="onDescriptionInput($event)"
         [maxlength]="1000"
         [rows]="4"
         placeholder="What is this project about?"
