@@ -3,11 +3,13 @@ import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
 import { DrawerService } from './drawer.service';
+import { ActivityService } from './activity.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 import { Column } from '../models/column.model';
 import { Card } from '../models/card.model';
 import { Label } from '../models/label.model';
+import { ActivityEntry } from '../models/activity.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +19,7 @@ export class BoardStateFacade {
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
+  private activityService = inject(ActivityService);
   private toastService = inject(ToastService);
 
   private _board = signal<BoardDetails | null>(null);
@@ -28,6 +31,10 @@ export class BoardStateFacade {
   private _showArchivePanel = signal<boolean>(false);
   private _archivedCards = signal<Card[]>([]);
   private _isLoadingArchive = signal<boolean>(false);
+  private _showActivityPanel = signal(false);
+  private _activityEntries = signal<ActivityEntry[]>([]);
+  private _activityNextCursor = signal<string | null>(null);
+  private _isLoadingActivity = signal(false);
 
   readonly board = this._board.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
@@ -36,6 +43,10 @@ export class BoardStateFacade {
   readonly showArchivePanel = this._showArchivePanel.asReadonly();
   readonly archivedCards = this._archivedCards.asReadonly();
   readonly isLoadingArchive = this._isLoadingArchive.asReadonly();
+  readonly showActivityPanel = this._showActivityPanel.asReadonly();
+  readonly activityEntries = this._activityEntries.asReadonly();
+  readonly activityNextCursor = this._activityNextCursor.asReadonly();
+  readonly isLoadingActivity = this._isLoadingActivity.asReadonly();
 
   readonly columns = computed(() => this._board()?.columns ?? []);
   readonly labels = computed(() => this._board()?.labels ?? []);
@@ -108,6 +119,10 @@ export class BoardStateFacade {
       this._showArchivePanel.set(false);
       this._archivedCards.set([]);
       this._isLoadingArchive.set(false);
+      this._showActivityPanel.set(false);
+      this._activityEntries.set([]);
+      this._activityNextCursor.set(null);
+      this._isLoadingActivity.set(false);
     }
 
     if (showLoading) {
@@ -280,6 +295,40 @@ export class BoardStateFacade {
         this.toastService.error('Failed to delete card');
       }
     });
+  }
+
+  openActivityPanel(): void {
+    this._showActivityPanel.set(true);
+    this._activityEntries.set([]);
+    this._activityNextCursor.set(null);
+    this.loadActivity();
+  }
+
+  closeActivityPanel(): void {
+    this._showActivityPanel.set(false);
+  }
+
+  loadMoreActivity(): void {
+    if (this._activityNextCursor() && !this._isLoadingActivity()) {
+      this.loadActivity();
+    }
+  }
+
+  private loadActivity(): void {
+    const projectId = this._currentProjectId();
+    const boardId = this._currentBoardId();
+    if (!projectId || !boardId) return;
+
+    this._isLoadingActivity.set(true);
+    this.activityService.getBoardActivity(projectId, boardId, 20, this._activityNextCursor() ?? undefined)
+      .subscribe({
+        next: (feed) => {
+          this._activityEntries.update(prev => [...prev, ...feed.entries]);
+          this._activityNextCursor.set(feed.nextCursor);
+          this._isLoadingActivity.set(false);
+        },
+        error: () => this._isLoadingActivity.set(false),
+      });
   }
 
   private loadArchivedCards(): void {

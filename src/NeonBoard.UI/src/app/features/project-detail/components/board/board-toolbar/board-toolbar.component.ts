@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faGear, faXmark, faBoxArchive } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faXmark, faBoxArchive, faClockRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { getLabelColorClasses } from '../../../models/label.model';
 
@@ -23,6 +23,7 @@ export class BoardToolbarComponent {
   faGear = faGear;
   faXmark = faXmark;
   faBoxArchive = faBoxArchive;
+  faClockRotateLeft = faClockRotateLeft;
   getLabelDotClass(color: string): string {
     const { bg, border } = getLabelColorClasses(color);
     return `w-2.5 h-2.5 rounded-full flex-shrink-0 border ${bg} ${border}`;
@@ -72,6 +73,10 @@ export class BoardToolbarComponent {
 
   openArchivePanel(): void {
     this.facade.openArchivePanel();
+  }
+
+  openActivityPanel(): void {
+    this.facade.openActivityPanel();
   }
 
   onDocumentClick(): void {

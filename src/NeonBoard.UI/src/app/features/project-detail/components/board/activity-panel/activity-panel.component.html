@@ -1,0 +1,60 @@
+<app-drawer [open]="open()" (close)="close()">
+  <!-- Header -->
+  <div class="px-5 py-4 border-b border-subtle">
+    <h2 class="text-base font-semibold text-primary">Activity</h2>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="flex-1 overflow-y-auto px-5 py-4">
+    <!-- Empty state -->
+    @if (entries().length === 0 && !isLoading()) {
+      <div class="flex items-center justify-center py-12">
+        <p class="text-sm text-muted">No activity yet</p>
+      </div>
+    }
+
+    <!-- Day groups -->
+    @for (group of groupedEntries(); track group.label) {
+      <div class="mb-4">
+        <p class="text-xs font-medium text-muted uppercase tracking-wide mb-2">{{ group.label }}</p>
+        @for (item of group.entries; track item.entry.id) {
+          <div class="flex items-start gap-3 py-2">
+            <div class="mt-0.5 w-5 h-5 flex items-center justify-center text-muted flex-shrink-0">
+              <fa-icon [icon]="item.icon" class="text-xs"></fa-icon>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-secondary leading-snug">
+                @for (part of item.messageParts; track $index) {
+                  @if (part.bold) {
+                    <span class="font-medium text-primary">{{ part.text }}</span>
+                  } @else {
+                    <span>{{ part.text }}</span>
+                  }
+                }
+              </p>
+              <p class="text-xs text-muted mt-0.5">{{ item.relativeTime }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Loading spinner -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-6">
+        <div class="inline-block w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Load more button -->
+    @if (nextCursor() && !isLoading()) {
+      <div class="flex justify-center py-2">
+        <button
+          (click)="loadMore()"
+          class="text-sm text-accent hover:text-accent/80 transition-colors">
+          Load more
+        </button>
+      </div>
+    }
+  </div>
+</app-drawer>
