@@ -34,7 +34,9 @@
                     <div class="flex min-w-0 flex-1 justify-between gap-4 pt-1">
                       <p class="text-sm text-secondary leading-snug">
                         @for (part of item.messageParts; track $index) {
-                          @if (part.cardId) {
+                          @if (part.labelClasses) {
+                            <span [class]="'inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded border ' + part.labelClasses">{{ part.text }}</span>
+                          } @else if (part.cardId) {
                             <button
                               (click)="onCardClick(part.cardId)"
                               class="font-medium text-accent hover:text-accent/80 transition-colors cursor-pointer">{{ part.text }}</button>

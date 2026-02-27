@@ -51,14 +51,16 @@ describe('getActivityMessage', () => {
     expect(msg.text).toContain('In Review');
   });
 
-  it('should render label created message', () => {
+  it('should render label created message with label info', () => {
     const msg = getActivityMessage(makeEntry({
       actionType: 'Created',
       entityType: 'Label',
-      data: { labelName: 'Bug', labelColor: '#ef4444' },
+      data: { labelName: 'Bug', labelColor: 'red' },
     }));
     expect(msg.text).toContain('Bug');
     expect(msg.icon).toBe('tag');
+    expect(msg.labelName).toBe('Bug');
+    expect(msg.labelColor).toBe('red');
   });
 
   it('should render card archived message', () => {
@@ -70,13 +72,15 @@ describe('getActivityMessage', () => {
     expect(msg.icon).toBe('box-archive');
   });
 
-  it('should render label added to card message', () => {
+  it('should render label added to card message with label info', () => {
     const msg = getActivityMessage(makeEntry({
       actionType: 'LabelAdded',
-      data: { cardTitle: 'Fix bug', cardNumber: 3, labelName: 'Bug', labelColor: '#ef4444', prefix: 'SPR' },
+      data: { cardTitle: 'Fix bug', cardNumber: 3, labelName: 'Bug', labelColor: 'red', prefix: 'SPR' },
     }));
     expect(msg.text).toContain('Bug');
     expect(msg.text).toContain('SPR-3');
+    expect(msg.labelName).toBe('Bug');
+    expect(msg.labelColor).toBe('red');
   });
 
   it('should render prefix updated message', () => {
@@ -123,6 +127,25 @@ describe('getActivityMessage', () => {
       data: { cardTitle: 'Old card', cardNumber: 5, prefix: 'TST' },
     }));
     expect(msg.cardEntityId).toBeUndefined();
+  });
+
+  it('should include labelName without color for deleted labels', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'Deleted',
+      entityType: 'Label',
+      data: { labelName: 'Urgent' },
+    }));
+    expect(msg.labelName).toBe('Urgent');
+    expect(msg.labelColor).toBeUndefined();
+  });
+
+  it('should not include label info for non-label entries', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'Created',
+      entityType: 'Column',
+      data: { columnName: 'Backlog' },
+    }));
+    expect(msg.labelName).toBeUndefined();
   });
 
   it('should include cardEntityId for LabelAdded entries', () => {

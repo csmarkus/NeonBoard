@@ -8,10 +8,12 @@ import {
 import { ActivityService } from '../../../services/activity.service';
 import { ActivityEntry } from '../../../models/activity.model';
 import { getActivityMessage } from '../../../models/activity-messages';
+import { getLabelClassString } from '../../../models/label.model';
 
 interface MessagePart {
   text: string;
   bold: boolean;
+  labelClasses?: string;
 }
 
 @Component({
@@ -40,7 +42,9 @@ interface MessagePart {
                     <div class="flex min-w-0 flex-1 justify-between gap-3 pt-0.5">
                       <p class="text-xs text-secondary leading-snug">
                         @for (part of item.messageParts; track $index) {
-                          @if (part.bold) {
+                          @if (part.labelClasses) {
+                            <span [class]="'inline-flex items-center px-1 py-0.5 text-xs font-medium rounded border ' + part.labelClasses">{{ part.text }}</span>
+                          } @else if (part.bold) {
                             <span class="font-medium text-primary">{{ part.text }}</span>
                           } @else {
                             <span>{{ part.text }}</span>
@@ -106,7 +110,7 @@ export class CardActivityComponent {
       return {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
-        messageParts: this.parseMessageParts(message.text),
+        messageParts: this.parseMessageParts(message.text, message.labelName, message.labelColor),
         relativeTime: this.getRelativeTime(entry.occurredAt),
       };
     })
@@ -139,7 +143,7 @@ export class CardActivityComponent {
     return `${Math.floor(diffHr / 24)}d ago`;
   }
 
-  private parseMessageParts(text: string): MessagePart[] {
+  private parseMessageParts(text: string, labelName?: string, labelColor?: string): MessagePart[] {
     const parts: MessagePart[] = [];
     const regex = /\*\*(.+?)\*\*/g;
     let lastIndex = 0;
@@ -149,7 +153,13 @@ export class CardActivityComponent {
       if (match.index > lastIndex) {
         parts.push({ text: text.slice(lastIndex, match.index), bold: false });
       }
-      parts.push({ text: match[1], bold: true });
+      const boldText = match[1];
+      const isLabel = labelName && boldText === labelName;
+      parts.push({
+        text: boldText,
+        bold: true,
+        labelClasses: isLabel ? getLabelClassString(labelColor ?? 'grey') : undefined,
+      });
       lastIndex = regex.lastIndex;
     }
 

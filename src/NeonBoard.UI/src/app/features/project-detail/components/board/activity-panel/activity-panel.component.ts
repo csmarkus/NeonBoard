@@ -9,11 +9,13 @@ import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { getActivityMessage } from '../../../models/activity-messages';
 import { ActivityEntry } from '../../../models/activity.model';
+import { getLabelClassString } from '../../../models/label.model';
 
 interface MessagePart {
   text: string;
   bold: boolean;
   cardId?: string;
+  labelClasses?: string;
 }
 
 interface GroupedEntry {
@@ -68,7 +70,7 @@ export class ActivityPanelComponent {
       const grouped: GroupedEntry = {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
-        messageParts: this.parseMessageParts(message.text, message.cardEntityId, message.cardDisplayId),
+        messageParts: this.parseMessageParts(message.text, message.cardEntityId, message.cardDisplayId, message.labelName, message.labelColor),
         relativeTime: this.getRelativeTime(entry.occurredAt, now),
       };
 
@@ -124,7 +126,13 @@ export class ActivityPanelComponent {
     return `${diffDays}d ago`;
   }
 
-  private parseMessageParts(text: string, cardEntityId?: string, cardDisplayId?: string): MessagePart[] {
+  private parseMessageParts(
+    text: string,
+    cardEntityId?: string,
+    cardDisplayId?: string,
+    labelName?: string,
+    labelColor?: string,
+  ): MessagePart[] {
     const parts: MessagePart[] = [];
     const regex = /\*\*(.+?)\*\*/g;
     let lastIndex = 0;
@@ -136,7 +144,13 @@ export class ActivityPanelComponent {
       }
       const boldText = match[1];
       const isCardLink = cardEntityId && cardDisplayId && boldText === cardDisplayId;
-      parts.push({ text: boldText, bold: true, cardId: isCardLink ? cardEntityId : undefined });
+      const isLabel = labelName && boldText === labelName;
+      parts.push({
+        text: boldText,
+        bold: true,
+        cardId: isCardLink ? cardEntityId : undefined,
+        labelClasses: isLabel ? getLabelClassString(labelColor ?? 'grey') : undefined,
+      });
       lastIndex = regex.lastIndex;
     }
 
