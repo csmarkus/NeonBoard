@@ -1,0 +1,79 @@
+<app-drawer [open]="open()" (close)="close()">
+  <!-- Header -->
+  <div class="px-5 py-4 border-b border-subtle">
+    <h2 class="text-base font-semibold text-primary">Activity</h2>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="flex-1 overflow-y-auto px-5 py-4">
+    <!-- Empty state -->
+    @if (entries().length === 0 && !isLoading()) {
+      <div class="flex items-center justify-center py-12">
+        <p class="text-sm text-muted">No activity yet</p>
+      </div>
+    }
+
+    <!-- Day groups -->
+    @for (group of groupedEntries(); track group.label) {
+      <div class="mb-6">
+        <p class="text-xs font-medium text-muted uppercase tracking-wide mb-3">{{ group.label }}</p>
+        <div class="flow-root">
+          <ul role="list" class="-mb-8">
+            @for (item of group.entries; track item.entry.id; let last = $last) {
+              <li>
+                <div class="relative pb-8">
+                  @if (!last) {
+                    <span class="absolute left-4 top-8 -ml-px h-full w-0.5 bg-dim" aria-hidden="true"></span>
+                  }
+                  <div class="relative flex gap-3">
+                    <div>
+                      <span class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated ring-4 ring-surface">
+                        <fa-icon [icon]="item.icon" class="text-xs text-muted"></fa-icon>
+                      </span>
+                    </div>
+                    <div class="flex min-w-0 flex-1 justify-between gap-4 pt-1">
+                      <p class="text-sm text-secondary leading-snug">
+                        @for (part of item.messageParts; track $index) {
+                          @if (part.labelClasses) {
+                            <span [class]="'inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded border ' + part.labelClasses">{{ part.text }}</span>
+                          } @else if (part.cardId) {
+                            <button
+                              (click)="onCardClick(part.cardId)"
+                              class="font-medium text-accent hover:text-accent/80 transition-colors cursor-pointer">{{ part.text }}</button>
+                          } @else if (part.bold) {
+                            <span class="font-medium text-primary">{{ part.text }}</span>
+                          } @else {
+                            <span>{{ part.text }}</span>
+                          }
+                        }
+                      </p>
+                      <span class="whitespace-nowrap text-xs text-muted pt-0.5">{{ item.relativeTime }}</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+
+    <!-- Loading spinner -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-6">
+        <div class="inline-block w-5 h-5 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Load more button -->
+    @if (nextCursor() && !isLoading()) {
+      <div class="flex justify-center py-2">
+        <button
+          (click)="loadMore()"
+          class="text-sm text-accent hover:text-accent/80 transition-colors">
+          Load more
+        </button>
+      </div>
+    }
+  </div>
+</app-drawer>

@@ -22,6 +22,54 @@ namespace NeonBoard.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("NeonBoard.Domain.Boards.Activity.ActivityEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("EntityType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("BoardId", "OccurredAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_ActivityEntries_BoardId_OccurredAt");
+
+                    b.HasIndex("EntityId", "OccurredAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_ActivityEntries_EntityId_OccurredAt");
+
+                    b.ToTable("ActivityEntries", (string)null);
+                });
+
             modelBuilder.Entity("NeonBoard.Domain.Boards.Board", b =>
                 {
                     b.Property<Guid>("Id")
@@ -135,6 +183,21 @@ namespace NeonBoard.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("NeonBoard.Domain.Boards.Activity.ActivityEntry", b =>
+                {
+                    b.HasOne("NeonBoard.Domain.Boards.Board", null)
+                        .WithMany()
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NeonBoard.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NeonBoard.Domain.Boards.Board", b =>

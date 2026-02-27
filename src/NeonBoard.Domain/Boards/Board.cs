@@ -68,11 +68,17 @@ public sealed class Board : Entity, IAggregateRoot
     {
         ValidateName(newName);
 
+        var oldName = Name;
         Name = newName;
         Slug = SlugHelper.Slugify(newName);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new BoardRenamedEvent(Id, newName));
+        AddDomainEvent(new BoardRenamedEvent(Id, oldName, newName));
+    }
+
+    public void Delete()
+    {
+        AddDomainEvent(new BoardDeletedEvent(Id, ProjectId, Name));
     }
 
     public void UpdatePrefix(string newPrefix)
@@ -164,7 +170,7 @@ public sealed class Board : Entity, IAggregateRoot
         ResequenceColumns();
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new ColumnDeletedEvent(Id, columnId, moveCardsToColumnId));
+        AddDomainEvent(new ColumnDeletedEvent(Id, columnId, moveCardsToColumnId, column.Name));
     }
 
     #endregion
@@ -190,7 +196,10 @@ public sealed class Board : Entity, IAggregateRoot
             card.Id,
             columnId,
             title,
-            position.Value));
+            position.Value,
+            cardNumber,
+            column.Name,
+            Prefix.Value));
 
         return card.Id;
     }
@@ -207,7 +216,9 @@ public sealed class Board : Entity, IAggregateRoot
             Id,
             cardId,
             title,
-            description));
+            description,
+            card.CardNumber,
+            Prefix.Value));
     }
 
     public void MoveCard(Guid cardId, Guid targetColumnId, int targetPosition)
@@ -219,6 +230,8 @@ public sealed class Board : Entity, IAggregateRoot
             throw new DomainException(DomainMessages.BoardTargetPositionNegative);
 
         var sourceColumnId = card.ColumnId;
+        var sourceColumn = _columns.First(c => c.Id == sourceColumnId);
+        var targetColumn = _columns.First(c => c.Id == targetColumnId);
 
         card.Move(targetColumnId, Position.Create(int.MaxValue));
 
@@ -247,19 +260,26 @@ public sealed class Board : Entity, IAggregateRoot
             cardId,
             sourceColumnId,
             targetColumnId,
-            targetPosition));
+            targetPosition,
+            card.Content.Title,
+            card.CardNumber,
+            sourceColumn.Name,
+            targetColumn.Name,
+            Prefix.Value));
     }
 
     public void DeleteCard(Guid cardId)
     {
         var card = FindCard(cardId);
         var columnId = card.ColumnId;
+        var cardTitle = card.Content.Title;
+        var cardNumber = card.CardNumber;
 
         _cards.Remove(card);
         ResequenceCardsInColumn(columnId);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new CardDeletedEvent(Id, cardId, columnId));
+        AddDomainEvent(new CardDeletedEvent(Id, cardId, columnId, cardTitle, cardNumber, Prefix.Value));
     }
 
     public void ArchiveCard(Guid cardId)
@@ -271,7 +291,8 @@ public sealed class Board : Entity, IAggregateRoot
         ResequenceCardsInColumn(columnId);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new CardArchivedEvent(Id, cardId, columnId));
+        AddDomainEvent(new CardArchivedEvent(Id, cardId, columnId,
+            card.Content.Title, card.CardNumber, Prefix.Value));
     }
 
     public void RestoreCard(Guid cardId)
@@ -286,7 +307,8 @@ public sealed class Board : Entity, IAggregateRoot
         card.Move(columnId, restorePosition);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new CardRestoredEvent(Id, cardId, columnId));
+        AddDomainEvent(new CardRestoredEvent(Id, cardId, columnId,
+            card.Content.Title, card.CardNumber, Prefix.Value));
     }
 
     #endregion
@@ -316,6 +338,7 @@ public sealed class Board : Entity, IAggregateRoot
     public void RemoveLabel(Guid labelId)
     {
         var label = FindLabel(labelId);
+        var labelName = label.Name;
 
         // Remove label from all cards that have it
         foreach (var card in _cards)
@@ -329,28 +352,31 @@ public sealed class Board : Entity, IAggregateRoot
         _labels.Remove(label);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new LabelRemovedEvent(Id, labelId));
+        AddDomainEvent(new LabelRemovedEvent(Id, labelId, labelName));
     }
 
     public void AddLabelToCard(Guid cardId, Guid labelId)
     {
         var card = FindCard(cardId);
-        FindLabel(labelId);
+        var label = FindLabel(labelId);
 
         card.AddLabel(labelId);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new CardLabelAddedEvent(Id, cardId, labelId));
+        AddDomainEvent(new CardLabelAddedEvent(Id, cardId, labelId,
+            card.Content.Title, card.CardNumber, label.Name, label.Color, Prefix.Value));
     }
 
     public void RemoveLabelFromCard(Guid cardId, Guid labelId)
     {
         var card = FindCard(cardId);
+        var label = FindLabel(labelId);
 
         card.RemoveLabel(labelId);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new CardLabelRemovedEvent(Id, cardId, labelId));
+        AddDomainEvent(new CardLabelRemovedEvent(Id, cardId, labelId,
+            card.Content.Title, card.CardNumber, label.Name, label.Color, Prefix.Value));
     }
 
     #endregion

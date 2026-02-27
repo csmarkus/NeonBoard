@@ -76,6 +76,14 @@
       <span>Archive</span>
     </button>
 
+    <button
+      (click)="openActivityPanel()"
+      class="flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors"
+      aria-label="View board activity">
+      <fa-icon [icon]="faClockRotateLeft" class="text-sm"></fa-icon>
+      <span>Activity</span>
+    </button>
+
     <a
       [routerLink]="['/p', shortId(), 'b', slug(), 'settings']"
       class="flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors"

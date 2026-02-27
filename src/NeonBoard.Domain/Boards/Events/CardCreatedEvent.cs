@@ -7,4 +7,7 @@ public record CardCreatedEvent(
     Guid CardId,
     Guid ColumnId,
     string Title,
-    int Position) : IDomainEvent;
+    int Position,
+    int CardNumber,
+    string ColumnName,
+    string Prefix) : IDomainEvent;

@@ -5,4 +5,5 @@ namespace NeonBoard.Domain.Boards.Events;
 public record ColumnDeletedEvent(
     Guid BoardId,
     Guid ColumnId,
-    Guid? MovedCardsToColumnId) : IDomainEvent;
+    Guid? MovedCardsToColumnId,
+    string ColumnName) : IDomainEvent;
