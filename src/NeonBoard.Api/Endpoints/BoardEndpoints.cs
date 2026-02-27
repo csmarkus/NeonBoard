@@ -4,6 +4,9 @@ using NeonBoard.Api.Models;
 using NeonBoard.Application.Boards.Commands.CreateBoard;
 using NeonBoard.Application.Boards.Commands.DeleteBoard;
 using NeonBoard.Application.Boards.Commands.UpdateBoardSettings;
+using NeonBoard.Application.Boards.Activity.DTOs;
+using NeonBoard.Application.Boards.Activity.Queries.GetBoardActivity;
+using NeonBoard.Application.Boards.Activity.Queries.GetCardActivity;
 using NeonBoard.Application.Boards.DTOs;
 using NeonBoard.Application.Boards.Queries.GetBoardsByProject;
 using NeonBoard.Application.Boards.Queries.GetBoardDetails;
@@ -43,6 +46,16 @@ public static class BoardEndpoints
         group.MapDelete("/{boardId:guid}", DeleteBoard)
             .WithName("DeleteBoard")
             .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{boardId:guid}/activity", GetBoardActivity)
+            .WithName("GetBoardActivity")
+            .Produces<ActivityFeedDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapGet("/{boardId:guid}/cards/{cardId:guid}/activity", GetCardActivity)
+            .WithName("GetCardActivity")
+            .Produces<ActivityFeedDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
@@ -99,5 +112,32 @@ public static class BoardEndpoints
         var command = new DeleteBoardCommand(projectId, boardId);
         await mediator.Send(command, ct);
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> GetBoardActivity(
+        Guid projectId,
+        Guid boardId,
+        int pageSize,
+        DateTime? cursor,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var query = new GetBoardActivityQuery(projectId, boardId, pageSize, cursor);
+        var result = await mediator.Send(query, ct);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetCardActivity(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        int pageSize,
+        DateTime? cursor,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var query = new GetCardActivityQuery(projectId, boardId, cardId, pageSize, cursor);
+        var result = await mediator.Send(query, ct);
+        return Results.Ok(result);
     }
 }
