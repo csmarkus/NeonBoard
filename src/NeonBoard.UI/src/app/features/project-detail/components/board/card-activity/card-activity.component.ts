@@ -9,6 +9,11 @@ import { ActivityService } from '../../../services/activity.service';
 import { ActivityEntry } from '../../../models/activity.model';
 import { getActivityMessage } from '../../../models/activity-messages';
 
+interface MessagePart {
+  text: string;
+  bold: boolean;
+}
+
 @Component({
   selector: 'app-card-activity',
   imports: [FontAwesomeModule],
@@ -17,15 +22,38 @@ import { getActivityMessage } from '../../../models/activity-messages';
     <div class="border-t border-subtle pt-4 mt-4">
       <h3 class="text-sm font-medium text-primary mb-3">Activity</h3>
 
-      @for (item of entryMessages(); track item.entry.id) {
-        <div class="flex items-start gap-2 py-1.5">
-          <div class="mt-0.5 w-4 h-4 flex items-center justify-center text-muted flex-shrink-0">
-            <fa-icon [icon]="iconMap[item.message.icon] || iconMap['circle-info']" class="text-xs"></fa-icon>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-xs text-secondary">{{ item.plainText }}</p>
-            <p class="text-xs text-muted">{{ item.relativeTime }}</p>
-          </div>
+      @if (entryMessages().length > 0) {
+        <div class="flow-root">
+          <ul role="list" class="-mb-6">
+            @for (item of entryMessages(); track item.entry.id; let last = $last) {
+              <li>
+                <div class="relative pb-6">
+                  @if (!last) {
+                    <span class="absolute left-3 top-6 -ml-px h-full w-0.5 bg-dim" aria-hidden="true"></span>
+                  }
+                  <div class="relative flex gap-2.5">
+                    <div>
+                      <span class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-elevated ring-4 ring-surface">
+                        <fa-icon [icon]="item.icon" size="2xs" class="text-muted"></fa-icon>
+                      </span>
+                    </div>
+                    <div class="flex min-w-0 flex-1 justify-between gap-3 pt-0.5">
+                      <p class="text-xs text-secondary leading-snug">
+                        @for (part of item.messageParts; track $index) {
+                          @if (part.bold) {
+                            <span class="font-medium text-primary">{{ part.text }}</span>
+                          } @else {
+                            <span>{{ part.text }}</span>
+                          }
+                        }
+                      </p>
+                      <span class="whitespace-nowrap text-xs text-muted">{{ item.relativeTime }}</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
         </div>
       }
 
@@ -60,7 +88,7 @@ export class CardActivityComponent {
   nextCursor = signal<string | null>(null);
   isLoading = signal(false);
 
-  iconMap: Record<string, IconDefinition> = {
+  private iconMap: Record<string, IconDefinition> = {
     'plus': faPlus,
     'pencil': faPencil,
     'trash': faTrash,
@@ -77,8 +105,8 @@ export class CardActivityComponent {
       const message = getActivityMessage(entry);
       return {
         entry,
-        message,
-        plainText: message.text.replace(/\*\*/g, ''),
+        icon: this.iconMap[message.icon] ?? faCircleInfo,
+        messageParts: this.parseMessageParts(message.text),
         relativeTime: this.getRelativeTime(entry.occurredAt),
       };
     })
@@ -101,7 +129,7 @@ export class CardActivityComponent {
     }
   }
 
-  getRelativeTime(occurredAt: string): string {
+  private getRelativeTime(occurredAt: string): string {
     const diffMs = Date.now() - new Date(occurredAt).getTime();
     const diffMin = Math.floor(diffMs / 60000);
     if (diffMin < 1) return 'just now';
@@ -109,6 +137,27 @@ export class CardActivityComponent {
     const diffHr = Math.floor(diffMin / 60);
     if (diffHr < 24) return `${diffHr}h ago`;
     return `${Math.floor(diffHr / 24)}d ago`;
+  }
+
+  private parseMessageParts(text: string): MessagePart[] {
+    const parts: MessagePart[] = [];
+    const regex = /\*\*(.+?)\*\*/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push({ text: text.slice(lastIndex, match.index), bold: false });
+      }
+      parts.push({ text: match[1], bold: true });
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push({ text: text.slice(lastIndex), bold: false });
+    }
+
+    return parts;
   }
 
   private loadActivity(): void {

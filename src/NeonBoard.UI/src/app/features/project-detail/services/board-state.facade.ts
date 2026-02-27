@@ -308,6 +308,14 @@ export class BoardStateFacade {
     this._showActivityPanel.set(false);
   }
 
+  openCardFromActivity(cardId: string): void {
+    const card = this._board()?.cards.find(c => c.id === cardId);
+    if (card) {
+      this.closeActivityPanel();
+      this.drawerService.openCardDrawer(card, this._currentProjectId(), this._currentBoardId());
+    }
+  }
+
   loadMoreActivity(): void {
     if (this._activityNextCursor() && !this._isLoadingActivity()) {
       this.loadActivity();

@@ -13,6 +13,7 @@ import { ActivityEntry } from '../../../models/activity.model';
 interface MessagePart {
   text: string;
   bold: boolean;
+  cardId?: string;
 }
 
 interface GroupedEntry {
@@ -67,7 +68,7 @@ export class ActivityPanelComponent {
       const grouped: GroupedEntry = {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
-        messageParts: this.parseMessageParts(message.text),
+        messageParts: this.parseMessageParts(message.text, message.cardEntityId, message.cardDisplayId),
         relativeTime: this.getRelativeTime(entry.occurredAt, now),
       };
 
@@ -91,6 +92,10 @@ export class ActivityPanelComponent {
 
   loadMore(): void {
     this.facade.loadMoreActivity();
+  }
+
+  onCardClick(cardId: string): void {
+    this.facade.openCardFromActivity(cardId);
   }
 
   private getDayLabel(occurredAt: string, now: Date): string {
@@ -119,7 +124,7 @@ export class ActivityPanelComponent {
     return `${diffDays}d ago`;
   }
 
-  private parseMessageParts(text: string): MessagePart[] {
+  private parseMessageParts(text: string, cardEntityId?: string, cardDisplayId?: string): MessagePart[] {
     const parts: MessagePart[] = [];
     const regex = /\*\*(.+?)\*\*/g;
     let lastIndex = 0;
@@ -129,7 +134,9 @@ export class ActivityPanelComponent {
       if (match.index > lastIndex) {
         parts.push({ text: text.slice(lastIndex, match.index), bold: false });
       }
-      parts.push({ text: match[1], bold: true });
+      const boldText = match[1];
+      const isCardLink = cardEntityId && cardDisplayId && boldText === cardDisplayId;
+      parts.push({ text: boldText, bold: true, cardId: isCardLink ? cardEntityId : undefined });
       lastIndex = regex.lastIndex;
     }
 

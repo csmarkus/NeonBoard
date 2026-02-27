@@ -93,4 +93,46 @@ describe('getActivityMessage', () => {
     const msg = getActivityMessage(makeEntry({ actionType: 'Unknown' }));
     expect(msg.text).toBe('Unknown activity');
   });
+
+  it('should include cardEntityId and cardDisplayId for card-type entries', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'Moved',
+      entityType: 'Card',
+      entityId: 'card-42',
+      data: { cardTitle: 'Fix bug', cardNumber: 3, sourceColumn: 'To Do', targetColumn: 'Done', prefix: 'SPR' },
+    }));
+    expect(msg.cardEntityId).toBe('card-42');
+    expect(msg.cardDisplayId).toBe('SPR-3');
+  });
+
+  it('should not include cardEntityId for non-card entries', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'Created',
+      entityType: 'Column',
+      data: { columnName: 'Backlog' },
+    }));
+    expect(msg.cardEntityId).toBeUndefined();
+    expect(msg.cardDisplayId).toBeUndefined();
+  });
+
+  it('should not include cardEntityId for deleted cards', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'Deleted',
+      entityType: 'Card',
+      entityId: 'card-99',
+      data: { cardTitle: 'Old card', cardNumber: 5, prefix: 'TST' },
+    }));
+    expect(msg.cardEntityId).toBeUndefined();
+  });
+
+  it('should include cardEntityId for LabelAdded entries', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'LabelAdded',
+      entityType: 'Card',
+      entityId: 'card-7',
+      data: { cardTitle: 'Fix bug', cardNumber: 3, labelName: 'Bug', labelColor: '#ef4444', prefix: 'SPR' },
+    }));
+    expect(msg.cardEntityId).toBe('card-7');
+    expect(msg.cardDisplayId).toBe('SPR-3');
+  });
 });
