@@ -396,3 +396,5 @@ analysis/
 docs/
 
 .worktrees/
+
+.mcp.json
