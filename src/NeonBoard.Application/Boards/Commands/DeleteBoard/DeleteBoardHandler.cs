@@ -20,6 +20,7 @@ public class DeleteBoardHandler : IRequestHandler<DeleteBoardCommand, Unit>
         if (board == null)
             throw new NotFoundException(nameof(Board), request.BoardId);
 
+        board.Delete();
         await _boardRepository.DeleteAsync(board, cancellationToken);
 
         return Unit.Value;

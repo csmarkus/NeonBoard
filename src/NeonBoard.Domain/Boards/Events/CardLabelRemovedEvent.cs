@@ -5,4 +5,9 @@ namespace NeonBoard.Domain.Boards.Events;
 public record CardLabelRemovedEvent(
     Guid BoardId,
     Guid CardId,
-    Guid LabelId) : IDomainEvent;
+    Guid LabelId,
+    string CardTitle,
+    int CardNumber,
+    string LabelName,
+    string LabelColor,
+    string Prefix) : IDomainEvent;

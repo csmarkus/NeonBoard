@@ -6,4 +6,6 @@ public record CardUpdatedEvent(
     Guid BoardId,
     Guid CardId,
     string Title,
-    string Description) : IDomainEvent;
+    string Description,
+    int CardNumber,
+    string Prefix) : IDomainEvent;
