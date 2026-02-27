@@ -27,15 +27,17 @@ public class GetBoardActivityHandler : IRequestHandler<GetBoardActivityQuery, Ac
         if (!boardExists)
             throw new NotFoundException(nameof(Board), request.BoardId);
 
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
         // Fetch one extra to determine if there are more pages
         var entries = await _activityRepository.GetBoardActivityAsync(
             request.BoardId,
-            request.PageSize + 1,
+            pageSize + 1,
             request.Cursor,
             cancellationToken);
 
-        var hasMore = entries.Count > request.PageSize;
-        var pageEntries = hasMore ? entries.Take(request.PageSize).ToList() : entries;
+        var hasMore = entries.Count > pageSize;
+        var pageEntries = hasMore ? entries.Take(pageSize).ToList() : entries;
 
         var dtos = pageEntries.Select(e => new ActivityEntryDto(
             e.Id,
