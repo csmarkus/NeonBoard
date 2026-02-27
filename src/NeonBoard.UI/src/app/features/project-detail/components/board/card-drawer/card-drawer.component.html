@@ -77,6 +77,12 @@
         (delete)="requestDeleteCard()"
       />
 
+      <!-- Card activity feed -->
+      <app-card-activity
+        [projectId]="projectId()"
+        [boardId]="boardId()"
+        [cardId]="card()!.id" />
+
     } @else {
       <!-- ===== ADD MODE ===== -->
       <div class="space-y-4">

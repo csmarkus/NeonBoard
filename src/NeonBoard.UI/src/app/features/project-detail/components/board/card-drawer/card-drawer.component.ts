@@ -7,6 +7,7 @@ import { ErrorBannerComponent } from '../../../../../shared/components/error-ban
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { CardLabelPickerComponent } from './card-label-picker/card-label-picker.component';
 import { CardActionsComponent } from './card-actions/card-actions.component';
+import { CardActivityComponent } from '../card-activity/card-activity.component';
 import { CardService } from '../../../services/card.service';
 import { DrawerService } from '../../../services/drawer.service';
 import { ModalService } from '../../../../../core/services/modal.service';
@@ -14,7 +15,7 @@ import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-card-drawer',
-  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent],
+  imports: [CommonModule, FormsModule, DrawerComponent, ButtonComponent, ErrorBannerComponent, InputComponent, CardLabelPickerComponent, CardActionsComponent, CardActivityComponent],
   templateUrl: './card-drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
