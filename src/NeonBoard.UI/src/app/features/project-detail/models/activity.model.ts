@@ -1,6 +1,8 @@
 export interface ActivityEntry {
   id: string;
   boardId: string;
+  userId: string;
+  userName: string;
   entityType: string;
   entityId: string;
   actionType: string;

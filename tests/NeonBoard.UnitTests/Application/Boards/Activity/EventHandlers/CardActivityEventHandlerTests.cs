@@ -9,11 +9,15 @@ namespace NeonBoard.UnitTests.Application.Boards.Activity.EventHandlers;
 public class CardActivityEventHandlerTests
 {
     private readonly IActivityEntryRepository _repository = Substitute.For<IActivityEntryRepository>();
+    private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly CardActivityEventHandler _handler;
+    private readonly Guid _userId = Guid.NewGuid();
 
     public CardActivityEventHandlerTests()
     {
-        _handler = new CardActivityEventHandler(_repository);
+        _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns(_userId);
+        _currentUserService.Name.Returns("Test User");
+        _handler = new CardActivityEventHandler(_repository, _currentUserService);
     }
 
     [Fact]
@@ -29,6 +33,8 @@ public class CardActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.Created &&
@@ -51,6 +57,8 @@ public class CardActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.Updated &&
@@ -76,6 +84,8 @@ public class CardActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.Moved &&
@@ -100,6 +110,8 @@ public class CardActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.Deleted &&
@@ -122,6 +134,8 @@ public class CardActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.Archived &&
@@ -144,6 +158,8 @@ public class CardActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.Restored &&

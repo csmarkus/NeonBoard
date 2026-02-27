@@ -43,6 +43,8 @@ public class GetCardActivityHandler : IRequestHandler<GetCardActivityQuery, Acti
         var dtos = pageEntries.Select(e => new ActivityEntryDto(
             e.Id,
             e.BoardId,
+            e.UserId,
+            e.UserName,
             e.EntityType.ToString(),
             e.EntityId,
             e.ActionType.ToString(),

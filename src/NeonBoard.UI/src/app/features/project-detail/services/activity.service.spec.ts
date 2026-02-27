@@ -40,7 +40,7 @@ describe('ActivityService', () => {
 
   it('getBoardActivity → includes cursor param when provided', () => {
     const mockFeed = {
-      entries: [{ id: 'a-1', boardId: 'b-1', entityType: 'Card', entityId: 'c-1', actionType: 'Created', data: {}, occurredAt: '2026-01-01T00:00:00Z' }],
+      entries: [{ id: 'a-1', boardId: 'b-1', userId: 'u-1', userName: 'Alice', entityType: 'Card', entityId: 'c-1', actionType: 'Created', data: {}, occurredAt: '2026-01-01T00:00:00Z' }],
       nextCursor: 'next-abc',
     };
 

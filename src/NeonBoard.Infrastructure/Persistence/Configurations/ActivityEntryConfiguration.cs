@@ -17,6 +17,13 @@ public class ActivityEntryConfiguration : IEntityTypeConfiguration<ActivityEntry
         builder.Property(e => e.BoardId)
             .IsRequired();
 
+        builder.Property(e => e.UserId)
+            .IsRequired();
+
+        builder.Property(e => e.UserName)
+            .IsRequired()
+            .HasMaxLength(100);
+
         builder.Property(e => e.EntityType)
             .IsRequired();
 
@@ -61,5 +68,11 @@ public class ActivityEntryConfiguration : IEntityTypeConfiguration<ActivityEntry
             .WithMany()
             .HasForeignKey(e => e.BoardId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // FK to User with restrict delete (activity is a permanent audit record)
+        builder.HasOne<NeonBoard.Domain.Users.User>()
+            .WithMany()
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

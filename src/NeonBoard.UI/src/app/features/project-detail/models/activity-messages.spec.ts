@@ -3,7 +3,8 @@ import { ActivityEntry } from './activity.model';
 
 function makeEntry(overrides: Partial<ActivityEntry>): ActivityEntry {
   return {
-    id: '1', boardId: 'b1', entityType: 'Card', entityId: 'e1',
+    id: '1', boardId: 'b1', userId: 'u1', userName: 'Alice',
+    entityType: 'Card', entityId: 'e1',
     actionType: 'Created', data: {}, occurredAt: '2026-01-01T00:00:00Z',
     ...overrides,
   };
@@ -146,6 +147,16 @@ describe('getActivityMessage', () => {
       data: { columnName: 'Backlog' },
     }));
     expect(msg.labelName).toBeUndefined();
+  });
+
+  it('should include user name in message text', () => {
+    const msg = getActivityMessage(makeEntry({
+      actionType: 'Created',
+      entityType: 'Card',
+      userName: 'Bob',
+      data: { cardTitle: 'Fix bug', cardNumber: 3, columnName: 'To Do', prefix: 'SPR' },
+    }));
+    expect(msg.text).toContain('**Bob**');
   });
 
   it('should include cardEntityId for LabelAdded entries', () => {

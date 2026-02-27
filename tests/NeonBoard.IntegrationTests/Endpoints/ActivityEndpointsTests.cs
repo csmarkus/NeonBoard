@@ -61,6 +61,8 @@ public class ActivityEndpointsTests : IClassFixture<NeonBoardWebApplicationFacto
 
         boardCreatedEntry.BoardId.Should().Be(boardId);
         boardCreatedEntry.EntityId.Should().Be(boardId);
+        boardCreatedEntry.UserId.Should().Be(_factory.TestUserId);
+        boardCreatedEntry.UserName.Should().Be(TestAuthHandler.TestName);
         boardCreatedEntry.OccurredAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(30));
     }
 
@@ -179,6 +181,8 @@ public class ActivityEndpointsTests : IClassFixture<NeonBoardWebApplicationFacto
     private record ActivityEntryResponse(
         Guid Id,
         Guid BoardId,
+        Guid UserId,
+        string UserName,
         string EntityType,
         Guid EntityId,
         string ActionType,

@@ -12,6 +12,7 @@ public class GetCardActivityHandlerTests
     private readonly IActivityEntryRepository _activityRepository = Substitute.For<IActivityEntryRepository>();
     private readonly IBoardRepository _boardRepository = Substitute.For<IBoardRepository>();
     private readonly GetCardActivityHandler _handler;
+    private readonly Guid _userId = Guid.NewGuid();
 
     public GetCardActivityHandlerTests()
     {
@@ -27,8 +28,8 @@ public class GetCardActivityHandlerTests
 
         var entries = new List<ActivityEntry>
         {
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, cardId, ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, cardId, ActivityActionType.Updated, new Dictionary<string, object> { ["cardTitle"] = "Card 1" })
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, cardId, ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, cardId, ActivityActionType.Updated, new Dictionary<string, object> { ["cardTitle"] = "Card 1" })
         };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -43,6 +44,8 @@ public class GetCardActivityHandlerTests
         result.Should().NotBeNull();
         result.Entries.Should().HaveCount(2);
         result.Entries[0].EntityId.Should().Be(cardId);
+        result.Entries[0].UserId.Should().Be(_userId);
+        result.Entries[0].UserName.Should().Be("Alice");
         result.Entries[0].ActionType.Should().Be("Created");
         result.Entries[1].ActionType.Should().Be("Updated");
         result.NextCursor.Should().BeNull();
@@ -75,9 +78,9 @@ public class GetCardActivityHandlerTests
 
         var entries = new List<ActivityEntry>
         {
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, cardId, ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, cardId, ActivityActionType.Updated, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, cardId, ActivityActionType.Moved, new Dictionary<string, object> { ["cardTitle"] = "Card 1" })
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, cardId, ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, cardId, ActivityActionType.Updated, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, cardId, ActivityActionType.Moved, new Dictionary<string, object> { ["cardTitle"] = "Card 1" })
         };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -124,7 +127,7 @@ public class GetCardActivityHandlerTests
         var cardId = Guid.NewGuid();
         var data = new Dictionary<string, object> { ["cardTitle"] = "My Card", ["fromColumn"] = "To Do", ["toColumn"] = "Done" };
 
-        var entry = ActivityEntry.Create(boardId, ActivityEntityType.Card, cardId, ActivityActionType.Moved, data);
+        var entry = ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, cardId, ActivityActionType.Moved, data);
         var entries = new List<ActivityEntry> { entry };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -139,6 +142,8 @@ public class GetCardActivityHandlerTests
         var dto = result.Entries.Single();
         dto.Id.Should().Be(entry.Id);
         dto.BoardId.Should().Be(boardId);
+        dto.UserId.Should().Be(_userId);
+        dto.UserName.Should().Be("Alice");
         dto.EntityType.Should().Be("Card");
         dto.EntityId.Should().Be(cardId);
         dto.ActionType.Should().Be("Moved");

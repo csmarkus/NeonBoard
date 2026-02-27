@@ -9,11 +9,15 @@ namespace NeonBoard.UnitTests.Application.Boards.Activity.EventHandlers;
 public class LabelActivityEventHandlerTests
 {
     private readonly IActivityEntryRepository _repository = Substitute.For<IActivityEntryRepository>();
+    private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly LabelActivityEventHandler _handler;
+    private readonly Guid _userId = Guid.NewGuid();
 
     public LabelActivityEventHandlerTests()
     {
-        _handler = new LabelActivityEventHandler(_repository);
+        _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns(_userId);
+        _currentUserService.Name.Returns("Test User");
+        _handler = new LabelActivityEventHandler(_repository, _currentUserService);
     }
 
     [Fact]
@@ -28,6 +32,8 @@ public class LabelActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Label &&
                 e.EntityId == labelId &&
                 e.ActionType == ActivityActionType.Created &&
@@ -48,6 +54,8 @@ public class LabelActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Label &&
                 e.EntityId == labelId &&
                 e.ActionType == ActivityActionType.Updated &&
@@ -68,6 +76,8 @@ public class LabelActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Label &&
                 e.EntityId == labelId &&
                 e.ActionType == ActivityActionType.Deleted &&
@@ -88,6 +98,8 @@ public class LabelActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.LabelAdded &&
@@ -112,6 +124,8 @@ public class LabelActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Card &&
                 e.EntityId == cardId &&
                 e.ActionType == ActivityActionType.LabelRemoved &&

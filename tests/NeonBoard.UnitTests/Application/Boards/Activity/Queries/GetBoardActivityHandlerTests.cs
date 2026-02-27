@@ -12,6 +12,7 @@ public class GetBoardActivityHandlerTests
     private readonly IActivityEntryRepository _activityRepository = Substitute.For<IActivityEntryRepository>();
     private readonly IBoardRepository _boardRepository = Substitute.For<IBoardRepository>();
     private readonly GetBoardActivityHandler _handler;
+    private readonly Guid _userId = Guid.NewGuid();
 
     public GetBoardActivityHandlerTests()
     {
@@ -25,8 +26,8 @@ public class GetBoardActivityHandlerTests
         var boardId = Guid.NewGuid();
         var entries = new List<ActivityEntry>
         {
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
-            ActivityEntry.Create(boardId, ActivityEntityType.Column, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["columnName"] = "To Do" })
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Column, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["columnName"] = "To Do" })
         };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -41,6 +42,8 @@ public class GetBoardActivityHandlerTests
         result.Should().NotBeNull();
         result.Entries.Should().HaveCount(2);
         result.Entries[0].BoardId.Should().Be(boardId);
+        result.Entries[0].UserId.Should().Be(_userId);
+        result.Entries[0].UserName.Should().Be("Alice");
         result.Entries[0].EntityType.Should().Be("Card");
         result.Entries[0].ActionType.Should().Be("Created");
         result.Entries[1].EntityType.Should().Be("Column");
@@ -57,9 +60,9 @@ public class GetBoardActivityHandlerTests
         // Create 3 entries (pageSize + 1) to simulate "has more"
         var entries = new List<ActivityEntry>
         {
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Updated, new Dictionary<string, object> { ["cardTitle"] = "Card 2" }),
-            ActivityEntry.Create(boardId, ActivityEntityType.Column, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["columnName"] = "Col" })
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" }),
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Updated, new Dictionary<string, object> { ["cardTitle"] = "Card 2" }),
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Column, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["columnName"] = "Col" })
         };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -85,7 +88,7 @@ public class GetBoardActivityHandlerTests
 
         var entries = new List<ActivityEntry>
         {
-            ActivityEntry.Create(boardId, ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" })
+            ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, Guid.NewGuid(), ActivityActionType.Created, new Dictionary<string, object> { ["cardTitle"] = "Card 1" })
         };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -146,7 +149,7 @@ public class GetBoardActivityHandlerTests
         var entityId = Guid.NewGuid();
         var data = new Dictionary<string, object> { ["cardTitle"] = "Test Card", ["columnName"] = "To Do" };
 
-        var entry = ActivityEntry.Create(boardId, ActivityEntityType.Card, entityId, ActivityActionType.Created, data);
+        var entry = ActivityEntry.Create(boardId, _userId, "Alice", ActivityEntityType.Card, entityId, ActivityActionType.Created, data);
         var entries = new List<ActivityEntry> { entry };
 
         _boardRepository.BoardExistsInProjectAsync(boardId, projectId, Arg.Any<CancellationToken>())
@@ -161,6 +164,8 @@ public class GetBoardActivityHandlerTests
         var dto = result.Entries.Single();
         dto.Id.Should().Be(entry.Id);
         dto.BoardId.Should().Be(boardId);
+        dto.UserId.Should().Be(_userId);
+        dto.UserName.Should().Be("Alice");
         dto.EntityType.Should().Be("Card");
         dto.EntityId.Should().Be(entityId);
         dto.ActionType.Should().Be("Created");

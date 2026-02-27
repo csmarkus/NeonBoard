@@ -9,11 +9,15 @@ namespace NeonBoard.UnitTests.Application.Boards.Activity.EventHandlers;
 public class ColumnActivityEventHandlerTests
 {
     private readonly IActivityEntryRepository _repository = Substitute.For<IActivityEntryRepository>();
+    private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
     private readonly ColumnActivityEventHandler _handler;
+    private readonly Guid _userId = Guid.NewGuid();
 
     public ColumnActivityEventHandlerTests()
     {
-        _handler = new ColumnActivityEventHandler(_repository);
+        _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns(_userId);
+        _currentUserService.Name.Returns("Test User");
+        _handler = new ColumnActivityEventHandler(_repository, _currentUserService);
     }
 
     [Fact]
@@ -28,6 +32,8 @@ public class ColumnActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Column &&
                 e.EntityId == columnId &&
                 e.ActionType == ActivityActionType.Created &&
@@ -47,6 +53,8 @@ public class ColumnActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Column &&
                 e.EntityId == columnId &&
                 e.ActionType == ActivityActionType.Deleted &&
@@ -70,6 +78,8 @@ public class ColumnActivityEventHandlerTests
         await _repository.Received(1).AddAsync(
             Arg.Is<ActivityEntry>(e =>
                 e.BoardId == boardId &&
+                e.UserId == _userId &&
+                e.UserName == "Test User" &&
                 e.EntityType == ActivityEntityType.Column &&
                 e.EntityId == boardId &&
                 e.ActionType == ActivityActionType.Reordered &&

@@ -12,16 +12,24 @@ public class BoardActivityEventHandler :
     INotificationHandler<BoardDeletedEvent>
 {
     private readonly IActivityEntryRepository _repository;
+    private readonly ICurrentUserService _currentUserService;
 
-    public BoardActivityEventHandler(IActivityEntryRepository repository)
+    public BoardActivityEventHandler(
+        IActivityEntryRepository repository,
+        ICurrentUserService currentUserService)
     {
         _repository = repository;
+        _currentUserService = currentUserService;
     }
 
     public async Task Handle(BoardCreatedEvent notification, CancellationToken cancellationToken)
     {
+        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+
         var entry = ActivityEntry.Create(
             notification.BoardId,
+            userId,
+            userName,
             ActivityEntityType.Board,
             notification.BoardId,
             ActivityActionType.Created,
@@ -35,8 +43,12 @@ public class BoardActivityEventHandler :
 
     public async Task Handle(BoardRenamedEvent notification, CancellationToken cancellationToken)
     {
+        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+
         var entry = ActivityEntry.Create(
             notification.BoardId,
+            userId,
+            userName,
             ActivityEntityType.Board,
             notification.BoardId,
             ActivityActionType.Renamed,
@@ -51,8 +63,12 @@ public class BoardActivityEventHandler :
 
     public async Task Handle(BoardPrefixUpdatedEvent notification, CancellationToken cancellationToken)
     {
+        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+
         var entry = ActivityEntry.Create(
             notification.BoardId,
+            userId,
+            userName,
             ActivityEntityType.Board,
             notification.BoardId,
             ActivityActionType.PrefixUpdated,
@@ -67,8 +83,12 @@ public class BoardActivityEventHandler :
 
     public async Task Handle(BoardDeletedEvent notification, CancellationToken cancellationToken)
     {
+        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+
         var entry = ActivityEntry.Create(
             notification.BoardId,
+            userId,
+            userName,
             ActivityEntityType.Board,
             notification.BoardId,
             ActivityActionType.Deleted,
@@ -78,5 +98,11 @@ public class BoardActivityEventHandler :
             });
 
         await _repository.AddAsync(entry, cancellationToken);
+    }
+
+    private async Task<(Guid UserId, string UserName)> GetUserContextAsync(CancellationToken cancellationToken)
+    {
+        var userId = await _currentUserService.GetUserIdAsync(cancellationToken);
+        return (userId!.Value, _currentUserService.Name ?? "Unknown");
     }
 }
