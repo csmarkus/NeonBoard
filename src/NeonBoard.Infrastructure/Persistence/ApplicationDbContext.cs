@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards;
+using NeonBoard.Domain.Boards.Activity;
 using NeonBoard.Domain.Projects;
 using NeonBoard.Domain.Users;
 
@@ -15,6 +16,7 @@ public class ApplicationDbContext : DbContext, IUnitOfWork
     public DbSet<User> Users => Set<User>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Board> Boards => Set<Board>();
+    public DbSet<ActivityEntry> ActivityEntries => Set<ActivityEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
