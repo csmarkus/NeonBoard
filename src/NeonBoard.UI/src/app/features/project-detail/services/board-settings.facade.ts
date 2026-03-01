@@ -66,8 +66,7 @@ export class BoardSettingsFacade {
         this._boardLabels.set(board.labels ?? []);
         this._isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading board settings:', err);
+      error: () => {
         this._error.set('Failed to load board settings');
         this._isLoading.set(false);
       }
@@ -98,8 +97,7 @@ export class BoardSettingsFacade {
         this._isSaving.set(false);
         this.toastService.success('Board settings saved');
       }),
-      catchError((err) => {
-        console.error('Error saving board settings:', err);
+      catchError(() => {
         this._isSaving.set(false);
         this.toastService.error('Failed to save board settings');
         return EMPTY;
@@ -116,8 +114,8 @@ export class BoardSettingsFacade {
       next: (label) => {
         this._boardLabels.update(labels => [...labels, label]);
       },
-      error: (err) => {
-        console.error('Error adding label:', err);
+      error: () => {
+        this.toastService.error('Failed to add label');
       }
     });
   }
@@ -129,8 +127,8 @@ export class BoardSettingsFacade {
           labels.map(l => l.id === labelId ? { ...l, name, color } : l)
         );
       },
-      error: (err) => {
-        console.error('Error updating label:', err);
+      error: () => {
+        this.toastService.error('Failed to update label');
       }
     });
   }
@@ -140,8 +138,8 @@ export class BoardSettingsFacade {
       next: () => {
         this._boardLabels.update(labels => labels.filter(l => l.id !== labelId));
       },
-      error: (err) => {
-        console.error('Error deleting label:', err);
+      error: () => {
+        this.toastService.error('Failed to delete label');
       }
     });
   }

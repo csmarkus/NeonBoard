@@ -55,8 +55,7 @@ export class ProjectSettingsFacade {
         this._originalProjectDescription.set(project.description);
         this._isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading project settings:', err);
+      error: () => {
         this._error.set('Failed to load project settings');
         this._isLoading.set(false);
       }
@@ -87,8 +86,7 @@ export class ProjectSettingsFacade {
         this._isSaving.set(false);
         this.toastService.success('Project settings saved');
       }),
-      catchError((err) => {
-        console.error('Error saving project settings:', err);
+      catchError(() => {
         this._isSaving.set(false);
         this.toastService.error('Failed to save project settings');
         return EMPTY;

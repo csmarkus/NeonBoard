@@ -51,8 +51,7 @@ export class CreateBoardDrawerComponent {
         this.close.emit();
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error creating board:', err);
+      error: () => {
         this.error = 'Failed to create board. Please try again.';
         this.isCreating = false;
         this.cdr.detectChanges();

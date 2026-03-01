@@ -65,8 +65,7 @@ export class SidebarStateFacade {
         this._boards.set(boards);
         this._boardsMenuOpen.set(boards.length > 0);
       },
-      error: (err) => {
-        console.error('Error loading boards:', err);
+      error: () => {
         this._boards.set([]);
       }
     });

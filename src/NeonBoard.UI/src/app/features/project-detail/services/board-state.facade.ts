@@ -136,8 +136,7 @@ export class BoardStateFacade {
         this.drawerService.setBoardLabels(board.labels);
         this._isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading board:', err);
+      error: () => {
         this._error.set('Failed to load board');
         this._isLoading.set(false);
       }
@@ -159,8 +158,7 @@ export class BoardStateFacade {
     });
 
     this.columnService.reorderColumns(projectId, boardId, { columnIds }).subscribe({
-      error: (err) => {
-        console.error('Error reordering columns:', err);
+      error: () => {
         this.loadBoard(projectId, boardId, false);
       }
     });
@@ -171,8 +169,8 @@ export class BoardStateFacade {
       next: () => {
         this.loadBoard(projectId, boardId, false);
       },
-      error: (err) => {
-        console.error('Error adding column:', err);
+      error: () => {
+        this.toastService.error('Failed to add column');
       }
     });
   }
@@ -182,8 +180,8 @@ export class BoardStateFacade {
       next: () => {
         this.loadBoard(projectId, boardId, false);
       },
-      error: (err) => {
-        console.error('Error renaming column:', err);
+      error: () => {
+        this.toastService.error('Failed to rename column');
       }
     });
   }
@@ -194,9 +192,8 @@ export class BoardStateFacade {
         this.loadBoard(projectId, boardId, false);
       },
       error: (err) => {
-        console.error('Error deleting column:', err);
         const errorMessage = err.error?.title || err.error?.detail || 'Failed to delete column';
-        alert(errorMessage);
+        this.toastService.error(errorMessage);
       }
     });
   }
@@ -206,8 +203,7 @@ export class BoardStateFacade {
       targetColumnId,
       targetPosition
     }).subscribe({
-      error: (err) => {
-        console.error('Error moving card:', err);
+      error: () => {
         this.loadBoard(projectId, boardId, false);
       }
     });
@@ -222,8 +218,8 @@ export class BoardStateFacade {
       next: () => {
         this.loadBoard(projectId, boardId, false);
       },
-      error: (err) => {
-        console.error('Error adding card:', err);
+      error: () => {
+        this.toastService.error('Failed to add card');
       }
     });
   }
@@ -273,8 +269,7 @@ export class BoardStateFacade {
         this.loadBoard(projectId, boardId, false);
         this.toastService.success('Card restored');
       },
-      error: (err) => {
-        console.error('Error restoring card:', err);
+      error: () => {
         this.toastService.error('Failed to restore card');
       }
     });
@@ -290,8 +285,7 @@ export class BoardStateFacade {
         this._archivedCards.update(cards => cards.filter(c => c.id !== cardId));
         this.toastService.success('Card deleted');
       },
-      error: (err) => {
-        console.error('Error deleting card:', err);
+      error: () => {
         this.toastService.error('Failed to delete card');
       }
     });
@@ -351,8 +345,7 @@ export class BoardStateFacade {
         this._archivedCards.set(cards);
         this._isLoadingArchive.set(false);
       },
-      error: (err) => {
-        console.error('Error loading archived cards:', err);
+      error: () => {
         this._isLoadingArchive.set(false);
       }
     });

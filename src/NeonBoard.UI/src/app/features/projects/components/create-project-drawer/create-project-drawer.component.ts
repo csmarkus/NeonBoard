@@ -49,8 +49,7 @@ export class CreateProjectDrawerComponent {
         this.close.emit();
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error creating project:', err);
+      error: () => {
         this.error = 'Failed to create project. Please try again.';
         this.isCreating = false;
         this.cdr.detectChanges();
