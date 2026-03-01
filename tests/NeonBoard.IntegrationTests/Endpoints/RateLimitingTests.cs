@@ -51,7 +51,7 @@ public class RateLimitingTests : IClassFixture<NeonBoardWebApplicationFactory>
         var response = await client.GetAsync("/api/projects");
 
         response.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
 
         var content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("Too Many Requests");

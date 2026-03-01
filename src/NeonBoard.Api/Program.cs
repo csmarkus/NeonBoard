@@ -99,8 +99,6 @@ public class Program
 
             options.OnRejected = async (context, cancellationToken) =>
             {
-                context.HttpContext.Response.ContentType = "application/problem+json";
-
                 var retryAfter = context.Lease.TryGetMetadata(
                     MetadataName.RetryAfter, out var retryAfterValue)
                     ? (int)retryAfterValue.TotalSeconds
@@ -116,8 +114,11 @@ public class Program
                     Detail = $"Rate limit exceeded. Try again in {retryAfter} seconds."
                 };
 
-                await context.HttpContext.Response.WriteAsJsonAsync(
-                    problemDetails, cancellationToken);
+                context.HttpContext.Response.ContentType = "application/problem+json";
+                await System.Text.Json.JsonSerializer.SerializeAsync(
+                    context.HttpContext.Response.Body,
+                    problemDetails,
+                    cancellationToken: cancellationToken);
             };
 
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
