@@ -5,8 +5,9 @@ import {
   faBoxArchive, faRotateLeft, faTag, faCircleInfo,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
-import { ActivityService } from '../../../services/activity.service';
-import { ActivityEntry } from '../../../models/activity.model';
+import { formatRelativeTime } from '../../../../../shared/pipes/relative-time.pipe';
+import { CardService } from '../../../services/card.service';
+import { ActivityEntry, ActivityFeed } from '../../../models/activity.model';
 import { getActivityMessage } from '../../../models/activity-messages';
 import { getLabelClassString } from '../../../models/label.model';
 
@@ -82,11 +83,12 @@ interface MessagePart {
   `,
 })
 export class CardActivityComponent {
-  private activityService = inject(ActivityService);
+  private cardService = inject(CardService);
 
   projectId = input.required<string>();
   boardId = input.required<string>();
   cardId = input.required<string>();
+  initialActivity = input<ActivityFeed | null>(null);
 
   entries = signal<ActivityEntry[]>([]);
   nextCursor = signal<string | null>(null);
@@ -111,7 +113,7 @@ export class CardActivityComponent {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
         messageParts: this.parseMessageParts(message.text, message.labelName, message.labelColor),
-        relativeTime: this.getRelativeTime(entry.occurredAt),
+        relativeTime: formatRelativeTime(entry.occurredAt, 'short'),
       };
     })
   );
@@ -119,10 +121,16 @@ export class CardActivityComponent {
   constructor() {
     effect(() => {
       const cardId = this.cardId();
+      const initial = this.initialActivity();
       if (cardId) {
-        this.entries.set([]);
-        this.nextCursor.set(null);
-        this.loadActivity();
+        if (initial) {
+          this.entries.set(initial.entries);
+          this.nextCursor.set(initial.nextCursor);
+        } else {
+          this.entries.set([]);
+          this.nextCursor.set(null);
+          this.loadActivity();
+        }
       }
     });
   }
@@ -131,16 +139,6 @@ export class CardActivityComponent {
     if (this.nextCursor() && !this.isLoading()) {
       this.loadActivity();
     }
-  }
-
-  private getRelativeTime(occurredAt: string): string {
-    const diffMs = Date.now() - new Date(occurredAt).getTime();
-    const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return 'just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
-    const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return `${diffHr}h ago`;
-    return `${Math.floor(diffHr / 24)}d ago`;
   }
 
   private parseMessageParts(text: string, labelName?: string, labelColor?: string): MessagePart[] {
@@ -172,7 +170,7 @@ export class CardActivityComponent {
 
   private loadActivity(): void {
     this.isLoading.set(true);
-    this.activityService.getCardActivity(
+    this.cardService.getCardActivity(
       this.projectId(), this.boardId(), this.cardId(), 10,
       this.nextCursor() ?? undefined
     ).subscribe({

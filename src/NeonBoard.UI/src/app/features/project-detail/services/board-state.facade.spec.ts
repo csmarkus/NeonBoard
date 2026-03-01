@@ -51,10 +51,12 @@ describe('BoardStateFacade', () => {
   let cardService: {
     moveCard: ReturnType<typeof vi.fn>;
     addCard: ReturnType<typeof vi.fn>;
+    getCardDetail: ReturnType<typeof vi.fn>;
   };
   let drawerService: {
     setBoardLabels: ReturnType<typeof vi.fn>;
     openCardDrawer: ReturnType<typeof vi.fn>;
+    initialCardActivity: { set: ReturnType<typeof vi.fn> };
     cardUpdated$: Subject<void>;
     cardDeleted$: Subject<void>;
     cardArchived$: Subject<void>;
@@ -72,10 +74,11 @@ describe('BoardStateFacade', () => {
       renameColumn: vi.fn(),
       deleteColumn: vi.fn(),
     };
-    cardService = { moveCard: vi.fn(), addCard: vi.fn() };
+    cardService = { moveCard: vi.fn(), addCard: vi.fn(), getCardDetail: vi.fn() };
     drawerService = {
       setBoardLabels: vi.fn(),
       openCardDrawer: vi.fn(),
+      initialCardActivity: { set: vi.fn() },
       cardUpdated$: cardUpdated$.asObservable() as never,
       cardDeleted$: cardDeleted$.asObservable() as never,
       cardArchived$: cardArchived$.asObservable() as never,
@@ -266,12 +269,16 @@ describe('BoardStateFacade', () => {
   });
 
   describe('openCardDrawer', () => {
-    it('should delegate to drawerService', () => {
+    it('should delegate to drawerService and fetch card detail', () => {
       const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '', archivedAt: null };
+      const mockActivity = { entries: [], nextCursor: null };
+      cardService.getCardDetail.mockReturnValue(of({ ...card, activity: mockActivity }));
 
       facade.openCardDrawer(card, 'project-1', 'board-1');
 
       expect(drawerService.openCardDrawer).toHaveBeenCalledWith(card, 'project-1', 'board-1');
+      expect(cardService.getCardDetail).toHaveBeenCalledWith('project-1', 'board-1', 'card-1');
+      expect(drawerService.initialCardActivity.set).toHaveBeenCalledWith(mockActivity);
     });
   });
 

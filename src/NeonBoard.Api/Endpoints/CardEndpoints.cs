@@ -10,6 +10,9 @@ using NeonBoard.Application.Cards.Commands.RemoveCardLabel;
 using NeonBoard.Application.Cards.Commands.ArchiveCard;
 using NeonBoard.Application.Cards.Commands.RestoreCard;
 using NeonBoard.Application.Cards.DTOs;
+using NeonBoard.Application.Cards.Queries.GetCardDetail;
+using NeonBoard.Application.Boards.Activity.DTOs;
+using NeonBoard.Application.Boards.Activity.Queries.GetCardActivity;
 using NeonBoard.Application.Boards.Queries.GetArchivedCards;
 
 namespace NeonBoard.Api.Endpoints;
@@ -27,6 +30,11 @@ public static class CardEndpoints
             .WithName("AddCard")
             .Produces<CardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
+
+        group.MapGet("/{cardId:guid}", GetCardDetail)
+            .WithName("GetCardDetail")
+            .Produces<CardDetailDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/archived", GetArchivedCards)
             .WithName("GetArchivedCards")
@@ -64,6 +72,23 @@ public static class CardEndpoints
         group.MapDelete("/{cardId:guid}/labels/{labelId:guid}", RemoveCardLabel)
             .WithName("RemoveCardLabel")
             .Produces(StatusCodes.Status204NoContent);
+
+        group.MapGet("/{cardId:guid}/activity", GetCardActivity)
+            .WithName("GetCardActivity")
+            .Produces<ActivityFeedDto>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+    }
+
+    private static async Task<IResult> GetCardDetail(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var query = new GetCardDetailQuery(projectId, boardId, cardId);
+        var result = await mediator.Send(query, ct);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> AddCard(
@@ -190,5 +215,19 @@ public static class CardEndpoints
         var command = new RemoveCardLabelCommand(projectId, boardId, cardId, labelId);
         await mediator.Send(command, ct);
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> GetCardActivity(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        int pageSize,
+        DateTime? cursor,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var query = new GetCardActivityQuery(projectId, boardId, cardId, pageSize, cursor);
+        var result = await mediator.Send(query, ct);
+        return Results.Ok(result);
     }
 }

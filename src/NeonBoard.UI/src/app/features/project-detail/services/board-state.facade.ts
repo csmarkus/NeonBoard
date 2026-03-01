@@ -3,7 +3,6 @@ import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
 import { DrawerService } from './drawer.service';
-import { ActivityService } from './activity.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 import { Column } from '../models/column.model';
@@ -19,7 +18,6 @@ export class BoardStateFacade {
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
-  private activityService = inject(ActivityService);
   private toastService = inject(ToastService);
 
   private _board = signal<BoardDetails | null>(null);
@@ -226,6 +224,11 @@ export class BoardStateFacade {
 
   openCardDrawer(card: Card, projectId: string, boardId: string): void {
     this.drawerService.openCardDrawer(card, projectId, boardId);
+    this.cardService.getCardDetail(projectId, boardId, card.id).subscribe({
+      next: (detail) => {
+        this.drawerService.initialCardActivity.set(detail.activity);
+      },
+    });
   }
 
   toggleLabelFilter(labelId: string): void {
@@ -322,7 +325,7 @@ export class BoardStateFacade {
     if (!projectId || !boardId) return;
 
     this._isLoadingActivity.set(true);
-    this.activityService.getBoardActivity(projectId, boardId, 20, this._activityNextCursor() ?? undefined)
+    this.boardService.getBoardActivity(projectId, boardId, 20, this._activityNextCursor() ?? undefined)
       .subscribe({
         next: (feed) => {
           this._activityEntries.update(prev => [...prev, ...feed.entries]);

@@ -1,3 +1,4 @@
+import { ActivityFeed } from './activity.model';
 import { Label } from './label.model';
 
 export interface Card {
@@ -12,6 +13,10 @@ export interface Card {
   createdAt: string;
   updatedAt: string;
   archivedAt: string | null;
+}
+
+export interface CardDetail extends Card {
+  activity: ActivityFeed;
 }
 
 export interface AddCardRequest {

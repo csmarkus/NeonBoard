@@ -15,8 +15,8 @@
       </p>
     </div>
     <div class="flex items-center justify-between text-xs text-muted pt-3 border-t border-subtle">
-      <span>Created {{ getRelativeTime(board().createdAt) }}</span>
-      <span>Updated {{ getRelativeTime(board().updatedAt) }}</span>
+      <span>Created {{ board().createdAt | relativeTime }}</span>
+      <span>Updated {{ board().updatedAt | relativeTime }}</span>
     </div>
   </a>
 </div>

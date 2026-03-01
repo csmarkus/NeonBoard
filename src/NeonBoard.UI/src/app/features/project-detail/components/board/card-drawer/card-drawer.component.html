@@ -81,7 +81,8 @@
       <app-card-activity
         [projectId]="projectId()"
         [boardId]="boardId()"
-        [cardId]="card()!.id" />
+        [cardId]="card()!.id"
+        [initialActivity]="drawerService.initialCardActivity()" />
 
     } @else {
       <!-- ===== ADD MODE ===== -->

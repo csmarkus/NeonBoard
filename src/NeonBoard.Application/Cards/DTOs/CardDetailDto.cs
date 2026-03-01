@@ -1,0 +1,18 @@
+using NeonBoard.Application.Boards.Activity.DTOs;
+using NeonBoard.Application.Labels.DTOs;
+
+namespace NeonBoard.Application.Cards.DTOs;
+
+public record CardDetailDto(
+    Guid Id,
+    int CardNumber,
+    string DisplayId,
+    string Title,
+    string Description,
+    Guid ColumnId,
+    int Position,
+    List<LabelDto> Labels,
+    DateTime CreatedAt,
+    DateTime UpdatedAt,
+    DateTime? ArchivedAt,
+    ActivityFeedDto Activity);

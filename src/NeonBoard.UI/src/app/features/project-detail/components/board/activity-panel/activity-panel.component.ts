@@ -6,6 +6,7 @@ import {
   faBoxArchive, faRotateLeft, faTag, faCircleInfo
 } from '@fortawesome/free-solid-svg-icons';
 import { DrawerComponent } from '../../../../../shared/components/drawer/drawer.component';
+import { formatRelativeTime } from '../../../../../shared/pipes/relative-time.pipe';
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { getActivityMessage } from '../../../models/activity-messages';
 import { ActivityEntry } from '../../../models/activity.model';
@@ -71,7 +72,7 @@ export class ActivityPanelComponent {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
         messageParts: this.parseMessageParts(message.text, message.cardEntityId, message.cardDisplayId, message.labelName, message.labelColor),
-        relativeTime: this.getRelativeTime(entry.occurredAt, now),
+        relativeTime: formatRelativeTime(entry.occurredAt, 'short'),
       };
 
       const existing = groups.get(label);
@@ -110,20 +111,6 @@ export class ActivityPanelComponent {
     if (diffDays === 1) return 'Yesterday';
 
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  private getRelativeTime(occurredAt: string, now: Date): string {
-    const date = new Date(occurredAt);
-    const diffMs = now.getTime() - date.getTime();
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffSeconds < 60) return 'just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
   }
 
   private parseMessageParts(

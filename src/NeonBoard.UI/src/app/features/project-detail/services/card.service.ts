@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Card, AddCardRequest, UpdateCardRequest, MoveCardRequest } from '../models/card.model';
+import { Card, CardDetail, AddCardRequest, UpdateCardRequest, MoveCardRequest } from '../models/card.model';
+import { ActivityFeed } from '../models/activity.model';
 
 @Injectable({
   providedIn: 'root'
@@ -57,6 +58,23 @@ export class CardService {
   removeCardLabel(projectId: string, boardId: string, cardId: string, labelId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/labels/${labelId}`
+    );
+  }
+
+  getCardDetail(projectId: string, boardId: string, cardId: string): Observable<CardDetail> {
+    return this.http.get<CardDetail>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}`
+    );
+  }
+
+  getCardActivity(projectId: string, boardId: string, cardId: string, pageSize = 20, cursor?: string): Observable<ActivityFeed> {
+    let params = new HttpParams().set('pageSize', pageSize);
+    if (cursor) {
+      params = params.set('cursor', cursor);
+    }
+    return this.http.get<ActivityFeed>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/activity`,
+      { params }
     );
   }
 }

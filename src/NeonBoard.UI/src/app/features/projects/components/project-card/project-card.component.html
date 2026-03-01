@@ -17,8 +17,8 @@
       }
     </div>
     <div class="flex items-center justify-between text-xs text-muted pt-3 border-t border-subtle">
-      <span>Created {{ getRelativeTime(project.createdAt) }}</span>
-      <span>Updated {{ getRelativeTime(project.updatedAt) }}</span>
+      <span>Created {{ project.createdAt | relativeTime }}</span>
+      <span>Updated {{ project.updatedAt | relativeTime }}</span>
     </div>
   </a>
 
