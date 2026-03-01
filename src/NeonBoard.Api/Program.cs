@@ -1,5 +1,9 @@
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using NeonBoard.Api.Configuration;
 using NeonBoard.Api.Endpoints;
 using NeonBoard.Api.Middleware;
 using NeonBoard.Api.Services;
@@ -85,6 +89,69 @@ public class Program
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
 
+        var rateLimitSettings = builder.Configuration
+            .GetSection(RateLimitSettings.SectionName)
+            .Get<RateLimitSettings>() ?? new RateLimitSettings();
+
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.OnRejected = async (context, cancellationToken) =>
+            {
+                var retryAfter = context.Lease.TryGetMetadata(
+                    MetadataName.RetryAfter, out var retryAfterValue)
+                    ? (int)retryAfterValue.TotalSeconds
+                    : rateLimitSettings.WindowInSeconds;
+
+                context.HttpContext.Response.Headers.RetryAfter = retryAfter.ToString();
+
+                var problemDetails = new Microsoft.AspNetCore.Mvc.ProblemDetails
+                {
+                    Status = StatusCodes.Status429TooManyRequests,
+                    Title = "Too Many Requests",
+                    Type = "https://httpstatuses.com/429",
+                    Detail = $"Rate limit exceeded. Try again in {retryAfter} seconds."
+                };
+
+                await context.HttpContext.Response.WriteAsJsonAsync(
+                    problemDetails,
+                    (System.Text.Json.JsonSerializerOptions?)null,
+                    "application/problem+json",
+                    cancellationToken);
+            };
+
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+            {
+                var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? context.User?.FindFirst("sub")?.Value;
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        $"user_{userId}",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = rateLimitSettings.AuthenticatedPermitLimit,
+                            Window = TimeSpan.FromSeconds(rateLimitSettings.WindowInSeconds),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 0
+                        });
+                }
+
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"ip_{ipAddress}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = rateLimitSettings.AnonymousPermitLimit,
+                        Window = TimeSpan.FromSeconds(rateLimitSettings.WindowInSeconds),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    });
+            });
+        });
+
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
@@ -117,6 +184,7 @@ public class Program
         app.UseStaticFiles();
 
         app.UseAuthentication();
+        app.UseRateLimiter();
         app.UseAuthorization();
 
         app.UseSerilogRequestLogging();
