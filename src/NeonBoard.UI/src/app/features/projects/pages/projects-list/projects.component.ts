@@ -48,8 +48,7 @@ export class ProjectsComponent implements OnInit {
         this.projects.set(projects);
         this.loadingService.hide();
       },
-      error: (err) => {
-        console.error('Error loading projects:', err);
+      error: () => {
         this.error.set('Failed to load projects. Please try again.');
         this.loadingService.hide();
       }
@@ -75,8 +74,7 @@ export class ProjectsComponent implements OnInit {
       next: () => {
         this.projects.update(list => list.filter(p => p.id !== project.id));
       },
-      error: (err) => {
-        console.error('Error deleting project:', err);
+      error: () => {
         this.error.set('Failed to delete project. Please try again.');
       }
     });

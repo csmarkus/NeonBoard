@@ -60,8 +60,7 @@ export class ProjectComponent implements OnInit {
           this.titleService.setTitle(`${project.name} | NeonBoard`);
           this.loadBoards();
         },
-        error: (err) => {
-          console.error('Error loading project:', err);
+        error: () => {
           this.error.set('Failed to load project');
           this.isLoading.set(false);
         }
@@ -82,8 +81,7 @@ export class ProjectComponent implements OnInit {
         this.boards.set(boards);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading boards:', err);
+      error: () => {
         this.error.set('Failed to load boards');
         this.isLoading.set(false);
       }
