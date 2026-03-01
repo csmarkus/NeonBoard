@@ -21,8 +21,6 @@ public class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
-
         var (statusCode, title, errors) = exception switch
         {
             Application.Common.Exceptions.NotFoundException notFoundEx => (
@@ -79,6 +77,15 @@ public class GlobalExceptionHandler : IExceptionHandler
                     ["error"] = ["An unexpected error occurred. Please try again later."]
                 })
         };
+
+        if (statusCode >= 500)
+        {
+            _logger.LogError(exception, "Unhandled server error: {Message}", exception.Message);
+        }
+        else
+        {
+            _logger.LogWarning(exception, "Client error ({StatusCode}): {Message}", statusCode, exception.Message);
+        }
 
         httpContext.Response.StatusCode = statusCode;
 

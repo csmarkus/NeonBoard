@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\NeonBoard.Api\NeonBoard.Api.csproj" />
     <ProjectReference Include="..\..\src\NeonBoard.Application\NeonBoard.Application.csproj" />
     <ProjectReference Include="..\..\src\NeonBoard.Domain\NeonBoard.Domain.csproj" />
   </ItemGroup>
