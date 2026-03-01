@@ -34,7 +34,7 @@ public class Program
             .WriteTo.File(
                 path: "logs/neonboard-.log",
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{CorrelationId}] {SourceContext} {Message:lj}{NewLine}{Exception}"));
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}"));
 
         builder.AddServiceDefaults();
 
@@ -177,7 +177,6 @@ public class Program
         }
 
         app.UseExceptionHandler();
-        app.UseMiddleware<CorrelationIdMiddleware>();
 
         app.UseCors();
 
