@@ -114,11 +114,11 @@ public class Program
                     Detail = $"Rate limit exceeded. Try again in {retryAfter} seconds."
                 };
 
-                context.HttpContext.Response.ContentType = "application/problem+json";
-                await System.Text.Json.JsonSerializer.SerializeAsync(
-                    context.HttpContext.Response.Body,
+                await context.HttpContext.Response.WriteAsJsonAsync(
                     problemDetails,
-                    cancellationToken: cancellationToken);
+                    (System.Text.Json.JsonSerializerOptions?)null,
+                    "application/problem+json",
+                    cancellationToken);
             };
 
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>

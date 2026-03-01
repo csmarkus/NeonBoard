@@ -3,6 +3,8 @@ using NeonBoard.IntegrationTests.Infrastructure;
 
 namespace NeonBoard.IntegrationTests.Endpoints;
 
+// Each test creates its own client via WithWebHostBuilder to get an isolated server
+// instance with independent rate limiter state. Do not refactor to share a client.
 public class RateLimitingTests : IClassFixture<NeonBoardWebApplicationFactory>
 {
     private readonly NeonBoardWebApplicationFactory _factory;
