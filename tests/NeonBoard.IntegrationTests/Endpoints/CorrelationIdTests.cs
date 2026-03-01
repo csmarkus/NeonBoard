@@ -25,13 +25,12 @@ public class CorrelationIdTests : IClassFixture<NeonBoardWebApplicationFactory>
     public async Task Request_WithCorrelationId_EchoesItBack()
     {
         var expected = Guid.NewGuid().ToString();
-        _client.DefaultRequestHeaders.Add("X-Correlation-Id", expected);
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/projects");
+        request.Headers.Add("X-Correlation-Id", expected);
 
-        var response = await _client.GetAsync("/api/projects");
+        var response = await _client.SendAsync(request);
 
         var actual = response.Headers.GetValues("X-Correlation-Id").First();
         actual.Should().Be(expected);
-
-        _client.DefaultRequestHeaders.Remove("X-Correlation-Id");
     }
 }
