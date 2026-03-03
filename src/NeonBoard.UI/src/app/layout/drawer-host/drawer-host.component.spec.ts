@@ -1,11 +1,11 @@
-import { initTestEnvironment } from '../../../../test-setup';
+import { initTestEnvironment } from '../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { signal, computed } from '@angular/core';
 import { DrawerHostComponent } from './drawer-host.component';
-import { DrawerService } from '../../../core/services/drawer.service';
-import { CardDrawerEventsService } from '../../../features/project-detail/services/card-drawer-events.service';
-import { CreateBoardDrawerEventsService } from '../../../features/project-detail/services/create-board-drawer-events.service';
-import { DrawerConfig } from '../../../core/models/drawer.model';
+import { DrawerService } from '../../core/services/drawer.service';
+import { CardDrawerEventsService } from '../../features/project-detail/services/card-drawer-events.service';
+import { CreateBoardDrawerEventsService } from '../../features/project-detail/services/create-board-drawer-events.service';
+import { DrawerConfig } from '../../core/models/drawer.model';
 
 initTestEnvironment();
 

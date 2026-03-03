@@ -1,10 +1,10 @@
 import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
-import { DrawerService } from '../../../core/services/drawer.service';
-import { CardDrawerEventsService } from '../../../features/project-detail/services/card-drawer-events.service';
-import { CreateBoardDrawerEventsService } from '../../../features/project-detail/services/create-board-drawer-events.service';
-import { CardDrawerComponent } from '../../../features/project-detail/components/board/card-drawer/card-drawer.component';
-import { CreateBoardDrawerComponent } from '../../../features/project-detail/components/project/create-board-drawer/create-board-drawer.component';
-import { CardDrawerConfig, CreateBoardDrawerConfig } from '../../../core/models/drawer.model';
+import { DrawerService } from '../../core/services/drawer.service';
+import { CardDrawerEventsService } from '../../features/project-detail/services/card-drawer-events.service';
+import { CreateBoardDrawerEventsService } from '../../features/project-detail/services/create-board-drawer-events.service';
+import { CardDrawerComponent } from '../../features/project-detail/components/board/card-drawer/card-drawer.component';
+import { CreateBoardDrawerComponent } from '../../features/project-detail/components/project/create-board-drawer/create-board-drawer.component';
+import { CardDrawerConfig, CreateBoardDrawerConfig } from '../../core/models/drawer.model';
 
 @Component({
   selector: 'app-drawer-host',
