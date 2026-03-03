@@ -22,4 +22,18 @@ public class UserRepository : Repository<User>, IUserRepository
         return await DbSet
             .FirstOrDefaultAsync(u => u.Auth0UserId == auth0UserId, cancellationToken);
     }
+
+    public async Task<User> GetOrCreateByAuth0IdAsync(string auth0UserId, string email, string name, CancellationToken cancellationToken = default)
+    {
+        var user = await GetByAuth0UserIdAsync(auth0UserId, cancellationToken);
+
+        if (user != null)
+            return user;
+
+        user = User.Create(auth0UserId, email, name);
+        await DbSet.AddAsync(user, cancellationToken);
+        await Context.SaveChangesAsync(cancellationToken);
+
+        return user;
+    }
 }

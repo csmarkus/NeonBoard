@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using NeonBoard.Api.Constants;
 using NeonBoard.Application.Common.Interfaces;
-using NeonBoard.Domain.Users;
 
 namespace NeonBoard.Api.Services;
 
@@ -9,16 +8,13 @@ public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserRepository _userRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
     public CurrentUserService(
         IHttpContextAccessor httpContextAccessor,
-        IUserRepository userRepository,
-        IUnitOfWork unitOfWork)
+        IUserRepository userRepository)
     {
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;
-        _unitOfWork = unitOfWork;
     }
 
     public string? Auth0UserId =>
@@ -39,17 +35,10 @@ public sealed class CurrentUserService : ICurrentUserService
         if (!IsAuthenticated || string.IsNullOrEmpty(Auth0UserId))
             return null;
 
-        var user = await _userRepository.GetByAuth0UserIdAsync(Auth0UserId, cancellationToken);
-
-        if (user != null)
-            return user.Id;
-
         var email = Email ?? "unknown@neonboard.app";
         var name = Name ?? "Unknown User";
 
-        user = User.Create(Auth0UserId, email, name);
-        await _userRepository.AddAsync(user, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var user = await _userRepository.GetOrCreateByAuth0IdAsync(Auth0UserId, email, name, cancellationToken);
 
         return user.Id;
     }
