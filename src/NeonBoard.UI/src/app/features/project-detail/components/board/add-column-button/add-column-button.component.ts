@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, effect, viewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -9,11 +9,21 @@ import { FormsModule } from '@angular/forms';
 export class AddColumnButtonComponent {
   isAdding = input.required<boolean>();
   columnName = input.required<string>();
+  nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
 
   openAdd = output<void>();
   cancelAdd = output<void>();
   addColumn = output<string>();
   nameChange = output<string>();
+
+  constructor() {
+    effect(() => {
+      const input = this.nameInput();
+      if (input) {
+        input.nativeElement.focus();
+      }
+    });
+  }
 
   onOpenAdd(): void {
     this.openAdd.emit();
