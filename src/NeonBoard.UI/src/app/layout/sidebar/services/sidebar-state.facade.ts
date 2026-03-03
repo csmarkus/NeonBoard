@@ -35,8 +35,8 @@ export class SidebarStateFacade {
   });
 
   readonly userButtonClasses = computed(() => {
-    const base = 'w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-surface transition-colors duration-150';
-    const collapsed = this._collapsed() ? 'justify-center' : '';
+    const base = 'w-full flex items-center gap-3 py-2 rounded-lg hover:bg-surface transition-colors duration-150';
+    const collapsed = this._collapsed() ? 'justify-center px-0' : 'px-2';
     const menuOpen = this._userMenuOpen() ? 'bg-surface' : '';
     return `${base} ${collapsed} ${menuOpen}`;
   });
