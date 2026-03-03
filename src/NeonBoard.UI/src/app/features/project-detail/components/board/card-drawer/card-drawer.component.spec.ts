@@ -1,10 +1,9 @@
 import { initTestEnvironment } from '../../../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { CardDrawerComponent } from './card-drawer.component';
 import { CardService } from '../../../services/card.service';
-import { DrawerService } from '../../../services/drawer.service';
+import { CardDrawerEventsService } from '../../../services/card-drawer-events.service';
 import { ModalService } from '../../../../../core/services/modal.service';
 import { Card } from '../../../models/card.model';
 
@@ -33,8 +32,10 @@ describe('CardDrawerComponent', () => {
     addCardLabel: ReturnType<typeof vi.fn>;
     removeCardLabel: ReturnType<typeof vi.fn>;
   };
-  let mockDrawerService: {
-    boardLabels: ReturnType<typeof signal>;
+  let mockCardDrawerEvents: {
+    notifyCardUpdated: ReturnType<typeof vi.fn>;
+    notifyCardDeleted: ReturnType<typeof vi.fn>;
+    notifyCardArchived: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -45,15 +46,17 @@ describe('CardDrawerComponent', () => {
       addCardLabel: vi.fn().mockReturnValue(of(undefined)),
       removeCardLabel: vi.fn().mockReturnValue(of(undefined)),
     };
-    mockDrawerService = {
-      boardLabels: signal([]),
+    mockCardDrawerEvents = {
+      notifyCardUpdated: vi.fn(),
+      notifyCardDeleted: vi.fn(),
+      notifyCardArchived: vi.fn(),
     };
 
     TestBed.configureTestingModule({
       imports: [CardDrawerComponent],
       providers: [
         { provide: CardService, useValue: mockCardService },
-        { provide: DrawerService, useValue: mockDrawerService },
+        { provide: CardDrawerEventsService, useValue: mockCardDrawerEvents },
         { provide: ModalService, useValue: { confirm: vi.fn().mockResolvedValue(true) } },
       ],
     });

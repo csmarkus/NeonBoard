@@ -2,7 +2,8 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
-import { DrawerService } from './drawer.service';
+import { DrawerService } from '../../../core/services/drawer.service';
+import { CardDrawerEventsService } from './card-drawer-events.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 import { Column } from '../models/column.model';
@@ -18,6 +19,7 @@ export class BoardStateFacade {
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
+  private cardDrawerEvents = inject(CardDrawerEventsService);
   private toastService = inject(ToastService);
 
   private _board = signal<BoardDetails | null>(null);
@@ -83,13 +85,13 @@ export class BoardStateFacade {
   });
 
   constructor() {
-    this.drawerService.cardUpdated$.subscribe(() => {
+    this.cardDrawerEvents.cardUpdated$.subscribe(() => {
       if (this._currentProjectId() && this._currentBoardId()) {
         this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
       }
     });
 
-    this.drawerService.cardDeleted$.subscribe(() => {
+    this.cardDrawerEvents.cardDeleted$.subscribe(() => {
       if (this._currentProjectId() && this._currentBoardId()) {
         this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
         if (this._showArchivePanel()) {
@@ -98,7 +100,7 @@ export class BoardStateFacade {
       }
     });
 
-    this.drawerService.cardArchived$.subscribe(() => {
+    this.cardDrawerEvents.cardArchived$.subscribe(() => {
       if (this._currentProjectId() && this._currentBoardId()) {
         this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
         if (this._showArchivePanel()) {
@@ -131,7 +133,6 @@ export class BoardStateFacade {
     this.boardService.getBoardDetails(projectId, boardId).subscribe({
       next: (board) => {
         this._board.set(board);
-        this.drawerService.setBoardLabels(board.labels);
         this._isLoading.set(false);
       },
       error: () => {
@@ -223,10 +224,21 @@ export class BoardStateFacade {
   }
 
   openCardDrawer(card: Card, projectId: string, boardId: string): void {
-    this.drawerService.openCardDrawer(card, projectId, boardId);
+    const boardLabels = this._board()?.labels ?? [];
+    this.drawerService.open({
+      type: 'card-detail',
+      card,
+      projectId,
+      boardId,
+      boardLabels,
+      initialActivity: null,
+    });
     this.cardService.getCardDetail(projectId, boardId, card.id).subscribe({
       next: (detail) => {
-        this.drawerService.initialCardActivity.set(detail.activity);
+        const current = this.drawerService.config();
+        if (current?.type === 'card-detail' && current.card.id === card.id) {
+          this.drawerService.open({ ...current, initialActivity: detail.activity });
+        }
       },
     });
   }
@@ -258,7 +270,15 @@ export class BoardStateFacade {
 
   openArchivedCardInDrawer(card: Card): void {
     this.closeArchivePanel();
-    this.drawerService.openCardDrawer(card, this._currentProjectId(), this._currentBoardId());
+    const boardLabels = this._board()?.labels ?? [];
+    this.drawerService.open({
+      type: 'card-detail',
+      card,
+      projectId: this._currentProjectId(),
+      boardId: this._currentBoardId(),
+      boardLabels,
+      initialActivity: null,
+    });
   }
 
   restoreArchivedCard(cardId: string): void {
@@ -309,7 +329,15 @@ export class BoardStateFacade {
     const card = this._board()?.cards.find(c => c.id === cardId);
     if (card) {
       this.closeActivityPanel();
-      this.drawerService.openCardDrawer(card, this._currentProjectId(), this._currentBoardId());
+      const boardLabels = this._board()?.labels ?? [];
+      this.drawerService.open({
+        type: 'card-detail',
+        card,
+        projectId: this._currentProjectId(),
+        boardId: this._currentBoardId(),
+        boardLabels,
+        initialActivity: null,
+      });
     }
   }
 

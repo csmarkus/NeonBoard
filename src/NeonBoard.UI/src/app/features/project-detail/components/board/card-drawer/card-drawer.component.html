@@ -32,9 +32,9 @@
       </div>
 
       <!-- Labels section -->
-      @if (drawerService.boardLabels().length) {
+      @if (boardLabels().length) {
         <app-card-label-picker class="block"
-          [boardLabels]="drawerService.boardLabels()"
+          [boardLabels]="boardLabels()"
           [assignedLabelIds]="cardLabelIds()"
           [togglingLabelId]="togglingLabelId()"
           [showPicker]="showLabelPicker()"
@@ -82,7 +82,7 @@
         [projectId]="projectId()"
         [boardId]="boardId()"
         [cardId]="card()!.id"
-        [initialActivity]="drawerService.initialCardActivity()" />
+        [initialActivity]="initialActivity()" />
 
     } @else {
       <!-- ===== ADD MODE ===== -->

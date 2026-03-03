@@ -8,7 +8,8 @@ import { faTriangleExclamation, faTableColumns } from '@fortawesome/free-solid-s
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
-import { DrawerService } from '../../services/drawer.service';
+import { DrawerService } from '../../../../core/services/drawer.service';
+import { CreateBoardDrawerEventsService } from '../../services/create-board-drawer-events.service';
 import { Project } from '../../../projects/models/project.model';
 import { Board } from '../../models/board.model';
 import { BoardCardComponent } from '../../components/project/board-card/board-card.component';
@@ -33,6 +34,7 @@ export class ProjectComponent implements OnInit {
   private projectService = inject(ProjectService);
   private boardService = inject(BoardService);
   private drawerService = inject(DrawerService);
+  private createBoardDrawerEvents = inject(CreateBoardDrawerEventsService);
   private titleService = inject(Title);
 
   private destroyRef = inject(DestroyRef);
@@ -68,7 +70,7 @@ export class ProjectComponent implements OnInit {
     }
 
     // Subscribe to board creation to reload boards list
-    this.drawerService.boardCreated$.pipe(
+    this.createBoardDrawerEvents.boardCreated$.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.loadBoards();
@@ -89,6 +91,9 @@ export class ProjectComponent implements OnInit {
   }
 
   openCreateBoardDrawer(): void {
-    this.drawerService.openCreateBoardDrawer(this.projectId());
+    this.drawerService.open({
+      type: 'create-board',
+      projectId: this.projectId(),
+    });
   }
 }
