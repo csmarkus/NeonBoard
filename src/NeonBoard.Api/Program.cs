@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NeonBoard.Api.Configuration;
 using NeonBoard.Api.Endpoints;
 using NeonBoard.Api.Middleware;
@@ -12,6 +13,7 @@ using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Infrastructure;
 using NeonBoard.Infrastructure.Persistence;
 using Serilog;
+using Serilog.Events;
 
 namespace NeonBoard.Api;
 
@@ -34,7 +36,19 @@ public class Program
             .WriteTo.File(
                 path: "logs/neonboard-.log",
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{CorrelationId}] {SourceContext} {Message:lj}{NewLine}{Exception}"));
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{CorrelationId}] {SourceContext} {Message:lj}{NewLine}{Exception}")
+            .WriteTo.Sentry(o =>
+            {
+                o.Dsn = builder.Configuration["Sentry:Dsn"];
+                o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+                o.MinimumEventLevel = LogEventLevel.Information;
+            }));
+
+        builder.WebHost.UseSentry(o =>
+        {
+            o.Dsn = builder.Configuration["Sentry:Dsn"];
+            o.MinimumEventLevel = LogLevel.Information;
+        });
 
         builder.AddServiceDefaults();
 
@@ -177,6 +191,7 @@ public class Program
         }
 
         app.UseExceptionHandler();
+        app.UseSentryTracing();
         app.UseMiddleware<CorrelationIdMiddleware>();
 
         app.UseCors();
