@@ -473,4 +473,122 @@ public class BoardCardTests
         act.Should().Throw<DomainException>()
             .WithMessage(DomainMessages.CardNotFound(fakeId));
     }
+
+    [Fact]
+    public void HoldCard_ShouldMarkCardAsOnHold()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var columnId = board.Columns[0].Id;
+        var cardId = board.AddCard(columnId, "Card", "");
+
+        board.HoldCard(cardId);
+
+        board.Cards.First(c => c.Id == cardId).IsOnHold.Should().BeTrue();
+    }
+
+    [Fact]
+    public void HoldCard_ShouldNotResequenceCards()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var columnId = board.Columns[0].Id;
+        var card1Id = board.AddCard(columnId, "Card 1", "");
+        var card2Id = board.AddCard(columnId, "Card 2", "");
+        var card3Id = board.AddCard(columnId, "Card 3", "");
+
+        board.HoldCard(card2Id);
+
+        var cards = board.Cards.OrderBy(c => c.Position.Value).ToList();
+        cards[0].Position.Value.Should().Be(0);
+        cards[1].Position.Value.Should().Be(1);
+        cards[2].Position.Value.Should().Be(2);
+    }
+
+    [Fact]
+    public void HoldCard_ShouldRaiseCardHeldEvent()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var columnId = board.Columns[0].Id;
+        var cardId = board.AddCard(columnId, "Card", "");
+        board.ClearDomainEvents();
+
+        board.HoldCard(cardId);
+
+        var evt = board.GetDomainEvents().OfType<CardHeldEvent>().Single();
+        evt.CardId.Should().Be(cardId);
+    }
+
+    [Fact]
+    public void HoldCard_AlreadyOnHold_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var cardId = board.AddCard(board.Columns[0].Id, "Card", "");
+        board.HoldCard(cardId);
+
+        var act = () => board.HoldCard(cardId);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardAlreadyOnHold);
+    }
+
+    [Fact]
+    public void HoldCard_NonExistentCard_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var fakeId = Guid.NewGuid();
+
+        var act = () => board.HoldCard(fakeId);
+
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void ResumeCard_ShouldClearHoldAt()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var columnId = board.Columns[0].Id;
+        var cardId = board.AddCard(columnId, "Card", "");
+        board.HoldCard(cardId);
+
+        board.ResumeCard(cardId);
+
+        var card = board.Cards.First(c => c.Id == cardId);
+        card.IsOnHold.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ResumeCard_ShouldRaiseCardResumedEvent()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var cardId = board.AddCard(board.Columns[0].Id, "Card", "");
+        board.HoldCard(cardId);
+        board.ClearDomainEvents();
+
+        board.ResumeCard(cardId);
+
+        var evt = board.GetDomainEvents().OfType<CardResumedEvent>().Single();
+        evt.CardId.Should().Be(cardId);
+    }
+
+    [Fact]
+    public void ResumeCard_NotOnHold_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var cardId = board.AddCard(board.Columns[0].Id, "Card", "");
+
+        var act = () => board.ResumeCard(cardId);
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.CardNotOnHold);
+    }
+
+    [Fact]
+    public void ResumeCard_NonExistentCard_ShouldThrow()
+    {
+        var board = new BoardBuilder().WithColumn("To Do").Build();
+        var fakeId = Guid.NewGuid();
+
+        var act = () => board.ResumeCard(fakeId);
+
+        act.Should().Throw<DomainException>();
+    }
 }
