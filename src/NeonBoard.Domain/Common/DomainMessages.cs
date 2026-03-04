@@ -39,6 +39,8 @@ public static class DomainMessages
     public const string CardLabelNotAssigned = "This label is not assigned to the card.";
     public const string CardAlreadyArchived = "Card is already archived.";
     public const string CardNotArchived = "Card is not archived.";
+    public const string CardAlreadyOnHold = "Card is already on hold.";
+    public const string CardNotOnHold = "Card is not on hold.";
 
     #endregion
 
