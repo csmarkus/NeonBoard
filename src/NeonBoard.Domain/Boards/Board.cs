@@ -311,6 +311,28 @@ public sealed class Board : Entity, IAggregateRoot
             card.Content.Title, card.CardNumber, Prefix.Value));
     }
 
+    public void HoldCard(Guid cardId)
+    {
+        var card = FindCard(cardId);
+
+        card.Hold();
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new CardHeldEvent(Id, cardId, card.ColumnId,
+            card.Content.Title, card.CardNumber, Prefix.Value));
+    }
+
+    public void ResumeCard(Guid cardId)
+    {
+        var card = FindCard(cardId);
+
+        card.Resume();
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new CardResumedEvent(Id, cardId, card.ColumnId,
+            card.Content.Title, card.CardNumber, Prefix.Value));
+    }
+
     #endregion
 
     #region Label Operations

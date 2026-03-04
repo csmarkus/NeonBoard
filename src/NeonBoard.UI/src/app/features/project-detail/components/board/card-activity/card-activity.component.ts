@@ -17,6 +17,18 @@ interface MessagePart {
   labelClasses?: string;
 }
 
+interface GroupedEntry {
+  entry: ActivityEntry;
+  icon: IconDefinition;
+  messageParts: MessagePart[];
+  relativeTime: string;
+}
+
+interface DayGroup {
+  label: string;
+  entries: GroupedEntry[];
+}
+
 @Component({
   selector: 'app-card-activity',
   imports: [FontAwesomeModule],
@@ -25,40 +37,43 @@ interface MessagePart {
     <div class="border-t border-subtle pt-4 mt-4">
       <h3 class="text-sm font-medium text-primary mb-3">Activity</h3>
 
-      @if (entryMessages().length > 0) {
-        <div class="flow-root">
-          <ul role="list" class="-mb-6">
-            @for (item of entryMessages(); track item.entry.id; let last = $last) {
-              <li>
-                <div class="relative pb-6">
-                  @if (!last) {
-                    <span class="absolute left-3 top-6 -ml-px h-full w-0.5 bg-dim" aria-hidden="true"></span>
-                  }
-                  <div class="relative flex gap-2.5">
-                    <div>
-                      <span class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-elevated ring-4 ring-surface">
-                        <fa-icon [icon]="item.icon" size="2xs" class="text-muted"></fa-icon>
-                      </span>
-                    </div>
-                    <div class="flex min-w-0 flex-1 justify-between gap-3 pt-0.5">
-                      <p class="text-xs text-secondary leading-snug">
-                        @for (part of item.messageParts; track $index) {
-                          @if (part.labelClasses) {
-                            <span [class]="'inline-flex items-center px-1 py-0.5 text-xs font-medium rounded border ' + part.labelClasses">{{ part.text }}</span>
-                          } @else if (part.bold) {
-                            <span class="font-medium text-primary">{{ part.text }}</span>
-                          } @else {
-                            <span>{{ part.text }}</span>
+      @for (group of groupedEntries(); track group.label) {
+        <div class="mb-4">
+          <p class="text-xs font-medium text-muted uppercase tracking-wide mb-2">{{ group.label }}</p>
+          <div class="flow-root">
+            <ul role="list" class="-mb-6">
+              @for (item of group.entries; track item.entry.id; let last = $last) {
+                <li>
+                  <div class="relative pb-6">
+                    @if (!last) {
+                      <span class="absolute left-3 top-6 -ml-px h-full w-0.5 bg-dim" aria-hidden="true"></span>
+                    }
+                    <div class="relative flex gap-2.5">
+                      <div>
+                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-surface-elevated ring-4 ring-surface">
+                          <fa-icon [icon]="item.icon" size="2xs" class="text-muted"></fa-icon>
+                        </span>
+                      </div>
+                      <div class="flex min-w-0 flex-1 justify-between gap-3 pt-0.5">
+                        <p class="text-xs text-secondary leading-snug">
+                          @for (part of item.messageParts; track $index) {
+                            @if (part.labelClasses) {
+                              <span [class]="'inline-flex items-center px-1 py-0.5 text-xs font-medium rounded border ' + part.labelClasses">{{ part.text }}</span>
+                            } @else if (part.bold) {
+                              <span class="font-medium text-primary">{{ part.text }}</span>
+                            } @else {
+                              <span>{{ part.text }}</span>
+                            }
                           }
-                        }
-                      </p>
-                      <span class="whitespace-nowrap text-xs text-muted">{{ item.relativeTime }}</span>
+                        </p>
+                        <span class="whitespace-nowrap text-xs text-muted">{{ item.relativeTime }}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            }
-          </ul>
+                </li>
+              }
+            </ul>
+          </div>
         </div>
       }
 
@@ -73,11 +88,13 @@ interface MessagePart {
       }
 
       @if (nextCursor() && !isLoading()) {
-        <button
-          (click)="loadMore()"
-          class="text-xs text-accent hover:text-accent/80 transition-colors mt-1">
-          Show more
-        </button>
+        <div class="flex justify-center py-2">
+          <button
+            (click)="loadMore()"
+            class="text-xs text-accent hover:text-accent/80 transition-colors">
+            Show more
+          </button>
+        </div>
       }
     </div>
   `,
@@ -106,17 +123,37 @@ export class CardActivityComponent {
     'circle-info': faCircleInfo,
   };
 
-  entryMessages = computed(() =>
-    this.entries().map(entry => {
+  groupedEntries = computed<DayGroup[]>(() => {
+    const entries = this.entries();
+    if (entries.length === 0) return [];
+
+    const now = new Date();
+    const groups = new Map<string, GroupedEntry[]>();
+
+    for (const entry of entries) {
       const message = getActivityMessage(entry);
-      return {
+      const label = this.getDayLabel(entry.occurredAt, now);
+
+      const grouped: GroupedEntry = {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
         messageParts: this.parseMessageParts(message.text, message.labelName, message.labelColor),
         relativeTime: formatRelativeTime(entry.occurredAt, 'short'),
       };
-    })
-  );
+
+      const existing = groups.get(label);
+      if (existing) {
+        existing.push(grouped);
+      } else {
+        groups.set(label, [grouped]);
+      }
+    }
+
+    return Array.from(groups.entries()).map(([label, items]) => ({
+      label,
+      entries: items,
+    }));
+  });
 
   constructor() {
     effect(() => {
@@ -129,7 +166,6 @@ export class CardActivityComponent {
         } else {
           this.entries.set([]);
           this.nextCursor.set(null);
-          this.loadActivity();
         }
       }
     });
@@ -139,6 +175,18 @@ export class CardActivityComponent {
     if (this.nextCursor() && !this.isLoading()) {
       this.loadActivity();
     }
+  }
+
+  private getDayLabel(occurredAt: string, now: Date): string {
+    const date = new Date(occurredAt);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const entryDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.floor((today.getTime() - entryDay.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   private parseMessageParts(text: string, labelName?: string, labelColor?: string): MessagePart[] {

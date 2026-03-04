@@ -42,6 +42,20 @@ export class CardService {
     );
   }
 
+  holdCard(projectId: string, boardId: string, cardId: string): Observable<Card> {
+    return this.http.patch<Card>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/hold`,
+      {}
+    );
+  }
+
+  resumeCard(projectId: string, boardId: string, cardId: string): Observable<Card> {
+    return this.http.patch<Card>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/${cardId}/resume`,
+      {}
+    );
+  }
+
   getArchivedCards(projectId: string, boardId: string): Observable<Card[]> {
     return this.http.get<Card[]>(
       `${this.apiUrl}/projects/${projectId}/boards/${boardId}/cards/archived`

@@ -1,13 +1,14 @@
 import { Component, input, output, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faAlignLeft } from '@fortawesome/free-solid-svg-icons';
+import { GradientAccentComponent } from '../../../../../shared/components/gradient-accent/gradient-accent.component';
 import { Card } from '../../../models/card.model';
 import { getLabelClassString } from '../../../models/label.model';
 import { DrawerService } from '../../../services/drawer.service';
 
 @Component({
   selector: 'app-card',
-  imports: [FontAwesomeModule],
+  imports: [FontAwesomeModule, GradientAccentComponent],
   templateUrl: './card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

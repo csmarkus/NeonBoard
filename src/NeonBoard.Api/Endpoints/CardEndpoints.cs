@@ -9,6 +9,8 @@ using NeonBoard.Application.Cards.Commands.DeleteCard;
 using NeonBoard.Application.Cards.Commands.RemoveCardLabel;
 using NeonBoard.Application.Cards.Commands.ArchiveCard;
 using NeonBoard.Application.Cards.Commands.RestoreCard;
+using NeonBoard.Application.Cards.Commands.HoldCard;
+using NeonBoard.Application.Cards.Commands.ResumeCard;
 using NeonBoard.Application.Cards.DTOs;
 using NeonBoard.Application.Cards.Queries.GetCardDetail;
 using NeonBoard.Application.Boards.Activity.DTOs;
@@ -62,6 +64,16 @@ public static class CardEndpoints
 
         group.MapPatch("/{cardId:guid}/restore", RestoreCard)
             .WithName("RestoreCard")
+            .Produces<CardDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/{cardId:guid}/hold", HoldCard)
+            .WithName("HoldCard")
+            .Produces<CardDto>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/{cardId:guid}/resume", ResumeCard)
+            .WithName("ResumeCard")
             .Produces<CardDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -187,6 +199,30 @@ public static class CardEndpoints
         CancellationToken ct)
     {
         var command = new RestoreCardCommand(projectId, boardId, cardId);
+        var result = await mediator.Send(command, ct);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> HoldCard(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new HoldCardCommand(projectId, boardId, cardId);
+        var result = await mediator.Send(command, ct);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> ResumeCard(
+        Guid projectId,
+        Guid boardId,
+        Guid cardId,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new ResumeCardCommand(projectId, boardId, cardId);
         var result = await mediator.Send(command, ct);
         return Results.Ok(result);
     }

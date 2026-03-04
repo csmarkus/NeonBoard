@@ -11,7 +11,9 @@ public class CardActivityEventHandler :
     INotificationHandler<CardMovedEvent>,
     INotificationHandler<CardDeletedEvent>,
     INotificationHandler<CardArchivedEvent>,
-    INotificationHandler<CardRestoredEvent>
+    INotificationHandler<CardRestoredEvent>,
+    INotificationHandler<CardHeldEvent>,
+    INotificationHandler<CardResumedEvent>
 {
     private readonly IActivityEntryRepository _repository;
     private readonly ICurrentUserService _currentUserService;
@@ -143,6 +145,48 @@ public class CardActivityEventHandler :
             ActivityEntityType.Card,
             notification.CardId,
             ActivityActionType.Restored,
+            new Dictionary<string, object>
+            {
+                ["cardTitle"] = notification.CardTitle,
+                ["cardNumber"] = notification.CardNumber,
+                ["prefix"] = notification.Prefix
+            });
+
+        await _repository.AddAsync(entry, cancellationToken);
+    }
+
+    public async Task Handle(CardHeldEvent notification, CancellationToken cancellationToken)
+    {
+        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+
+        var entry = ActivityEntry.Create(
+            notification.BoardId,
+            userId,
+            userName,
+            ActivityEntityType.Card,
+            notification.CardId,
+            ActivityActionType.Held,
+            new Dictionary<string, object>
+            {
+                ["cardTitle"] = notification.CardTitle,
+                ["cardNumber"] = notification.CardNumber,
+                ["prefix"] = notification.Prefix
+            });
+
+        await _repository.AddAsync(entry, cancellationToken);
+    }
+
+    public async Task Handle(CardResumedEvent notification, CancellationToken cancellationToken)
+    {
+        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+
+        var entry = ActivityEntry.Create(
+            notification.BoardId,
+            userId,
+            userName,
+            ActivityEntityType.Card,
+            notification.CardId,
+            ActivityActionType.Resumed,
             new Dictionary<string, object>
             {
                 ["cardTitle"] = notification.CardTitle,

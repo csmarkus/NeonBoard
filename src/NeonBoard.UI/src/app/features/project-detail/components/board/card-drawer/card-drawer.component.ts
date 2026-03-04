@@ -42,6 +42,7 @@ export class CardDrawerComponent {
   isSaving = signal(false);
   isDeleting = signal(false);
   isArchiving = signal(false);
+  isHolding = signal(false);
   showLabelPicker = signal(false);
   togglingLabelId = signal<string | null>(null);
 
@@ -254,6 +255,46 @@ export class CardDrawerComponent {
       error: () => {
         this.error.set('Failed to restore card. Please try again.');
         this.isArchiving.set(false);
+      }
+    });
+  }
+
+  holdCard(): void {
+    if (!this.isEditMode() || this.isHolding()) return;
+
+    this.isHolding.set(true);
+    this.error.set(null);
+
+    const cardId = this.card()!.id;
+    this.cardService.holdCard(this.projectId(), this.boardId(), cardId).subscribe({
+      next: (updatedCard) => {
+        this.drawerService.selectedCard.set(updatedCard);
+        this.isHolding.set(false);
+        this.cardSaved.emit();
+      },
+      error: () => {
+        this.error.set('Failed to put card on hold. Please try again.');
+        this.isHolding.set(false);
+      }
+    });
+  }
+
+  resumeCard(): void {
+    if (!this.isEditMode() || this.isHolding()) return;
+
+    this.isHolding.set(true);
+    this.error.set(null);
+
+    const cardId = this.card()!.id;
+    this.cardService.resumeCard(this.projectId(), this.boardId(), cardId).subscribe({
+      next: (updatedCard) => {
+        this.drawerService.selectedCard.set(updatedCard);
+        this.isHolding.set(false);
+        this.cardSaved.emit();
+      },
+      error: () => {
+        this.error.set('Failed to resume card. Please try again.');
+        this.isHolding.set(false);
       }
     });
   }

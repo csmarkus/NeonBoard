@@ -13,6 +13,7 @@ export interface Card {
   createdAt: string;
   updatedAt: string;
   archivedAt: string | null;
+  holdAt: string | null;
 }
 
 export interface CardDetail extends Card {

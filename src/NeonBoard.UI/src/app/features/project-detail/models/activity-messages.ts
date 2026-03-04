@@ -51,6 +51,12 @@ export function getActivityMessage(entry: ActivityEntry): ActivityMessage {
     case 'Restored':
       return { icon: 'rotate-left', text: `${user} restored **${displayId}** "${d['cardTitle']}"`, ...cardLink };
 
+    case 'Held':
+      return { icon: 'pause', text: `${user} put **${displayId}** "${d['cardTitle']}" on hold`, ...cardLink };
+
+    case 'Resumed':
+      return { icon: 'play', text: `${user} resumed **${displayId}** "${d['cardTitle']}"`, ...cardLink };
+
     case 'Renamed':
       return { icon: 'pencil', text: `${user} renamed board from **${d['oldName']}** to **${d['newName']}**` };
 

@@ -23,6 +23,10 @@ public sealed class Card : Entity
 
     public bool IsArchived => ArchivedAt.HasValue;
 
+    public DateTime? HoldAt { get; private set; }
+
+    public bool IsOnHold => HoldAt.HasValue;
+
     private Card()
     {
     }
@@ -93,6 +97,24 @@ public sealed class Card : Entity
             throw new DomainException(DomainMessages.CardNotArchived);
 
         ArchivedAt = null;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    internal void Hold()
+    {
+        if (IsOnHold)
+            throw new DomainException(DomainMessages.CardAlreadyOnHold);
+
+        HoldAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    internal void Resume()
+    {
+        if (!IsOnHold)
+            throw new DomainException(DomainMessages.CardNotOnHold);
+
+        HoldAt = null;
         UpdatedAt = DateTime.UtcNow;
     }
 }

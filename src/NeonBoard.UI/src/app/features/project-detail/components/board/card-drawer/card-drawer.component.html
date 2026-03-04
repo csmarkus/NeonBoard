@@ -70,10 +70,14 @@
       <!-- Danger zone -->
       <app-card-actions
         [isArchived]="!!card()?.archivedAt"
+        [isOnHold]="!!card()?.holdAt"
         [isArchiving]="isArchiving()"
+        [isHolding]="isHolding()"
         [isDeleting]="isDeleting()"
         (archive)="archiveCard()"
         (restore)="restoreCard()"
+        (hold)="holdCard()"
+        (resume)="resumeCard()"
         (delete)="requestDeleteCard()"
       />
 

@@ -14,7 +14,8 @@ public record CardDto(
     List<LabelDto> Labels,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    DateTime? ArchivedAt)
+    DateTime? ArchivedAt,
+    DateTime? HoldAt)
 {
     public static CardDto FromCard(Card card, string prefix, List<LabelDto> boardLabels) =>
         new(
@@ -33,5 +34,6 @@ public record CardDto(
                 .ToList(),
             card.CreatedAt,
             card.UpdatedAt,
-            card.ArchivedAt);
+            card.ArchivedAt,
+            card.HoldAt);
 }

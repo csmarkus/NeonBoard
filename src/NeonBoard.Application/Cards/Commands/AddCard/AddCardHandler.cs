@@ -38,6 +38,7 @@ public class AddCardHandler : IRequestHandler<AddCardCommand, CardDto>
             [],
             card.CreatedAt,
             card.UpdatedAt,
-            card.ArchivedAt);
+            card.ArchivedAt,
+            card.HoldAt);
     }
 }

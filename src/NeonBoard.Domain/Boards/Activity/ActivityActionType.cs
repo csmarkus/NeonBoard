@@ -12,5 +12,7 @@ public enum ActivityActionType
     Reordered = 7,
     LabelAdded = 8,
     LabelRemoved = 9,
-    PrefixUpdated = 10
+    PrefixUpdated = 10,
+    Held = 11,
+    Resumed = 12
 }
