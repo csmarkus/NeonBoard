@@ -1,22 +1,30 @@
 <div
   (click)="cardClick.emit()"
-  class="bg-surface border border-subtle rounded-lg p-3 pt-1 hover:border-cyan-500/50 transition-colors cursor-pointer"
+  class="bg-surface border border-subtle rounded-lg hover:border-cyan-500/50 transition-colors cursor-pointer"
+  [class.border-amber-500/30]="card().holdAt"
 >
-  <span class="text-xs text-muted font-mono font-bold">{{ card().displayId }}</span>
-  <h3 class="text-sm text-primary mt-1">{{ card().title }}</h3>
-  @if (cardLabels().length) {
-    <div class="flex flex-wrap gap-1 mt-2">
-      @for (label of cardLabels(); track label.id) {
-        <span
-          [class]="'inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded border ' + getLabelClasses(label.color)"
-          [title]="label.name"
-        >{{ label.name }}</span>
-      }
+  @if (card().holdAt) {
+    <div class="bg-gradient-to-r from-amber-500/20 via-amber-400/10 to-amber-500/20 rounded-t-lg px-3 py-1.5">
+      <p class="text-xs font-semibold text-amber-400 text-center tracking-wider uppercase">On Hold</p>
     </div>
   }
-  @if (card().description) {
-    <div class="mt-2 flex items-center">
-      <fa-icon [icon]="faAlignLeft" class="text-sm text-muted"></fa-icon>
-    </div>
-  }
+  <div class="p-3 pt-1">
+    <span class="text-xs text-muted font-mono font-bold">{{ card().displayId }}</span>
+    <h3 class="text-sm text-primary mt-1">{{ card().title }}</h3>
+    @if (cardLabels().length) {
+      <div class="flex flex-wrap gap-1 mt-2">
+        @for (label of cardLabels(); track label.id) {
+          <span
+            [class]="'inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded border ' + getLabelClasses(label.color)"
+            [title]="label.name"
+          >{{ label.name }}</span>
+        }
+      </div>
+    }
+    @if (card().description) {
+      <div class="mt-2 flex items-center">
+        <fa-icon [icon]="faAlignLeft" class="text-sm text-muted"></fa-icon>
+      </div>
+    }
+  </div>
 </div>
