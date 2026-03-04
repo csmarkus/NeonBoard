@@ -44,6 +44,13 @@ const auth0Config = mergeApplicationConfig(appConfig, {
   ]
 });
 
+if (!environment.production) {
+  const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (link) {
+    link.href = 'favicon-dev.svg';
+  }
+}
+
 bootstrapApplication(App, auth0Config).catch((err) =>
   console.error(err)
 );
