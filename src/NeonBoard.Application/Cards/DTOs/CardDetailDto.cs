@@ -15,4 +15,5 @@ public record CardDetailDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     DateTime? ArchivedAt,
+    DateTime? HoldAt,
     ActivityFeedDto Activity);

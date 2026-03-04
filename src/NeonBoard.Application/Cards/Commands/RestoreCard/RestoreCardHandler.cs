@@ -45,6 +45,7 @@ public class RestoreCardHandler : IRequestHandler<RestoreCardCommand, CardDto>
                 .ToList(),
             card.CreatedAt,
             card.UpdatedAt,
-            card.ArchivedAt);
+            card.ArchivedAt,
+            card.HoldAt);
     }
 }

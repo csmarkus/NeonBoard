@@ -76,6 +76,7 @@ public class GetCardDetailHandler : IRequestHandler<GetCardDetailQuery, CardDeta
             cardDto.CreatedAt,
             cardDto.UpdatedAt,
             cardDto.ArchivedAt,
+            cardDto.HoldAt,
             activityFeed);
     }
 }
