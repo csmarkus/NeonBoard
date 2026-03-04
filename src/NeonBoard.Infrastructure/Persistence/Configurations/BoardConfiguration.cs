@@ -130,6 +130,8 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
 
             card.Property(c => c.ArchivedAt);
 
+            card.Property(c => c.HoldAt);
+
             card.HasIndex(c => c.ColumnId);
 
             card.HasIndex("BoardId", nameof(Card.CardNumber))
