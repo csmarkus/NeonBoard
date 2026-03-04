@@ -1,7 +1,7 @@
 import { Component, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type GradientVariant = 'cyan' | 'orange' | 'violet' | 'pink' | number;
+export type GradientVariant = 'cyan' | 'orange' | 'violet' | 'pink' | 'amber' | number;
 
 @Component({
   selector: 'app-gradient-accent',
@@ -24,6 +24,7 @@ export class GradientAccentComponent {
     orange: 'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(255,184,99,0.65) 30%, rgba(255,107,156,0.35) 60%, rgba(255,184,99,0) 90%)',
     violet: 'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(167,139,250,0.65) 24%, rgba(34,211,238,0.45) 52%, rgba(34,211,238,0) 85%)',
     pink: 'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(255,58,191,0.7) 26%, rgba(255,138,76,0.4) 54%, rgba(255,58,191,0) 86%)',
+    amber: 'linear-gradient(90deg, rgba(9,9,11,0) 0%, rgba(251,191,36,0.7) 26%, rgba(245,158,11,0.4) 54%, rgba(251,191,36,0) 86%)',
   };
 
   private variantOrder: GradientVariant[] = ['cyan', 'orange', 'violet', 'pink'];
