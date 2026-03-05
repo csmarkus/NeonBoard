@@ -1,4 +1,4 @@
-import { Component, input, output, signal, afterNextRender, inject, Injector, ElementRef } from '@angular/core';
+import { Component, input, output, signal, viewChild, afterNextRender, inject, Injector, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
@@ -37,6 +37,11 @@ export class ColumnComponent {
   cardAdded = output<{ columnId: string; title: string }>();
   cardDragStarted = output<number>();
 
+  private menuTrigger = viewChild<ElementRef>('menuTrigger');
+  private menuDropdown = viewChild<ElementRef>('menuDropdown');
+  private addCardForm = viewChild<ElementRef>('addCardForm');
+  private addCardTextarea = viewChild<ElementRef>('addCardTextarea');
+
   menuOpen = signal(false);
   editingName = signal(false);
   editingValue = signal('');
@@ -73,17 +78,25 @@ export class ColumnComponent {
   }
 
   onDocumentClick(event: MouseEvent): void {
-    if (!this.menuOpen()) return;
-
-    const menuButton = this.elementRef.nativeElement.querySelector('.column-menu-trigger');
-    const menuDropdown = this.elementRef.nativeElement.querySelector('.column-menu-dropdown');
     const target = event.target as Node;
 
-    if (
-      (!menuButton || !menuButton.contains(target)) &&
-      (!menuDropdown || !menuDropdown.contains(target))
-    ) {
-      this.menuOpen.set(false);
+    if (this.menuOpen()) {
+      const trigger = this.menuTrigger()?.nativeElement;
+      const dropdown = this.menuDropdown()?.nativeElement;
+
+      if (
+        (!trigger || !trigger.contains(target)) &&
+        (!dropdown || !dropdown.contains(target))
+      ) {
+        this.menuOpen.set(false);
+      }
+    }
+
+    if (this.addingCard()) {
+      const form = this.addCardForm()?.nativeElement;
+      if (form && !form.contains(target)) {
+        this.cancelAddCard();
+      }
     }
   }
 
@@ -107,10 +120,7 @@ export class ColumnComponent {
     this.newCardTitle.set('');
 
     afterNextRender(() => {
-      const textarea = document.querySelector(`#add-card-${this.column().id}`) as HTMLTextAreaElement;
-      if (textarea) {
-        textarea.focus();
-      }
+      this.addCardTextarea()?.nativeElement.focus();
     }, { injector: this.injector });
   }
 
