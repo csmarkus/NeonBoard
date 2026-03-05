@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using NeonBoard.Api.Constants;
 using NeonBoard.Application.Common.Interfaces;
 
 namespace NeonBoard.Api.Services;
@@ -8,13 +7,21 @@ public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserRepository _userRepository;
+    private readonly string _emailClaim;
+    private readonly string _nameClaim;
 
     public CurrentUserService(
         IHttpContextAccessor httpContextAccessor,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IConfiguration configuration)
     {
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;
+
+        var audience = configuration["Auth0:Audience"]
+            ?? throw new InvalidOperationException("Auth0:Audience is not configured.");
+        _emailClaim = $"{audience}/email";
+        _nameClaim = $"{audience}/name";
     }
 
     public string? Auth0UserId =>
@@ -22,10 +29,10 @@ public sealed class CurrentUserService : ICurrentUserService
         ?? _httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
 
     public string? Email =>
-        _httpContextAccessor.HttpContext?.User?.FindFirst(Auth0Claims.Email)?.Value;
+        _httpContextAccessor.HttpContext?.User?.FindFirst(_emailClaim)?.Value;
 
     public string? Name =>
-        _httpContextAccessor.HttpContext?.User?.FindFirst(Auth0Claims.Name)?.Value;
+        _httpContextAccessor.HttpContext?.User?.FindFirst(_nameClaim)?.Value;
 
     public bool IsAuthenticated =>
         _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;

@@ -30,5 +30,6 @@ WORKDIR /app
 COPY --from=api-build /app/publish .
 COPY --from=ui-build /app/dist/neonboard/browser wwwroot/
 
+ENV ASPNETCORE_ENVIRONMENT=Development
 EXPOSE 5001
 ENTRYPOINT ["dotnet", "NeonBoard.Api.dll"]
