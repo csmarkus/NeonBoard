@@ -47,28 +47,17 @@ describe('ColumnComponent', () => {
     expect(addCardBtn).toBeTruthy();
   });
 
-  it('onCardDragStarted sets placeholder height from pre-captured pointerdown height', () => {
+  it('onCardDragStarted sets placeholder height to match dragged card', () => {
     const mockPlaceholder = document.createElement('div');
-
-    // Simulate pointerdown capturing the card height
-    const cardWrapper = document.createElement('div');
-    cardWrapper.setAttribute('cdkDrag', '');
-    Object.defineProperty(cardWrapper, 'offsetHeight', { value: 120 });
-    document.body.appendChild(cardWrapper);
-
-    const pointerEvent = new PointerEvent('pointerdown', { bubbles: true });
-    Object.defineProperty(pointerEvent, 'target', { value: cardWrapper });
-    fixture.componentInstance.onCardPointerDown(pointerEvent);
-
-    document.body.removeChild(cardWrapper);
-
-    // Simulate drag start using the pre-captured height
+    const mockNativeElement = document.createElement('div');
+    Object.defineProperty(mockNativeElement, 'offsetHeight', { value: 120 });
     const mockSource = {
-      element: { nativeElement: document.createElement('div') },
+      element: { nativeElement: mockNativeElement },
       getPlaceholderElement: () => mockPlaceholder,
     };
-    const dragEvent = { source: mockSource } as unknown as CdkDragStart;
-    fixture.componentInstance.onCardDragStarted(dragEvent);
+    const event = { source: mockSource } as unknown as CdkDragStart;
+
+    fixture.componentInstance.onCardDragStarted(event);
 
     expect(mockPlaceholder.style.height).toBe('120px');
   });
