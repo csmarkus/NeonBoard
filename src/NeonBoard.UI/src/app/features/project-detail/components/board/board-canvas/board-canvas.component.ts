@@ -28,7 +28,6 @@ export class BoardCanvasComponent {
 
   isAddingColumn = signal<boolean>(false);
   newColumnName = signal<string>('');
-  draggedCardHeight = signal<number>(0);
 
   board = this.facade.board;
   columns = this.facade.columns;
@@ -123,7 +122,4 @@ export class BoardCanvasComponent {
     this.newColumnName.set(name);
   }
 
-  onCardDragStarted(height: number): void {
-    this.draggedCardHeight.set(height);
-  }
 }

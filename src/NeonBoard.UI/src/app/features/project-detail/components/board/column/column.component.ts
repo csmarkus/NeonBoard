@@ -35,7 +35,6 @@ export class ColumnComponent {
   columnDeleted = output<string>();
   cardSelected = output<Card>();
   cardAdded = output<{ columnId: string; title: string }>();
-  cardDragStarted = output<number>();
 
   private menuTrigger = viewChild<ElementRef>('menuTrigger');
   private menuDropdown = viewChild<ElementRef>('menuDropdown');
@@ -105,10 +104,7 @@ export class ColumnComponent {
   }
 
   onCardDragStarted(event: CdkDragStart): void {
-    const cardElement = event.source.element.nativeElement;
-    const cardHeight = cardElement.offsetHeight;
-    this.draggedCardHeight.set(cardHeight);
-    this.cardDragStarted.emit(cardHeight);
+    this.draggedCardHeight.set(event.source.element.nativeElement.offsetHeight);
   }
 
   selectCard(card: Card): void {
