@@ -10,26 +10,7 @@ import { formatRelativeTime } from '../../../../../shared/pipes/relative-time.pi
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { getActivityMessage } from '../../../models/activity-messages';
 import { ActivityEntry } from '../../../models/activity.model';
-import { getLabelClassString } from '../../../models/label.model';
-
-interface MessagePart {
-  text: string;
-  bold: boolean;
-  cardId?: string;
-  labelClasses?: string;
-}
-
-interface GroupedEntry {
-  entry: ActivityEntry;
-  icon: IconDefinition;
-  messageParts: MessagePart[];
-  relativeTime: string;
-}
-
-interface DayGroup {
-  label: string;
-  entries: GroupedEntry[];
-}
+import { DayGroup, getDayLabel, GroupedEntry, MessagePart, parseMessageParts } from '../../../models/activity-utils';
 
 @Component({
   selector: 'app-activity-panel',
@@ -66,12 +47,12 @@ export class ActivityPanelComponent {
 
     for (const entry of entries) {
       const message = getActivityMessage(entry);
-      const label = this.getDayLabel(entry.occurredAt, now);
+      const label = getDayLabel(entry.occurredAt, now);
 
       const grouped: GroupedEntry = {
         entry,
         icon: this.iconMap[message.icon] ?? faCircleInfo,
-        messageParts: this.parseMessageParts(message.text, message.cardEntityId, message.cardDisplayId, message.labelName, message.labelColor),
+        messageParts: parseMessageParts(message.text, message.cardEntityId, message.cardDisplayId, message.labelName, message.labelColor),
         relativeTime: formatRelativeTime(entry.occurredAt, 'short'),
       };
 
@@ -99,52 +80,5 @@ export class ActivityPanelComponent {
 
   onCardClick(cardId: string): void {
     this.facade.openCardFromActivity(cardId);
-  }
-
-  private getDayLabel(occurredAt: string, now: Date): string {
-    const date = new Date(occurredAt);
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const entryDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const diffDays = Math.floor((today.getTime() - entryDay.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  private parseMessageParts(
-    text: string,
-    cardEntityId?: string,
-    cardDisplayId?: string,
-    labelName?: string,
-    labelColor?: string,
-  ): MessagePart[] {
-    const parts: MessagePart[] = [];
-    const regex = /\*\*(.+?)\*\*/g;
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = regex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push({ text: text.slice(lastIndex, match.index), bold: false });
-      }
-      const boldText = match[1];
-      const isCardLink = cardEntityId && cardDisplayId && boldText === cardDisplayId;
-      const isLabel = labelName && boldText === labelName;
-      parts.push({
-        text: boldText,
-        bold: true,
-        cardId: isCardLink ? cardEntityId : undefined,
-        labelClasses: isLabel ? getLabelClassString(labelColor ?? 'grey') : undefined,
-      });
-      lastIndex = regex.lastIndex;
-    }
-
-    if (lastIndex < text.length) {
-      parts.push({ text: text.slice(lastIndex), bold: false });
-    }
-
-    return parts;
   }
 }
