@@ -22,7 +22,7 @@ public class RenameColumnValidator : AbstractValidator<RenameColumnCommand>
         RuleFor(x => x.NewName)
             .NotEmpty()
             .WithMessage(ValidationMessages.ColumnNameRequired)
-            .MaximumLength(100)
+            .MaximumLength(50)
             .WithMessage(ValidationMessages.ColumnNameTooLong);
     }
 }

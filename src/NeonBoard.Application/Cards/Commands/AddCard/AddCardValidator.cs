@@ -26,7 +26,7 @@ public class AddCardValidator : AbstractValidator<AddCardCommand>
             .WithMessage(ValidationMessages.CardTitleTooLong);
 
         RuleFor(x => x.Description)
-            .MaximumLength(2000)
+            .MaximumLength(5000)
             .WithMessage(ValidationMessages.CardDescriptionTooLong);
     }
 }

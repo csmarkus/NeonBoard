@@ -12,6 +12,7 @@ public static class DomainMessages
     public const string BoardTargetPositionNegative = "Target position cannot be negative.";
     public const string BoardPrefixEmpty = "Board prefix cannot be empty.";
     public const string BoardPrefixInvalid = "Board prefix must be 2-5 uppercase letters (A-Z).";
+    public const string BoardPrefixCannotBeGenerated = "Board prefix cannot be generated from the board name. The name must contain at least one letter.";
 
     public static string ColumnNotFound(Guid columnId) =>
         $"Column with ID {columnId} not found.";

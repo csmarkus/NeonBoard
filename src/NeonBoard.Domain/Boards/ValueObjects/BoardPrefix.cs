@@ -36,6 +36,9 @@ public sealed partial class BoardPrefix : ValueObject
         if (words.Length == 1)
         {
             var clean = new string(words[0].Where(char.IsLetter).ToArray());
+            if (clean.Length == 0)
+                throw new DomainException(DomainMessages.BoardPrefixCannotBeGenerated);
+
             prefix = clean.Length >= 3
                 ? clean[..3].ToUpperInvariant()
                 : clean.ToUpperInvariant().PadRight(MinLength, clean.ToUpperInvariant().Last());
@@ -49,6 +52,9 @@ public sealed partial class BoardPrefix : ValueObject
                 .Select(char.ToUpperInvariant);
             prefix = new string(initials.ToArray());
         }
+
+        if (prefix.Length == 0)
+            throw new DomainException(DomainMessages.BoardPrefixCannotBeGenerated);
 
         if (prefix.Length < MinLength)
             prefix = prefix.PadRight(MinLength, prefix.Last());

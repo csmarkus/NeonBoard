@@ -69,6 +69,11 @@ public class GlobalExceptionHandler : IExceptionHandler
                     ["error"] = ["You do not have permission to perform this action."]
                 }),
 
+            OperationCanceledException => (
+                499,
+                "Client Closed Request",
+                new Dictionary<string, string[]>()),
+
             _ => (
                 StatusCodes.Status500InternalServerError,
                 "Internal Server Error",
@@ -81,6 +86,10 @@ public class GlobalExceptionHandler : IExceptionHandler
         if (statusCode >= 500)
         {
             _logger.LogError(exception, "Unhandled server error: {Message}", exception.Message);
+        }
+        else if (statusCode == 499)
+        {
+            _logger.LogInformation("Request cancelled by client: {Message}", exception.Message);
         }
         else
         {

@@ -155,6 +155,24 @@ public class BoardPrefixTests
             .WithMessage(DomainMessages.BoardNameEmpty);
     }
 
+    [Fact]
+    public void GenerateFromName_WithSingleWordNoLetters_ShouldThrow()
+    {
+        var act = () => BoardPrefix.GenerateFromName("123");
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.BoardPrefixCannotBeGenerated);
+    }
+
+    [Fact]
+    public void GenerateFromName_WithMultipleWordsNoLetters_ShouldThrow()
+    {
+        var act = () => BoardPrefix.GenerateFromName("### !!!");
+
+        act.Should().Throw<DomainException>()
+            .WithMessage(DomainMessages.BoardPrefixCannotBeGenerated);
+    }
+
     #endregion
 
     #region Equality

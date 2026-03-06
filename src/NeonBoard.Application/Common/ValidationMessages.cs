@@ -25,7 +25,7 @@ public static class ValidationMessages
     #region Column
 
     public const string ColumnNameRequired = "Column name is required.";
-    public const string ColumnNameTooLong = "Column name cannot exceed 100 characters.";
+    public const string ColumnNameTooLong = "Column name cannot exceed 50 characters.";
     public const string ColumnIdsRequired = "Column IDs are required.";
 
     #endregion
@@ -34,7 +34,7 @@ public static class ValidationMessages
 
     public const string CardTitleRequired = "Card title is required.";
     public const string CardTitleTooLong = "Card title cannot exceed 200 characters.";
-    public const string CardDescriptionTooLong = "Card description cannot exceed 2000 characters.";
+    public const string CardDescriptionTooLong = "Card description cannot exceed 5000 characters.";
     public const string TargetColumnIdRequired = "Target column ID is required.";
     public const string TargetPositionNonNegative = "Target position must be greater than or equal to 0.";
 

@@ -113,6 +113,36 @@ public class GlobalExceptionHandlerTests
             Arg.Any<Func<object, Exception?, string>>());
     }
 
+    [Fact]
+    public async Task TryHandleAsync_WithOperationCanceledException_ShouldReturn499AndLogInformation()
+    {
+        var context = CreateHttpContext();
+        var exception = new OperationCanceledException("The operation was canceled.");
+
+        var result = await _handler.TryHandleAsync(context, exception, CancellationToken.None);
+
+        result.Should().BeTrue();
+        context.Response.StatusCode.Should().Be(499);
+        _logger.Received().Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+        _logger.DidNotReceive().Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+        _logger.DidNotReceive().Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
     private static DefaultHttpContext CreateHttpContext()
     {
         var context = new DefaultHttpContext();

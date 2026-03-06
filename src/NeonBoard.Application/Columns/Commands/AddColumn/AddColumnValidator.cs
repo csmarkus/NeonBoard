@@ -18,7 +18,7 @@ public class AddColumnValidator : AbstractValidator<AddColumnCommand>
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage(ValidationMessages.ColumnNameRequired)
-            .MaximumLength(100)
+            .MaximumLength(50)
             .WithMessage(ValidationMessages.ColumnNameTooLong);
     }
 }

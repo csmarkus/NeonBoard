@@ -18,7 +18,7 @@ public class Repository<T> : IRepository<T> where T : class, IAggregateRoot
 
     public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await DbSet.FindAsync([id], cancellationToken);
+        return await DbSet.FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id, cancellationToken);
     }
 
     public virtual async Task<List<T>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -45,6 +45,6 @@ public class Repository<T> : IRepository<T> where T : class, IAggregateRoot
 
     public virtual async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await DbSet.FindAsync([id], cancellationToken) != null;
+        return await DbSet.AnyAsync(e => EF.Property<Guid>(e, "Id") == id, cancellationToken);
     }
 }
