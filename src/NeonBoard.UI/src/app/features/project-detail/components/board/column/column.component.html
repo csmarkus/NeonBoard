@@ -62,7 +62,7 @@
     class="flex flex-col gap-2 rounded-lg transition-colors overflow-y-auto flex-1 min-h-24"
   >
     @for (card of cards(); track card.id) {
-      <div cdkDrag [cdkDragData]="card" (cdkDragStarted)="onCardDragStarted($event)">
+      <div cdkDrag [cdkDragData]="card" (pointerdown)="onCardPointerdown($event)">
         <app-card [card]="card" (cardClick)="selectCard(card)"></app-card>
         <div *cdkDragPlaceholder class="card-drag-placeholder" [style.height.px]="draggedCardHeight()"></div>
       </div>
@@ -70,7 +70,7 @@
 
     <!-- Inline add card form -->
     @if (addingCard()) {
-      <div #addCardForm class="relative z-20 bg-surface border border-subtle rounded-lg overflow-hidden">
+      <div #addCardForm class="relative z-20 bg-surface border border-subtle rounded-lg overflow-hidden shrink-0">
         <textarea
           #addCardTextarea
           [(ngModel)]="newCardTitle"
@@ -80,7 +80,6 @@
           placeholder="Card title..."
           rows="1"
           class="w-full px-3 pt-3 pb-2 text-sm bg-transparent text-primary placeholder:text-muted border-none focus:outline-none resize-none overflow-hidden"
-          autofocus
         ></textarea>
         <div class="flex">
           <button

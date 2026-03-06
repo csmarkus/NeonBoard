@@ -1,7 +1,6 @@
 import { initTestEnvironment } from '../../../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { CdkDragStart } from '@angular/cdk/drag-drop';
 import { ColumnComponent } from './column.component';
 import { Column } from '../../../models/column.model';
 import { Card } from '../../../models/card.model';
@@ -47,16 +46,13 @@ describe('ColumnComponent', () => {
     expect(addCardBtn).toBeTruthy();
   });
 
-  it('onCardDragStarted sets draggedCardHeight signal to card offsetHeight', () => {
-    const mockNativeElement = document.createElement('div');
-    Object.defineProperty(mockNativeElement, 'offsetHeight', { value: 120 });
-    const mockSource = {
-      element: { nativeElement: mockNativeElement },
-    };
-    const event = { source: mockSource } as unknown as CdkDragStart;
+  it('onCardPointerdown sets draggedCardHeight signal to element offsetHeight', () => {
+    const mockElement = document.createElement('div');
+    Object.defineProperty(mockElement, 'offsetHeight', { value: 146 });
+    const event = { currentTarget: mockElement } as unknown as PointerEvent;
 
-    fixture.componentInstance.onCardDragStarted(event);
+    fixture.componentInstance.onCardPointerdown(event);
 
-    expect(fixture.componentInstance.draggedCardHeight()).toBe(120);
+    expect(fixture.componentInstance.draggedCardHeight()).toBe(146);
   });
 });

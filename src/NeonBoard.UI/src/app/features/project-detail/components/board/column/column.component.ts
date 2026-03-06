@@ -1,7 +1,7 @@
 import { Component, input, output, signal, viewChild, afterNextRender, inject, Injector, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CdkDragDrop, CdkDragStart, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGripVertical, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { Column } from '../../../models/column.model';
@@ -103,9 +103,10 @@ export class ColumnComponent {
     this.cardDropped.emit(event);
   }
 
-  onCardDragStarted(event: CdkDragStart): void {
-    this.draggedCardHeight.set(event.source.element.nativeElement.offsetHeight);
+  onCardPointerdown(event: PointerEvent): void {
+    this.draggedCardHeight.set((event.currentTarget as HTMLElement).offsetHeight);
   }
+
 
   selectCard(card: Card): void {
     this.cardSelected.emit(card);
@@ -116,7 +117,14 @@ export class ColumnComponent {
     this.newCardTitle.set('');
 
     afterNextRender(() => {
-      this.addCardTextarea()?.nativeElement.focus();
+      const textarea = this.addCardTextarea()?.nativeElement;
+      if (textarea) {
+        textarea.focus();
+        const scrollContainer = this.addCardForm()?.nativeElement?.parentElement;
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      }
     }, { injector: this.injector });
   }
 
