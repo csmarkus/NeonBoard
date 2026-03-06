@@ -46,6 +46,7 @@ export class ColumnComponent {
   editingValue = signal('');
   addingCard = signal(false);
   newCardTitle = signal('');
+  private lastPointerDownHeight = 0;
 
   startEdit(): void {
     this.editingName.set(true);
@@ -102,10 +103,15 @@ export class ColumnComponent {
     this.cardDropped.emit(event);
   }
 
+  onCardPointerDown(event: PointerEvent): void {
+    const cardWrapper = (event.target as HTMLElement).closest('[cdkDrag]') as HTMLElement;
+    if (cardWrapper) {
+      this.lastPointerDownHeight = cardWrapper.offsetHeight;
+    }
+  }
+
   onCardDragStarted(event: CdkDragStart): void {
-    const cardElement = event.source.element.nativeElement;
-    const cardHeight = cardElement.offsetHeight;
-    event.source.getPlaceholderElement().style.height = `${cardHeight}px`;
+    event.source.getPlaceholderElement().style.height = `${this.lastPointerDownHeight}px`;
   }
 
   selectCard(card: Card): void {
