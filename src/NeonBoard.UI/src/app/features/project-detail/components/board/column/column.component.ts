@@ -46,6 +46,7 @@ export class ColumnComponent {
   editingValue = signal('');
   addingCard = signal(false);
   newCardTitle = signal('');
+  draggedCardHeight = signal(0);
 
   startEdit(): void {
     this.editingName.set(true);
@@ -103,8 +104,7 @@ export class ColumnComponent {
   }
 
   onCardDragStarted(event: CdkDragStart): void {
-    const cardHeight = event.source.element.nativeElement.offsetHeight;
-    event.source.getPlaceholderElement().style.height = `${cardHeight}px`;
+    this.draggedCardHeight.set(event.source.element.nativeElement.offsetHeight);
   }
 
   selectCard(card: Card): void {

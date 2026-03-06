@@ -64,7 +64,7 @@
     @for (card of cards(); track card.id) {
       <div cdkDrag [cdkDragData]="card" (cdkDragStarted)="onCardDragStarted($event)">
         <app-card [card]="card" (cardClick)="selectCard(card)"></app-card>
-        <div *cdkDragPlaceholder class="card-drag-placeholder"></div>
+        <div *cdkDragPlaceholder class="card-drag-placeholder" [style.height.px]="draggedCardHeight()"></div>
       </div>
     }
 

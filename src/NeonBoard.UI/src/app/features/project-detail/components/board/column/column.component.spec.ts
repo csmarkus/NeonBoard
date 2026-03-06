@@ -47,18 +47,16 @@ describe('ColumnComponent', () => {
     expect(addCardBtn).toBeTruthy();
   });
 
-  it('onCardDragStarted sets placeholder height to match dragged card', () => {
-    const mockPlaceholder = document.createElement('div');
+  it('onCardDragStarted sets draggedCardHeight signal to card offsetHeight', () => {
     const mockNativeElement = document.createElement('div');
     Object.defineProperty(mockNativeElement, 'offsetHeight', { value: 120 });
     const mockSource = {
       element: { nativeElement: mockNativeElement },
-      getPlaceholderElement: () => mockPlaceholder,
     };
     const event = { source: mockSource } as unknown as CdkDragStart;
 
     fixture.componentInstance.onCardDragStarted(event);
 
-    expect(mockPlaceholder.style.height).toBe('120px');
+    expect(fixture.componentInstance.draggedCardHeight()).toBe(120);
   });
 });
