@@ -103,4 +103,17 @@ public class BoardActivityEventHandlerTests
                 (string)e.Data["boardName"] == "Sprint Board"),
             Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Handle_WhenUserIdIsNull_ShouldNotPersistActivityEntry()
+    {
+        _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns((Guid?)null);
+        var boardId = Guid.NewGuid();
+        var projectId = Guid.NewGuid();
+        var evt = new BoardCreatedEvent(boardId, "Sprint Board", projectId, DateTime.UtcNow);
+
+        await _handler.Handle(evt, CancellationToken.None);
+
+        await _repository.DidNotReceive().AddAsync(Arg.Any<ActivityEntry>(), Arg.Any<CancellationToken>());
+    }
 }
