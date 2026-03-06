@@ -7,16 +7,19 @@ public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly string _emailClaim;
     private readonly string _nameClaim;
 
     public CurrentUserService(
         IHttpContextAccessor httpContextAccessor,
         IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
         IConfiguration configuration)
     {
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
 
         var audience = configuration["Auth0:Audience"]
             ?? throw new InvalidOperationException("Auth0:Audience is not configured.");
@@ -46,6 +49,7 @@ public sealed class CurrentUserService : ICurrentUserService
         var name = Name ?? "Unknown User";
 
         var user = await _userRepository.GetOrCreateByAuth0IdAsync(Auth0UserId, email, name, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return user.Id;
     }

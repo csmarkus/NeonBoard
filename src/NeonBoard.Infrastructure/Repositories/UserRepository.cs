@@ -32,7 +32,6 @@ public class UserRepository : Repository<User>, IUserRepository
 
         user = User.Create(auth0UserId, email, name);
         await DbSet.AddAsync(user, cancellationToken);
-        await Context.SaveChangesAsync(cancellationToken);
 
         return user;
     }
