@@ -1,6 +1,7 @@
 import { initTestEnvironment } from '../../../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { CdkDragStart } from '@angular/cdk/drag-drop';
 import { ColumnComponent } from './column.component';
 import { Column } from '../../../models/column.model';
 import { Card } from '../../../models/card.model';
@@ -44,5 +45,20 @@ describe('ColumnComponent', () => {
     const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
     const addCardBtn = buttons.find(b => b.textContent?.includes('Add card'));
     expect(addCardBtn).toBeTruthy();
+  });
+
+  it('onCardDragStarted sets placeholder height to match dragged card', () => {
+    const mockPlaceholder = document.createElement('div');
+    const mockNativeElement = document.createElement('div');
+    Object.defineProperty(mockNativeElement, 'offsetHeight', { value: 120 });
+    const mockSource = {
+      element: { nativeElement: mockNativeElement },
+      getPlaceholderElement: () => mockPlaceholder,
+    };
+    const event = { source: mockSource } as unknown as CdkDragStart;
+
+    fixture.componentInstance.onCardDragStarted(event);
+
+    expect(mockPlaceholder.style.height).toBe('120px');
   });
 });

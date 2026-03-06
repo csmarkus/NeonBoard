@@ -105,11 +105,7 @@ export class ColumnComponent {
   onCardDragStarted(event: CdkDragStart): void {
     const cardElement = event.source.element.nativeElement;
     const cardHeight = cardElement.offsetHeight;
-
-    const placeholder = event.source.getPlaceholderElement();
-    if (placeholder) {
-      placeholder.style.height = `${cardHeight}px`;
-    }
+    event.source.getPlaceholderElement().style.height = `${cardHeight}px`;
   }
 
   selectCard(card: Card): void {
