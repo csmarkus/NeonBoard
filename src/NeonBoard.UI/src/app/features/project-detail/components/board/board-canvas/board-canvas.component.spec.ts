@@ -217,10 +217,5 @@ describe('BoardCanvasComponent', () => {
       expect(mockFacade.moveCard).toHaveBeenCalledWith('p-1', 'b-1', 'card-1', 'col-2', 0);
     });
 
-    it('onCardDragStarted sets draggedCardHeight signal to event height', () => {
-      component.onCardDragStarted(120);
-
-      expect(component.draggedCardHeight()).toBe(120);
-    });
   });
 });

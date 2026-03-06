@@ -16,7 +16,7 @@
     </div>
   </div>
 } @else if (board()) {
-  <main class="flex-1 p-6 overflow-x-auto overflow-y-hidden" [style.--dragged-card-height]="draggedCardHeight() + 'px'">
+  <main class="flex-1 p-6 overflow-x-auto overflow-y-hidden">
     <div
       cdkDropList
       cdkDropListOrientation="horizontal"
@@ -36,7 +36,6 @@
             (columnDeleted)="onColumnDeleted($event)"
             (cardSelected)="onCardSelected($event)"
             (cardAdded)="onCardAdded($event)"
-            (cardDragStarted)="onCardDragStarted($event)"
           ></app-column>
         }
       </div>
