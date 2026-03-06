@@ -30,22 +30,6 @@ public class RestoreCardHandler : IRequestHandler<RestoreCardCommand, CardDto>
         var card = board.Cards.First(c => c.Id == request.CardId);
         var labels = board.Labels.Select(l => new LabelDto(l.Id, l.Name, l.Color)).ToList();
 
-        return new CardDto(
-            card.Id,
-            card.CardNumber,
-            $"{board.Prefix.Value}-{card.CardNumber}",
-            card.Content.Title,
-            card.Content.Description,
-            card.ColumnId,
-            card.Position.Value,
-            card.LabelIds
-                .Select(labelId => labels.FirstOrDefault(l => l.Id == labelId))
-                .Where(label => label != null)
-                .Cast<LabelDto>()
-                .ToList(),
-            card.CreatedAt,
-            card.UpdatedAt,
-            card.ArchivedAt,
-            card.HoldAt);
+        return CardDto.FromCard(card, board.Prefix.Value, labels);
     }
 }

@@ -74,6 +74,23 @@ public class BoardColumnTests
     }
 
     [Fact]
+    public void RenameColumn_ShouldRaiseColumnRenamedEvent()
+    {
+        var board = new BoardBuilder().WithColumn("Old Name").Build();
+        var columnId = board.Columns[0].Id;
+
+        board.RenameColumn(columnId, "New Name");
+
+        var domainEvent = board.GetDomainEvents().Should().ContainSingle()
+            .Which.Should().BeOfType<ColumnRenamedEvent>().Subject;
+
+        domainEvent.BoardId.Should().Be(board.Id);
+        domainEvent.ColumnId.Should().Be(columnId);
+        domainEvent.OldName.Should().Be("Old Name");
+        domainEvent.NewName.Should().Be("New Name");
+    }
+
+    [Fact]
     public void RenameColumn_WithInvalidId_ShouldThrowDomainException()
     {
         var board = new BoardBuilder().WithColumn("To Do").Build();

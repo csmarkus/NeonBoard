@@ -1,6 +1,10 @@
 <div
+  role="button"
+  tabindex="0"
   (click)="cardClick.emit()"
-  class="bg-surface border border-subtle rounded-lg hover:border-cyan-500/50 transition-colors cursor-pointer relative overflow-hidden"
+  (keydown.enter)="cardClick.emit()"
+  (keydown.space)="$event.preventDefault(); cardClick.emit()"
+  class="bg-surface border border-subtle rounded-lg hover:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-colors cursor-pointer relative overflow-hidden"
   [class.border-amber-500/30]="card().holdAt"
 >
   @if (card().holdAt) {

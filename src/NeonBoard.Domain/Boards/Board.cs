@@ -112,8 +112,11 @@ public sealed class Board : Entity, IAggregateRoot
     public void RenameColumn(Guid columnId, string newName)
     {
         var column = FindColumn(columnId);
+        var oldName = column.Name;
         column.UpdateName(newName);
         UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new ColumnRenamedEvent(Id, columnId, oldName, newName));
     }
 
     public void ReorderColumns(List<Guid> columnIdsInOrder)

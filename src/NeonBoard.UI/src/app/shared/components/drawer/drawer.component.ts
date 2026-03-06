@@ -1,10 +1,11 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-drawer',
-  imports: [FontAwesomeModule],
+  imports: [FontAwesomeModule, A11yModule],
   templateUrl: './drawer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

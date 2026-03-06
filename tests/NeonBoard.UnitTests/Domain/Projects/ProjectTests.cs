@@ -94,6 +94,24 @@ public class ProjectTests
         project.UpdatedAt.Should().BeOnOrAfter(originalCreatedAt);
     }
 
+    [Fact]
+    public void Update_ShouldRaiseProjectUpdatedEvent()
+    {
+        var project = Project.Create("Original", "Desc", Guid.NewGuid());
+        project.ClearDomainEvents();
+
+        project.Update("Updated Name", "Updated Desc");
+
+        var domainEvent = project.GetDomainEvents()
+            .OfType<ProjectUpdatedEvent>()
+            .SingleOrDefault();
+
+        domainEvent.Should().NotBeNull();
+        domainEvent!.ProjectId.Should().Be(project.Id);
+        domainEvent.Name.Should().Be("Updated Name");
+        domainEvent.Description.Should().Be("Updated Desc");
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]

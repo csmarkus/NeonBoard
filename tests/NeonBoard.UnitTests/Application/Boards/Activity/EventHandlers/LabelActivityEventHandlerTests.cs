@@ -136,4 +136,17 @@ public class LabelActivityEventHandlerTests
                 (string)e.Data["prefix"] == "SPR"),
             Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Handle_WhenUserIdIsNull_ShouldNotPersistActivityEntry()
+    {
+        _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns((Guid?)null);
+        var boardId = Guid.NewGuid();
+        var labelId = Guid.NewGuid();
+        var evt = new LabelCreatedEvent(boardId, labelId, "Bug", "#ff0000");
+
+        await _handler.Handle(evt, CancellationToken.None);
+
+        await _repository.DidNotReceive().AddAsync(Arg.Any<ActivityEntry>(), Arg.Any<CancellationToken>());
+    }
 }

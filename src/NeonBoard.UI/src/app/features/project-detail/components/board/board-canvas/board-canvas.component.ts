@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, input, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule, NgStyle } from '@angular/common';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
@@ -11,7 +10,7 @@ import { Card } from '../../../models/card.model';
 
 @Component({
   selector: 'app-board-canvas',
-  imports: [CommonModule, NgStyle, DragDropModule, FontAwesomeModule, ColumnComponent, AddColumnButtonComponent],
+  imports: [DragDropModule, FontAwesomeModule, ColumnComponent, AddColumnButtonComponent],
   host: {
     class: 'flex-1 flex flex-col'
   },
@@ -39,10 +38,6 @@ export class BoardCanvasComponent {
   error = this.facade.error;
 
   columnIds = computed(() => this.columns().map(c => c.id));
-
-  cardHeightStyle = computed(() => ({
-    '--dragged-card-height': `${this.draggedCardHeight()}px`
-  }));
 
   constructor() {
     effect(() => {

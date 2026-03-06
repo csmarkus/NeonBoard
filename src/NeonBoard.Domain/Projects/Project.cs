@@ -58,6 +58,8 @@ public sealed class Project : Entity, IAggregateRoot
         Name = name;
         Description = description ?? string.Empty;
         UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new ProjectUpdatedEvent(Id, Name, Description));
     }
 
     private static void ValidateName(string name)

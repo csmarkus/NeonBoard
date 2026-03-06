@@ -86,4 +86,17 @@ public class ColumnActivityEventHandlerTests
                 e.Data.Count == 0),
             Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Handle_WhenUserIdIsNull_ShouldNotPersistActivityEntry()
+    {
+        _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns((Guid?)null);
+        var boardId = Guid.NewGuid();
+        var columnId = Guid.NewGuid();
+        var evt = new ColumnAddedEvent(boardId, columnId, "To Do", 0);
+
+        await _handler.Handle(evt, CancellationToken.None);
+
+        await _repository.DidNotReceive().AddAsync(Arg.Any<ActivityEntry>(), Arg.Any<CancellationToken>());
+    }
 }

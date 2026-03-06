@@ -25,7 +25,11 @@ public class LabelActivityEventHandler :
 
     public async Task Handle(LabelCreatedEvent notification, CancellationToken cancellationToken)
     {
-        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+        var userContext = await GetUserContextAsync(cancellationToken);
+        if (userContext == null)
+            return;
+
+        var (userId, userName) = userContext.Value;
 
         var entry = ActivityEntry.Create(
             notification.BoardId,
@@ -45,7 +49,11 @@ public class LabelActivityEventHandler :
 
     public async Task Handle(LabelUpdatedEvent notification, CancellationToken cancellationToken)
     {
-        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+        var userContext = await GetUserContextAsync(cancellationToken);
+        if (userContext == null)
+            return;
+
+        var (userId, userName) = userContext.Value;
 
         var entry = ActivityEntry.Create(
             notification.BoardId,
@@ -65,7 +73,11 @@ public class LabelActivityEventHandler :
 
     public async Task Handle(LabelRemovedEvent notification, CancellationToken cancellationToken)
     {
-        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+        var userContext = await GetUserContextAsync(cancellationToken);
+        if (userContext == null)
+            return;
+
+        var (userId, userName) = userContext.Value;
 
         var entry = ActivityEntry.Create(
             notification.BoardId,
@@ -84,7 +96,11 @@ public class LabelActivityEventHandler :
 
     public async Task Handle(CardLabelAddedEvent notification, CancellationToken cancellationToken)
     {
-        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+        var userContext = await GetUserContextAsync(cancellationToken);
+        if (userContext == null)
+            return;
+
+        var (userId, userName) = userContext.Value;
 
         var entry = ActivityEntry.Create(
             notification.BoardId,
@@ -107,7 +123,11 @@ public class LabelActivityEventHandler :
 
     public async Task Handle(CardLabelRemovedEvent notification, CancellationToken cancellationToken)
     {
-        var (userId, userName) = await GetUserContextAsync(cancellationToken);
+        var userContext = await GetUserContextAsync(cancellationToken);
+        if (userContext == null)
+            return;
+
+        var (userId, userName) = userContext.Value;
 
         var entry = ActivityEntry.Create(
             notification.BoardId,
@@ -128,9 +148,12 @@ public class LabelActivityEventHandler :
         await _repository.AddAsync(entry, cancellationToken);
     }
 
-    private async Task<(Guid UserId, string UserName)> GetUserContextAsync(CancellationToken cancellationToken)
+    private async Task<(Guid UserId, string UserName)?> GetUserContextAsync(CancellationToken cancellationToken)
     {
         var userId = await _currentUserService.GetUserIdAsync(cancellationToken);
-        return (userId!.Value, _currentUserService.Name ?? "Unknown");
+        if (userId == null)
+            return null;
+
+        return (userId.Value, _currentUserService.Name ?? "Unknown");
     }
 }

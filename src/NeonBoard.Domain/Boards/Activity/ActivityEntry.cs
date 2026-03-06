@@ -1,8 +1,9 @@
+using NeonBoard.Domain.Common;
+
 namespace NeonBoard.Domain.Boards.Activity;
 
-public class ActivityEntry
+public class ActivityEntry : Entity
 {
-    public Guid Id { get; private init; }
     public Guid BoardId { get; private init; }
     public Guid UserId { get; private init; }
     public string UserName { get; private init; } = string.Empty;
