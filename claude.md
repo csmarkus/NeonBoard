@@ -3,14 +3,6 @@
 ## Project Overview
 NeonBoard is a Kanban project tracking application built with .NET 10 and Angular. Users can create projects, add boards to projects, and manage cards across columns within those boards.
 
-**Current Feature Set:**
-- Single user per project (no collaboration features)
-- Card management: title, description, labels
-- Board prefixes and human-readable card display IDs (e.g. `SPR-1`)
-- Drag-and-drop card and column positioning
-- Board settings: rename, prefix, label management, delete
-- Human-readable URLs: `/p/{shortId}/b/{slug}` (projects use a 7-char base62 short ID, boards use a name-derived slug)
-
 ## Architecture
 
 ### Clean Architecture Layers
@@ -41,7 +33,7 @@ src/
 - **ORM:** Entity Framework Core 10
 - **Patterns:** DDD, CQRS, Clean Architecture, Vertical Slice Architecture
 - **Libraries:** MediatR, FluentValidation, Aspire
-- **Testing:** xUnit, FluentAssertions, Moq
+- **Testing:** xUnit, FluentAssertions, NSubstitute
 - **Local Dev:** .NET Aspire orchestration
 - **Deployment:** Docker (single container with Angular + API), Dokploy
 
@@ -195,7 +187,7 @@ Order matters! Defined in `Application/DependencyInjection.cs`.
 - Test domain logic in isolation
 - Test command/query handlers with mocked dependencies
 - Use FluentAssertions for readable assertions
-- Use Moq for mocking
+- Use NSubstitute for mocking
 
 ### Integration Tests (tests/NeonBoard.IntegrationTests/)
 - Test API endpoints end-to-end
