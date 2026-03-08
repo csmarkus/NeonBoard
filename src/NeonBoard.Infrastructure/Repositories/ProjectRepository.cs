@@ -24,4 +24,26 @@ public class ProjectRepository : Repository<Project>, IProjectRepository
         return await DbSet
             .AnyAsync(p => p.Id == projectId && p.OwnerId == userId, cancellationToken);
     }
+
+    public async Task<Project?> GetWithMembersAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(p => p.Members)
+            .FirstOrDefaultAsync(p => p.Id == projectId, cancellationToken);
+    }
+
+    public async Task<List<Project>> GetProjectsByMemberUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(p => p.Members)
+            .Where(p => p.Members.Any(m => m.UserId == userId))
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> IsUserMemberAsync(Guid projectId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AnyAsync(p => p.Id == projectId && p.Members.Any(m => m.UserId == userId), cancellationToken);
+    }
 }
