@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NeonBoard.Domain.Projects;
+using NeonBoard.Domain.Projects.Entities;
 
 namespace NeonBoard.Infrastructure.Persistence.Configurations;
 
@@ -37,5 +38,31 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .IsUnique();
 
         builder.HasIndex(p => p.OwnerId);
+
+        builder.OwnsMany(p => p.Members, member =>
+        {
+            member.ToTable("ProjectMembers");
+
+            member.WithOwner().HasForeignKey("ProjectId");
+
+            member.HasKey(m => m.Id);
+
+            member.Property(m => m.Id)
+                .ValueGeneratedNever();
+
+            member.Property(m => m.UserId)
+                .IsRequired();
+
+            member.Property(m => m.Role)
+                .IsRequired();
+
+            member.Property(m => m.JoinedAt)
+                .IsRequired();
+
+            member.HasIndex("ProjectId", "UserId")
+                .IsUnique();
+
+            member.HasIndex(m => m.UserId);
+        });
     }
 }

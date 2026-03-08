@@ -22,12 +22,21 @@ public class ProjectAuthorizationFilter : IEndpointFilter
 
         var currentUserService = context.HttpContext.RequestServices
             .GetRequiredService<ICurrentUserService>();
+        var projectRepository = context.HttpContext.RequestServices
+            .GetRequiredService<IProjectRepository>();
         var authorizationService = context.HttpContext.RequestServices
             .GetRequiredService<IProjectAuthorizationService>();
 
         var userId = await currentUserService.GetUserIdAsync(context.HttpContext.RequestAborted);
         if (userId == null)
             return Results.Unauthorized();
+
+        var exists = await projectRepository.ExistsAsync(projectId.Value, context.HttpContext.RequestAborted);
+        if (!exists)
+            return Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Not Found",
+                detail: $"Project with ID {projectId.Value} was not found.");
 
         var hasRole = await authorizationService.HasRoleAsync(
             projectId.Value, userId.Value, _requiredRole, context.HttpContext.RequestAborted);
