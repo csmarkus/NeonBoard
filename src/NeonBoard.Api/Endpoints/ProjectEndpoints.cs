@@ -26,7 +26,7 @@ public static class ProjectEndpoints
 
         group.MapGet("/{id:guid}", GetProject)
             .WithName("GetProject")
-            .AddEndpointFilter<ProjectOwnershipFilter>()
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<ProjectDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -36,14 +36,14 @@ public static class ProjectEndpoints
 
         group.MapPut("/{id:guid}", UpdateProject)
             .WithName("UpdateProject")
-            .AddEndpointFilter<ProjectOwnershipFilter>()
+            .AddEndpointFilter(ProjectAuth.Owner())
             .Produces<ProjectDto>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{id:guid}", DeleteProject)
             .WithName("DeleteProject")
-            .AddEndpointFilter<ProjectOwnershipFilter>()
+            .AddEndpointFilter(ProjectAuth.Owner())
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }

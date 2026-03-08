@@ -202,6 +202,8 @@ public class Program
         app.MapColumnEndpoints();
         app.MapCardEndpoints();
         app.MapLabelEndpoints();
+        app.MapMemberEndpoints();
+        app.MapInvitationEndpoints();
 
         app.MapFallbackToFile("index.html");
 

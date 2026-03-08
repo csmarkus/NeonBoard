@@ -16,7 +16,7 @@ public static class ColumnEndpoints
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards/{boardId:guid}/columns")
             .WithTags("Columns")
             .RequireAuthorization()
-            .AddEndpointFilter<ProjectOwnershipFilter>();
+            .AddEndpointFilter(ProjectAuth.Editor());
 
         group.MapPost("/", AddColumn)
             .WithName("AddColumn")
