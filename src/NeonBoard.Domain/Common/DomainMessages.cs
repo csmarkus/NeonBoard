@@ -93,6 +93,19 @@ public static class DomainMessages
 
     #endregion
 
+    #region ProjectInvitation
+
+    public const string InvitationEmailEmpty = "Invitation email cannot be empty.";
+    public const string InvitationEmailInvalid = "Invitation email must be a valid email address.";
+    public const string InvitationProjectIdEmpty = "Invitation project ID cannot be empty.";
+    public const string InvitationInviterIdEmpty = "Inviter user ID cannot be empty.";
+    public const string InvitationAlreadyAccepted = "This invitation has already been accepted.";
+    public const string InvitationAlreadyRevoked = "This invitation has already been revoked.";
+    public const string InvitationExpired = "This invitation has expired.";
+    public const string InvitationNotPending = "Only pending invitations can be modified.";
+
+    #endregion
+
     #region User
 
     public const string UserAuth0IdEmpty = "Auth0 User ID cannot be empty.";
