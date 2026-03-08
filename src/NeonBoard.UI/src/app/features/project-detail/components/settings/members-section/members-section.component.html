@@ -1,0 +1,126 @@
+<app-settings-section
+  title="Members"
+  description="Manage who has access to this project and their permissions.">
+
+  <div class="space-y-6">
+    <!-- Header with invite button -->
+    @if (isOwner()) {
+      <div class="flex justify-end">
+        <app-button
+          variant="primary"
+          size="sm"
+          (click)="openInviteDrawer()">
+          Invite Member
+        </app-button>
+      </div>
+    }
+
+    <!-- Error -->
+    <app-error-banner [message]="error()" />
+
+    <!-- Loading state -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-8">
+        <div class="inline-block w-6 h-6 border-4 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+        <span class="ml-3 text-sm text-muted">Loading members...</span>
+      </div>
+    } @else {
+      <!-- Members list -->
+      <div class="space-y-1" role="list" aria-label="Project members">
+        @for (member of members(); track member.userId) {
+          <div
+            class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-surface-elevated transition-colors"
+            role="listitem">
+            <!-- Avatar -->
+            <div
+              class="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-sm font-semibold shrink-0"
+              aria-hidden="true">
+              {{ getInitial(member.displayName) }}
+            </div>
+
+            <!-- Name and email -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-primary truncate">{{ member.displayName }}</p>
+              <p class="text-xs text-muted truncate">{{ member.email }}</p>
+            </div>
+
+            <!-- Joined date -->
+            <span class="text-xs text-muted hidden sm:block">
+              Joined {{ member.joinedAt | relativeTime }}
+            </span>
+
+            <!-- Role badge / dropdown -->
+            @if (isOwner() && member.role !== 'Owner') {
+              <select
+                [value]="member.role"
+                (change)="onRoleChange(member, $any($event.target).value)"
+                class="text-xs bg-surface border border-dim rounded-md px-2 py-1 text-secondary focus:outline-none focus:border-accent"
+                [attr.aria-label]="'Change role for ' + member.displayName">
+                <option value="Editor">Editor</option>
+                <option value="Viewer">Viewer</option>
+              </select>
+            } @else {
+              <app-badge [variant]="getRoleBadgeVariant(member.role)">
+                {{ member.role }}
+              </app-badge>
+            }
+
+            <!-- Remove button (owner only, can't remove self/other owners) -->
+            @if (isOwner() && member.role !== 'Owner') {
+              <button
+                (click)="onRemoveMember(member)"
+                class="text-xs text-muted hover:text-danger transition-colors p-1"
+                [attr.aria-label]="'Remove ' + member.displayName">
+                Remove
+              </button>
+            }
+          </div>
+        } @empty {
+          <p class="text-sm text-muted py-4">No members found.</p>
+        }
+      </div>
+
+      <!-- Pending invitations (Owner only) -->
+      @if (isOwner() && pendingInvitations().length > 0) {
+        <div class="mt-8">
+          <h3 class="text-sm font-semibold text-secondary mb-3">Pending Invitations</h3>
+          <div class="space-y-1" role="list" aria-label="Pending invitations">
+            @for (invitation of pendingInvitations(); track invitation.id) {
+              <div
+                class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-surface-elevated transition-colors"
+                role="listitem">
+                <!-- Placeholder avatar -->
+                <div
+                  class="w-8 h-8 rounded-full bg-surface-elevated text-muted flex items-center justify-center text-sm shrink-0"
+                  aria-hidden="true">
+                  ?
+                </div>
+
+                <!-- Email -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm text-primary truncate">{{ invitation.email }}</p>
+                  <p class="text-xs text-muted">
+                    Invited by {{ invitation.invitedByName }} &middot; {{ invitation.createdAt | relativeTime }}
+                  </p>
+                </div>
+
+                <!-- Role -->
+                <app-badge [variant]="getRoleBadgeVariant(invitation.role)">
+                  {{ invitation.role }}
+                </app-badge>
+
+                <!-- Revoke button -->
+                <button
+                  (click)="onRevokeInvitation(invitation)"
+                  class="text-xs text-muted hover:text-danger transition-colors p-1"
+                  [attr.aria-label]="'Revoke invitation for ' + invitation.email">
+                  Revoke
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</app-settings-section>

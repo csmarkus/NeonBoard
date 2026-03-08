@@ -7,12 +7,13 @@ import { CreateBoardDrawerComponent } from '../../components/project/create-boar
 import { CardDrawerComponent } from '../../components/board/card-drawer/card-drawer.component';
 import { ArchivePanelComponent } from '../../components/board/archive-panel/archive-panel.component';
 import { ActivityPanelComponent } from '../../components/board/activity-panel/activity-panel.component';
+import { InviteMemberDrawerComponent } from '../../components/settings/invite-member-drawer/invite-member-drawer.component';
 import { DrawerService } from '../../services/drawer.service';
 import { ProjectService } from '../../../projects/services/project.service';
 
 @Component({
   selector: 'app-project-layout',
-  imports: [CommonModule, RouterOutlet, SidebarComponent, CreateBoardDrawerComponent, CardDrawerComponent, ArchivePanelComponent, ActivityPanelComponent],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, CreateBoardDrawerComponent, CardDrawerComponent, ArchivePanelComponent, ActivityPanelComponent, InviteMemberDrawerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block h-screen'
@@ -42,6 +43,13 @@ import { ProjectService } from '../../../projects/services/project.service';
       (cardSaved)="onCardUpdated()"
       (cardDeleted)="onCardDeleted()">
     </app-card-drawer>
+
+    <app-invite-member-drawer
+      [open]="drawerService.showInviteMemberDrawer()"
+      [projectId]="drawerService.inviteMemberProjectId() ?? ''"
+      (close)="drawerService.closeInviteMemberDrawer()"
+      (invited)="onMemberInvited()">
+    </app-invite-member-drawer>
 
     <app-archive-panel />
     <app-activity-panel />
@@ -81,5 +89,10 @@ export class ProjectLayoutComponent implements OnInit {
   onCardDeleted(): void {
     this.drawerService.closeCardDrawer();
     this.drawerService.notifyCardDeleted();
+  }
+
+  onMemberInvited(): void {
+    this.drawerService.closeInviteMemberDrawer();
+    this.drawerService.notifyMemberInvited();
   }
 }

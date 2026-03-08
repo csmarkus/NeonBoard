@@ -13,6 +13,8 @@ import { ProjectService } from '../../../projects/services/project.service';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
 import { ProjectGeneralSettingsSectionComponent } from '../../components/settings/project-general-settings-section/project-general-settings-section.component';
 import { DangerZoneSectionComponent } from '../../components/settings/danger-zone-section/danger-zone-section.component';
+import { MembersSectionComponent } from '../../components/settings/members-section/members-section.component';
+import { ProjectRole } from '../../models/member.model';
 
 @Component({
   selector: 'app-project-settings',
@@ -22,6 +24,7 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
     PageHeaderComponent,
     ButtonComponent,
     ProjectGeneralSettingsSectionComponent,
+    MembersSectionComponent,
     DangerZoneSectionComponent,
   ],
   host: {
@@ -43,6 +46,7 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
 
   shortId = signal('');
   projectId = signal('');
+  currentUserRole = signal<ProjectRole | undefined>(undefined);
   isDeleting = signal(false);
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -72,6 +76,7 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
       ).subscribe({
         next: (project) => {
           this.projectId.set(project.id);
+          this.currentUserRole.set(project.currentUserRole);
           this.facade.loadProjectSettings(project.id);
         }
       });

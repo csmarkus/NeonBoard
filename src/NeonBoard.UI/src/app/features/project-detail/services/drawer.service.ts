@@ -19,16 +19,22 @@ export class DrawerService {
   boardLabels = signal<Label[]>([]);
   initialCardActivity = signal<ActivityFeed | null>(null);
 
+  // Invite member drawer
+  showInviteMemberDrawer = signal<boolean>(false);
+  inviteMemberProjectId = signal<string | null>(null);
+
   // Events
   private cardUpdatedSubject = new Subject<void>();
   private cardDeletedSubject = new Subject<void>();
   private boardCreatedSubject = new Subject<void>();
   private cardArchivedSubject = new Subject<void>();
+  private memberInvitedSubject = new Subject<void>();
 
   cardUpdated$ = this.cardUpdatedSubject.asObservable();
   cardDeleted$ = this.cardDeletedSubject.asObservable();
   boardCreated$ = this.boardCreatedSubject.asObservable();
   cardArchived$ = this.cardArchivedSubject.asObservable();
+  memberInvited$ = this.memberInvitedSubject.asObservable();
 
   openCreateBoardDrawer(projectId: string): void {
     this.createBoardProjectId.set(projectId);
@@ -71,5 +77,19 @@ export class DrawerService {
 
   notifyCardArchived(): void {
     this.cardArchivedSubject.next();
+  }
+
+  openInviteMemberDrawer(projectId: string): void {
+    this.inviteMemberProjectId.set(projectId);
+    this.showInviteMemberDrawer.set(true);
+  }
+
+  closeInviteMemberDrawer(): void {
+    this.showInviteMemberDrawer.set(false);
+    this.inviteMemberProjectId.set(null);
+  }
+
+  notifyMemberInvited(): void {
+    this.memberInvitedSubject.next();
   }
 }
