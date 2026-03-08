@@ -1,3 +1,5 @@
+using NeonBoard.Domain.Projects;
+
 namespace NeonBoard.Application.Projects.DTOs;
 
 public record ProjectDto(
@@ -7,4 +9,5 @@ public record ProjectDto(
     string Description,
     Guid OwnerId,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    ProjectRole? CurrentUserRole = null);

@@ -1,27 +1,26 @@
-import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Injectable, inject, signal, computed, effect, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { BoardService } from '../../../features/project-detail/services/board.service';
-import { Board } from '../../../features/project-detail/models/board.model';
+import { ProjectContext } from '../../../features/project-detail/services/project-context.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SidebarStateFacade {
   private boardService = inject(BoardService);
+  private projectContext = inject(ProjectContext);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
   private _collapsed = signal(false);
   private _userMenuOpen = signal(false);
   private _boardsMenuOpen = signal(false);
-  private _boards = signal<Board[]>([]);
-  private _currentProjectId = signal<string>('');
 
   readonly collapsed = this._collapsed.asReadonly();
   readonly userMenuOpen = this._userMenuOpen.asReadonly();
   readonly boardsMenuOpen = this._boardsMenuOpen.asReadonly();
-  readonly boards = this._boards.asReadonly();
+  readonly boards = this.projectContext.boards;
 
   readonly sidebarClasses = computed(() => {
     const width = this._collapsed() ? 'w-16' : 'w-64';
@@ -47,34 +46,18 @@ export class SidebarStateFacade {
   });
 
   constructor() {
+    effect(() => {
+      const boards = this.projectContext.boards();
+      if (boards.length > 0) {
+        this._boardsMenuOpen.set(true);
+      }
+    });
+
     this.boardService.boardsUpdated$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        const currentProjectId = this._currentProjectId();
-        if (currentProjectId) {
-          this.loadBoards(currentProjectId);
-        }
+        this.projectContext.reloadBoards();
       });
-  }
-
-  loadBoards(projectId: string): void {
-    this._currentProjectId.set(projectId);
-
-    this.boardService.getBoardsByProject(projectId).subscribe({
-      next: (boards) => {
-        this._boards.set(boards);
-        this._boardsMenuOpen.set(boards.length > 0);
-      },
-      error: () => {
-        this._boards.set([]);
-      }
-    });
-  }
-
-  clearBoards(): void {
-    this._boards.set([]);
-    this._currentProjectId.set('');
-    this._boardsMenuOpen.set(false);
   }
 
   toggleCollapsed(): void {

@@ -1,13 +1,11 @@
 import { initTestEnvironment } from '../../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { convertToParamMap } from '@angular/router';
-import { of, throwError, Subject } from 'rxjs';
+import { signal } from '@angular/core';
+import { Subject } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { ProjectComponent } from './project.component';
-import { ActivatedRoute } from '@angular/router';
-import { ProjectService } from '../../../projects/services/project.service';
-import { BoardService } from '../../services/board.service';
 import { DrawerService } from '../../services/drawer.service';
+import { ProjectContext } from '../../services/project-context.service';
 import { Project } from '../../../projects/models/project.model';
 import { Board } from '../../models/board.model';
 
@@ -29,32 +27,42 @@ const mockBoards: Board[] = [
 describe('ProjectComponent', () => {
   let fixture: ComponentFixture<ProjectComponent>;
   let component: ProjectComponent;
-  let mockProjectService: { getProjectByShortId: ReturnType<typeof vi.fn> };
-  let mockBoardService: { getBoardsByProject: ReturnType<typeof vi.fn> };
   let boardCreated$: Subject<void>;
   let mockDrawerService: { boardCreated$: Subject<void>; openCreateBoardDrawer: ReturnType<typeof vi.fn> };
   let mockTitle: { setTitle: ReturnType<typeof vi.fn> };
+  let mockProjectContext: {
+    project: ReturnType<typeof signal>;
+    boards: ReturnType<typeof signal>;
+    boardsLoaded: ReturnType<typeof signal>;
+    projectId: ReturnType<typeof signal>;
+    projectName: ReturnType<typeof signal>;
+    shortId: ReturnType<typeof signal>;
+    currentUserRole: ReturnType<typeof signal>;
+    reloadBoards: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     boardCreated$ = new Subject<void>();
-    mockProjectService = { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) };
-    mockBoardService = { getBoardsByProject: vi.fn().mockReturnValue(of(mockBoards)) };
     mockDrawerService = {
       boardCreated$,
       openCreateBoardDrawer: vi.fn(),
     };
     mockTitle = { setTitle: vi.fn() };
-
-    const mockRoute = {
-      snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) },
+    mockProjectContext = {
+      project: signal(mockProject),
+      boards: signal(mockBoards),
+      boardsLoaded: signal(true),
+      projectId: signal('p-1'),
+      projectName: signal('Test Project'),
+      shortId: signal('p-short-1'),
+      currentUserRole: signal(undefined),
+      reloadBoards: vi.fn(),
     };
 
     TestBed.configureTestingModule({
       imports: [ProjectComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: mockRoute },
-        { provide: ProjectService, useValue: mockProjectService },
-        { provide: BoardService, useValue: mockBoardService },
+        { provide: ProjectContext, useValue: mockProjectContext },
         { provide: DrawerService, useValue: mockDrawerService },
         { provide: Title, useValue: mockTitle },
       ],
@@ -65,40 +73,29 @@ describe('ProjectComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('loads project and sets browser title via Title service on init', () => {
-    component.ngOnInit();
+  it('reads project from ProjectContext and sets browser title', () => {
+    TestBed.flushEffects();
 
     expect(component.project()).toEqual(mockProject);
     expect(mockTitle.setTitle).toHaveBeenCalledWith('Test Project | NeonBoard');
   });
 
-  it('loads boards after project is loaded', () => {
-    component.ngOnInit();
-
-    expect(mockBoardService.getBoardsByProject).toHaveBeenCalledWith('p-1');
+  it('reads boards from ProjectContext', () => {
     expect(component.boards()).toEqual(mockBoards);
   });
 
   it('reloads boards when drawerService.boardCreated$ emits', () => {
-    component.ngOnInit();
-    mockBoardService.getBoardsByProject.mockClear();
-    mockBoardService.getBoardsByProject.mockReturnValue(of(mockBoards));
-
     boardCreated$.next();
 
-    expect(mockBoardService.getBoardsByProject).toHaveBeenCalledWith('p-1');
+    expect(mockProjectContext.reloadBoards).toHaveBeenCalled();
   });
 
-  it('sets error signal when project load fails', () => {
-    mockProjectService.getProjectByShortId.mockReturnValue(throwError(() => new Error('fail')));
-
-    component.ngOnInit();
-
-    expect(component.error()).toBe('Failed to load project');
-  });
-
-  it('sets isLoading to false after fetch completes on success', () => {
-    component.ngOnInit();
+  it('isLoading is false when boardsLoaded is true', () => {
     expect(component.isLoading()).toBe(false);
+  });
+
+  it('isLoading is true when boardsLoaded is false', () => {
+    mockProjectContext.boardsLoaded.set(false);
+    expect(component.isLoading()).toBe(true);
   });
 });

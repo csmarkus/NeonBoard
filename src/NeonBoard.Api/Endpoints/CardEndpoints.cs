@@ -25,68 +25,80 @@ public static class CardEndpoints
     {
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards/{boardId:guid}/cards")
             .WithTags("Cards")
-            .RequireAuthorization()
-            .AddEndpointFilter<ProjectOwnershipFilter>();
+            .RequireAuthorization();
 
         group.MapPost("/", AddCard)
             .WithName("AddCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<CardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
         group.MapGet("/{cardId:guid}", GetCardDetail)
             .WithName("GetCardDetail")
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<CardDetailDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/archived", GetArchivedCards)
             .WithName("GetArchivedCards")
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<List<CardDto>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPut("/{cardId:guid}", UpdateCard)
             .WithName("UpdateCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem();
 
         group.MapPatch("/{cardId:guid}/move", MoveCard)
             .WithName("MoveCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem();
 
         group.MapDelete("/{cardId:guid}", DeleteCard)
             .WithName("DeleteCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapPatch("/{cardId:guid}/archive", ArchiveCard)
             .WithName("ArchiveCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<CardDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPatch("/{cardId:guid}/restore", RestoreCard)
             .WithName("RestoreCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<CardDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPatch("/{cardId:guid}/hold", HoldCard)
             .WithName("HoldCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<CardDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPatch("/{cardId:guid}/resume", ResumeCard)
             .WithName("ResumeCard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<CardDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPut("/{cardId:guid}/labels/{labelId:guid}", AddCardLabel)
             .WithName("AddCardLabel")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapDelete("/{cardId:guid}/labels/{labelId:guid}", RemoveCardLabel)
             .WithName("RemoveCardLabel")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/{cardId:guid}/activity", GetCardActivity)
             .WithName("GetCardActivity")
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<ActivityFeedDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }

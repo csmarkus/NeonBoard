@@ -30,6 +30,7 @@ public class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Projec
             project.Description,
             project.OwnerId,
             project.CreatedAt,
-            project.UpdatedAt);
+            project.UpdatedAt,
+            ProjectRole.Owner);
     }
 }

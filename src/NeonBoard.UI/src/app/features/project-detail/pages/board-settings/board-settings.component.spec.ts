@@ -6,11 +6,11 @@ import { of } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { BoardSettingsComponent } from './board-settings.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProjectService } from '../../../projects/services/project.service';
-import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
+import { ProjectContext } from '../../services/project-context.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { Project } from '../../../projects/models/project.model';
+import { Board } from '../../models/board.model';
 
 initTestEnvironment();
 
@@ -22,6 +22,10 @@ const mockProject: Project = {
   createdAt: '',
   updatedAt: '',
 } as Project;
+
+const mockBoards: Board[] = [
+  { id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 },
+];
 
 describe('BoardSettingsComponent', () => {
   let fixture: ComponentFixture<BoardSettingsComponent>;
@@ -42,6 +46,15 @@ describe('BoardSettingsComponent', () => {
   };
   let mockRouter: { navigate: ReturnType<typeof vi.fn> };
   let mockTitle: { setTitle: ReturnType<typeof vi.fn> };
+  let mockProjectContext: {
+    project: ReturnType<typeof signal>;
+    boards: ReturnType<typeof signal>;
+    boardsLoaded: ReturnType<typeof signal>;
+    projectId: ReturnType<typeof signal>;
+    projectName: ReturnType<typeof signal>;
+    shortId: ReturnType<typeof signal>;
+    currentUserRole: ReturnType<typeof signal>;
+  };
 
   beforeEach(() => {
     mockFacade = {
@@ -60,9 +73,17 @@ describe('BoardSettingsComponent', () => {
     };
     mockRouter = { navigate: vi.fn() };
     mockTitle = { setTitle: vi.fn() };
+    mockProjectContext = {
+      project: signal(mockProject),
+      boards: signal(mockBoards),
+      boardsLoaded: signal(true),
+      projectId: signal('p-1'),
+      projectName: signal('Test Project'),
+      shortId: signal('p-short-1'),
+      currentUserRole: signal(undefined),
+    };
 
     const mockRoute = {
-      parent: { snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) } },
       snapshot: { paramMap: convertToParamMap({ slug: 'sprint-board' }) },
     };
 
@@ -71,8 +92,7 @@ describe('BoardSettingsComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
         { provide: Router, useValue: mockRouter },
-        { provide: ProjectService, useValue: { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) } },
-        { provide: BoardService, useValue: { getBoardsByProject: vi.fn().mockReturnValue(of([{ id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 }])) } },
+        { provide: ProjectContext, useValue: mockProjectContext },
         { provide: BoardSettingsFacade, useValue: mockFacade },
         { provide: Title, useValue: mockTitle },
         { provide: ModalService, useValue: { confirm: vi.fn().mockResolvedValue(true) } },
@@ -84,17 +104,14 @@ describe('BoardSettingsComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('calls facade.loadBoardSettings with projectId and boardId on init', () => {
-    component.ngOnInit();
+  it('calls facade.loadBoardSettings with projectId and boardId from context', () => {
+    TestBed.flushEffects();
 
     expect(mockFacade.loadBoardSettings).toHaveBeenCalledWith('p-1', 'b-1');
   });
 
   it('saveChanges delegates to facade.saveBoardSettings', () => {
-    component.projectId.set('p-1');
-    component.boardId.set('b-1');
-    component.shortId.set('p-short-1');
-    component.slug.set('sprint-board');
+    TestBed.flushEffects();
 
     component.saveChanges();
 
@@ -102,9 +119,7 @@ describe('BoardSettingsComponent', () => {
   });
 
   it('onDeleteBoard calls facade.deleteBoard and navigates to /p/:shortId on success', () => {
-    component.projectId.set('p-1');
-    component.boardId.set('b-1');
-    component.shortId.set('p-short-1');
+    TestBed.flushEffects();
     mockFacade.deleteBoard.mockReturnValue(of(undefined));
 
     component.onDeleteBoard();

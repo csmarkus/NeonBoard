@@ -36,4 +36,11 @@ public class UserRepository : Repository<User>, IUserRepository
 
         return user;
     }
+
+    public async Task<List<User>> GetByIdsAsync(List<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(u => ids.Contains(u.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -150,6 +150,57 @@ namespace NeonBoard.Infrastructure.Migrations
                     b.ToTable("Projects", (string)null);
                 });
 
+            modelBuilder.Entity("NeonBoard.Domain.Projects.ProjectInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AcceptedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InvitedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitedByUserId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("ProjectId", "Email");
+
+                    b.ToTable("ProjectInvitations", (string)null);
+                });
+
             modelBuilder.Entity("NeonBoard.Domain.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -400,6 +451,56 @@ namespace NeonBoard.Infrastructure.Migrations
                     b.Navigation("Labels");
 
                     b.Navigation("Prefix")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NeonBoard.Domain.Projects.Project", b =>
+                {
+                    b.OwnsMany("NeonBoard.Domain.Projects.Entities.ProjectMember", "Members", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("JoinedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<Guid>("ProjectId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Role")
+                                .HasColumnType("integer");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("UserId");
+
+                            b1.HasIndex("ProjectId", "UserId")
+                                .IsUnique();
+
+                            b1.ToTable("ProjectMembers", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProjectId");
+                        });
+
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("NeonBoard.Domain.Projects.ProjectInvitation", b =>
+                {
+                    b.HasOne("NeonBoard.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NeonBoard.Domain.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

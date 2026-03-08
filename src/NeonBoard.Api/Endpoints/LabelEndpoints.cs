@@ -15,7 +15,7 @@ public static class LabelEndpoints
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards/{boardId:guid}/labels")
             .WithTags("Labels")
             .RequireAuthorization()
-            .AddEndpointFilter<ProjectOwnershipFilter>();
+            .AddEndpointFilter(ProjectAuth.Editor());
 
         group.MapPost("/", AddLabel)
             .WithName("AddLabel")

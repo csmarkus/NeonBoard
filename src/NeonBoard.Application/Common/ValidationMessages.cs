@@ -55,4 +55,15 @@ public static class ValidationMessages
     public const string LabelColorRequired = "Label color is required.";
 
     #endregion
+
+    #region Membership
+
+    public const string MemberUserIdRequired = "Member user ID is required.";
+    public const string InvitationEmailRequired = "Email address is required.";
+    public const string InvitationEmailInvalid = "A valid email address is required.";
+    public const string InvitationTokenRequired = "Invitation token is required.";
+    public const string InvitationRoleRequired = "Role is required.";
+    public const string InvitationRoleInvalid = "Role must be Editor or Viewer.";
+
+    #endregion
 }

@@ -1,9 +1,17 @@
 using NeonBoard.Application.Common.Interfaces;
+using NeonBoard.Domain.Projects;
 
 namespace NeonBoard.Api.Filters;
 
-public class ProjectOwnershipFilter : IEndpointFilter
+public class ProjectAuthorizationFilter : IEndpointFilter
 {
+    private readonly ProjectRole _requiredRole;
+
+    public ProjectAuthorizationFilter(ProjectRole requiredRole)
+    {
+        _requiredRole = requiredRole;
+    }
+
     public async ValueTask<object?> InvokeAsync(
         EndpointFilterInvocationContext context,
         EndpointFilterDelegate next)
@@ -16,6 +24,8 @@ public class ProjectOwnershipFilter : IEndpointFilter
             .GetRequiredService<ICurrentUserService>();
         var projectRepository = context.HttpContext.RequestServices
             .GetRequiredService<IProjectRepository>();
+        var authorizationService = context.HttpContext.RequestServices
+            .GetRequiredService<IProjectAuthorizationService>();
 
         var userId = await currentUserService.GetUserIdAsync(context.HttpContext.RequestAborted);
         if (userId == null)
@@ -28,10 +38,10 @@ public class ProjectOwnershipFilter : IEndpointFilter
                 title: "Not Found",
                 detail: $"Project with ID {projectId.Value} was not found.");
 
-        var isOwner = await projectRepository.IsProjectOwnedByUserAsync(
-            projectId.Value, userId.Value, context.HttpContext.RequestAborted);
+        var hasRole = await authorizationService.HasRoleAsync(
+            projectId.Value, userId.Value, _requiredRole, context.HttpContext.RequestAborted);
 
-        if (!isOwner)
+        if (!hasRole)
             return Results.Problem(
                 statusCode: StatusCodes.Status403Forbidden,
                 title: "Forbidden",
@@ -52,4 +62,11 @@ public class ProjectOwnershipFilter : IEndpointFilter
 
         return null;
     }
+}
+
+public static class ProjectAuth
+{
+    public static ProjectAuthorizationFilter Viewer() => new(ProjectRole.Viewer);
+    public static ProjectAuthorizationFilter Editor() => new(ProjectRole.Editor);
+    public static ProjectAuthorizationFilter Owner() => new(ProjectRole.Owner);
 }

@@ -13,8 +13,6 @@ describe('SidebarComponent', () => {
   let component: SidebarComponent;
   let mockAuth: { logout: ReturnType<typeof vi.fn> };
   let mockFacade: {
-    loadBoards: ReturnType<typeof vi.fn>;
-    clearBoards: ReturnType<typeof vi.fn>;
     collapsed: ReturnType<typeof signal<boolean>>;
     userMenuOpen: ReturnType<typeof signal<boolean>>;
     boardsMenuOpen: ReturnType<typeof signal<boolean>>;
@@ -33,8 +31,6 @@ describe('SidebarComponent', () => {
   beforeEach(() => {
     mockAuth = { logout: vi.fn() };
     mockFacade = {
-      loadBoards: vi.fn(),
-      clearBoards: vi.fn(),
       collapsed: signal(false),
       userMenuOpen: signal(false),
       boardsMenuOpen: signal(false),
@@ -64,22 +60,9 @@ describe('SidebarComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('calls facade.loadBoards when projectId input is non-empty', () => {
-    fixture.componentRef.setInput('projectId', 'p-1');
-    TestBed.flushEffects();
-
-    expect(mockFacade.loadBoards).toHaveBeenCalledWith('p-1');
-  });
-
-  it('calls facade.clearBoards when projectId input is empty string', () => {
-    fixture.componentRef.setInput('projectId', '');
-    TestBed.flushEffects();
-
-    expect(mockFacade.clearBoards).toHaveBeenCalled();
-  });
-
   it('logout calls auth.logout with returnTo: window.location.origin', () => {
     fixture.componentRef.setInput('projectId', 'p-1');
+    fixture.componentRef.setInput('shortId', 's-1');
     component.logout();
 
     expect(mockAuth.logout).toHaveBeenCalledWith({

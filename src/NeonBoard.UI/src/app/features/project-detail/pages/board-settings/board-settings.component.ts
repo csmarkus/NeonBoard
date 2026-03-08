@@ -1,17 +1,16 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { Observable, from, tap, switchMap } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { ModalService } from '../../../../core/services/modal.service';
-import { ProjectService } from '../../../projects/services/project.service';
-import { BoardService } from '../../services/board.service';
 import { BoardSettingsFacade } from '../../services/board-settings.facade';
+import { ProjectContext } from '../../services/project-context.service';
 import { GeneralSettingsSectionComponent } from '../../components/settings/general-settings-section/general-settings-section.component';
 import { LabelManagementSectionComponent } from '../../components/settings/label-management-section/label-management-section.component';
 import { DangerZoneSectionComponent } from '../../components/settings/danger-zone-section/danger-zone-section.component';
@@ -33,24 +32,22 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
   templateUrl: './board-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
+export class BoardSettingsComponent implements HasUnsavedChanges {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private projectService = inject(ProjectService);
-  private boardService = inject(BoardService);
+  private projectContext = inject(ProjectContext);
   facade = inject(BoardSettingsFacade);
   private titleService = inject(Title);
-
-  faChevronLeft = faChevronLeft;
   private destroyRef = inject(DestroyRef);
-
   private modalService = inject(ModalService);
 
-  shortId = signal('');
+  faChevronLeft = faChevronLeft;
+
+  shortId = this.projectContext.shortId;
+  projectId = this.projectContext.projectId;
+  projectName = this.projectContext.projectName;
   slug = signal('');
-  projectId = signal('');
   boardId = signal('');
-  projectName = signal('');
   isDeleting = signal(false);
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -60,41 +57,29 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
   ]);
 
   constructor() {
+    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    this.slug.set(slug);
+
+    this.facade.resetState();
+
     effect(() => {
       const name = this.facade.originalBoardName();
       if (name) {
         this.titleService.setTitle(`Settings - ${name} | NeonBoard`);
       }
     });
-  }
 
-  ngOnInit(): void {
-    const shortId = this.route.parent?.snapshot.paramMap.get('shortId') ?? '';
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
-
-    if (shortId) this.shortId.set(shortId);
-    if (slug) this.slug.set(slug);
-
-    this.facade.resetState();
-
-    if (shortId && slug) {
-      this.projectService.getProjectByShortId(shortId).pipe(
-        tap(project => {
-          this.projectId.set(project.id);
-          this.projectName.set(project.name);
-        }),
-        switchMap(project => this.boardService.getBoardsByProject(project.id)),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe({
-        next: (boards) => {
-          const board = boards.find(b => b.slug === slug);
-          if (board) {
-            this.boardId.set(board.id);
-            this.facade.loadBoardSettings(this.projectId(), board.id);
-          }
+    effect(() => {
+      const boards = this.projectContext.boards();
+      const currentSlug = this.slug();
+      if (boards.length > 0 && currentSlug) {
+        const board = boards.find(b => b.slug === currentSlug);
+        if (board) {
+          this.boardId.set(board.id);
+          this.facade.loadBoardSettings(this.projectContext.projectId(), board.id);
         }
-      });
-    }
+      }
+    });
   }
 
   hasUnsavedChanges(): boolean {
@@ -115,7 +100,6 @@ export class BoardSettingsComponent implements OnInit, HasUnsavedChanges {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: (board) => {
-        // If slug changed (board was renamed), navigate to new URL
         if (board.slug !== this.slug()) {
           this.slug.set(board.slug);
           this.router.navigate(['/p', this.shortId(), 'b', board.slug, 'settings']);

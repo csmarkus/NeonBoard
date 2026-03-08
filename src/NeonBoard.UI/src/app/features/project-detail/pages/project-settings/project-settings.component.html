@@ -31,6 +31,14 @@
 
       <hr class="border-subtle my-12" />
 
+      @if (projectId()) {
+        <app-members-section
+          [projectId]="projectId()"
+          [currentUserRole]="currentUserRole()" />
+
+        <hr class="border-subtle my-12" />
+      }
+
       <app-danger-zone-section
         entityName="project"
         deleteDescription="All boards, columns, and cards will be permanently removed."

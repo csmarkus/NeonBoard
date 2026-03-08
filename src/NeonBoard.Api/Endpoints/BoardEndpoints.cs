@@ -18,40 +18,44 @@ public static class BoardEndpoints
     {
         var group = app.MapGroup("/api/projects/{projectId:guid}/boards")
             .WithTags("Boards")
-            .RequireAuthorization()
-            .AddEndpointFilter<ProjectOwnershipFilter>();
+            .RequireAuthorization();
 
         group.MapGet("/", GetBoardsByProject)
             .WithName("GetBoardsByProject")
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<List<BoardDto>>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/{boardId:guid}", GetBoardDetails)
             .WithName("GetBoardDetails")
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<BoardDetailsDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPost("/", CreateBoard)
             .WithName("CreateBoard")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<BoardDto>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
         group.MapPut("/{boardId:guid}", UpdateBoardSettings)
             .WithName("UpdateBoardSettings")
+            .AddEndpointFilter(ProjectAuth.Editor())
             .Produces<BoardDto>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{boardId:guid}", DeleteBoard)
             .WithName("DeleteBoard")
+            .AddEndpointFilter(ProjectAuth.Owner())
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/{boardId:guid}/activity", GetBoardActivity)
             .WithName("GetBoardActivity")
+            .AddEndpointFilter(ProjectAuth.Viewer())
             .Produces<ActivityFeedDto>()
             .ProducesProblem(StatusCodes.Status404NotFound);
-
     }
 
     private static async Task<IResult> GetBoardsByProject(

@@ -12,6 +12,12 @@ export const routes: Routes = [
     data: { animation: 'ProjectsPage' }
   },
   {
+    path: 'invite/:token',
+    loadComponent: () => import('./features/invitations/pages/accept-invitation/accept-invitation.component').then(m => m.AcceptInvitationComponent),
+    canActivate: [authGuard],
+    title: 'Accept Invitation | NeonBoard',
+  },
+  {
     path: 'p/:shortId',
     loadComponent: () => import('./features/project-detail/pages/project-layout/project-layout.component').then(m => m.ProjectLayoutComponent),
     canActivate: [authGuard],
