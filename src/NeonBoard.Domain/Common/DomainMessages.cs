@@ -79,6 +79,20 @@ public static class DomainMessages
 
     #endregion
 
+    #region ProjectMember
+
+    public const string MemberUserIdEmpty = "Member user ID cannot be empty.";
+    public const string MemberAlreadyExists = "User is already a member of this project.";
+    public const string MemberNotFound = "Member not found in this project.";
+    public const string CannotRemoveLastOwner = "Cannot remove the last owner of a project.";
+    public const string CannotDemoteLastOwner = "Cannot demote the last owner of a project.";
+    public const string CannotRemoveSelfAsLastOwner = "Cannot leave the project as the last owner.";
+
+    public static string MemberNotFoundByUserId(Guid userId) =>
+        $"Member with user ID {userId} not found in this project.";
+
+    #endregion
+
     #region User
 
     public const string UserAuth0IdEmpty = "Auth0 User ID cannot be empty.";
