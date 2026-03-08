@@ -5,12 +5,13 @@ import { routeAnimations } from './animations/route-animations';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container.component';
 import { ModalHostComponent } from './shared/components/modal-host/modal-host.component';
+import { DrawerHostComponent } from './layout/drawer-host/drawer-host.component';
 import { LoadingService } from './core/services/loading.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, LoadingOverlayComponent, ToastContainerComponent, ModalHostComponent],
+  imports: [RouterOutlet, LoadingOverlayComponent, ToastContainerComponent, ModalHostComponent, DrawerHostComponent],
   templateUrl: './app.html',
   animations: [routeAnimations]
 })

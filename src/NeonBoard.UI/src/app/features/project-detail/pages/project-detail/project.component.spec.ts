@@ -7,7 +7,8 @@ import { ProjectComponent } from './project.component';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../../projects/services/project.service';
 import { BoardService } from '../../services/board.service';
-import { DrawerService } from '../../services/drawer.service';
+import { DrawerService } from '../../../../core/services/drawer.service';
+import { CreateBoardDrawerEventsService } from '../../services/create-board-drawer-events.service';
 import { Project } from '../../../projects/models/project.model';
 import { Board } from '../../models/board.model';
 
@@ -32,16 +33,22 @@ describe('ProjectComponent', () => {
   let mockProjectService: { getProjectByShortId: ReturnType<typeof vi.fn> };
   let mockBoardService: { getBoardsByProject: ReturnType<typeof vi.fn> };
   let boardCreated$: Subject<void>;
-  let mockDrawerService: { boardCreated$: Subject<void>; openCreateBoardDrawer: ReturnType<typeof vi.fn> };
+  let mockCreateBoardDrawerEvents: { boardCreated$: Subject<void> };
+  let mockDrawerService: { open: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn>; config: ReturnType<typeof vi.fn>; isOpen: ReturnType<typeof vi.fn> };
   let mockTitle: { setTitle: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     boardCreated$ = new Subject<void>();
     mockProjectService = { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) };
     mockBoardService = { getBoardsByProject: vi.fn().mockReturnValue(of(mockBoards)) };
-    mockDrawerService = {
+    mockCreateBoardDrawerEvents = {
       boardCreated$,
-      openCreateBoardDrawer: vi.fn(),
+    };
+    mockDrawerService = {
+      open: vi.fn(),
+      close: vi.fn(),
+      config: vi.fn().mockReturnValue(null),
+      isOpen: vi.fn().mockReturnValue(false),
     };
     mockTitle = { setTitle: vi.fn() };
 
@@ -56,6 +63,7 @@ describe('ProjectComponent', () => {
         { provide: ProjectService, useValue: mockProjectService },
         { provide: BoardService, useValue: mockBoardService },
         { provide: DrawerService, useValue: mockDrawerService },
+        { provide: CreateBoardDrawerEventsService, useValue: mockCreateBoardDrawerEvents },
         { provide: Title, useValue: mockTitle },
       ],
     });
@@ -79,7 +87,7 @@ describe('ProjectComponent', () => {
     expect(component.boards()).toEqual(mockBoards);
   });
 
-  it('reloads boards when drawerService.boardCreated$ emits', () => {
+  it('reloads boards when createBoardDrawerEvents.boardCreated$ emits', () => {
     component.ngOnInit();
     mockBoardService.getBoardsByProject.mockClear();
     mockBoardService.getBoardsByProject.mockReturnValue(of(mockBoards));

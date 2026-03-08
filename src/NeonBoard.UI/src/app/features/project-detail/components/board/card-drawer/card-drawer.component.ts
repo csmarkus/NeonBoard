@@ -9,9 +9,11 @@ import { CardLabelPickerComponent } from './card-label-picker/card-label-picker.
 import { CardActionsComponent } from './card-actions/card-actions.component';
 import { CardActivityComponent } from '../card-activity/card-activity.component';
 import { CardService } from '../../../services/card.service';
-import { DrawerService } from '../../../services/drawer.service';
+import { CardDrawerEventsService } from '../../../services/card-drawer-events.service';
 import { ModalService } from '../../../../../core/services/modal.service';
 import { Card } from '../../../models/card.model';
+import { Label } from '../../../models/label.model';
+import { ActivityFeed } from '../../../models/activity.model';
 
 @Component({
   selector: 'app-card-drawer',
@@ -26,12 +28,15 @@ export class CardDrawerComponent {
   columnId = input<string | null>(null);
   card = input<Card | null>(null);
 
+  boardLabels = input<Label[]>([]);
+  initialActivity = input<ActivityFeed | null>(null);
+
   close = output<void>();
   cardSaved = output<void>();
   cardDeleted = output<void>();
 
   private cardService = inject(CardService);
-  protected drawerService = inject(DrawerService);
+  private cardDrawerEvents = inject(CardDrawerEventsService);
   private modalService = inject(ModalService);
 
   cardTitle = signal('');
@@ -227,10 +232,9 @@ export class CardDrawerComponent {
 
     const cardId = this.card()!.id;
     this.cardService.archiveCard(this.projectId(), this.boardId(), cardId).subscribe({
-      next: (updatedCard) => {
-        this.drawerService.selectedCard.set(updatedCard);
+      next: () => {
         this.isArchiving.set(false);
-        this.drawerService.notifyCardArchived();
+        this.cardDrawerEvents.notifyCardArchived();
       },
       error: () => {
         this.error.set('Failed to archive card. Please try again.');
@@ -247,10 +251,9 @@ export class CardDrawerComponent {
 
     const cardId = this.card()!.id;
     this.cardService.restoreCard(this.projectId(), this.boardId(), cardId).subscribe({
-      next: (updatedCard) => {
-        this.drawerService.selectedCard.set(updatedCard);
+      next: () => {
         this.isArchiving.set(false);
-        this.drawerService.notifyCardArchived();
+        this.cardDrawerEvents.notifyCardArchived();
       },
       error: () => {
         this.error.set('Failed to restore card. Please try again.');

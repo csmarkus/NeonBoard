@@ -7,7 +7,8 @@ initTestEnvironment();
 import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
-import { DrawerService } from './drawer.service';
+import { DrawerService } from '../../../core/services/drawer.service';
+import { CardDrawerEventsService } from './card-drawer-events.service';
 import { BoardDetails } from '../models/board.model';
 import { Card } from '../models/card.model';
 
@@ -54,12 +55,18 @@ describe('BoardStateFacade', () => {
     getCardDetail: ReturnType<typeof vi.fn>;
   };
   let drawerService: {
-    setBoardLabels: ReturnType<typeof vi.fn>;
-    openCardDrawer: ReturnType<typeof vi.fn>;
-    initialCardActivity: { set: ReturnType<typeof vi.fn> };
+    open: ReturnType<typeof vi.fn>;
+    close: ReturnType<typeof vi.fn>;
+    config: ReturnType<typeof vi.fn>;
+    isOpen: ReturnType<typeof vi.fn>;
+  };
+  let cardDrawerEvents: {
     cardUpdated$: Subject<void>;
     cardDeleted$: Subject<void>;
     cardArchived$: Subject<void>;
+    notifyCardUpdated: ReturnType<typeof vi.fn>;
+    notifyCardDeleted: ReturnType<typeof vi.fn>;
+    notifyCardArchived: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -76,12 +83,18 @@ describe('BoardStateFacade', () => {
     };
     cardService = { moveCard: vi.fn(), addCard: vi.fn(), getCardDetail: vi.fn() };
     drawerService = {
-      setBoardLabels: vi.fn(),
-      openCardDrawer: vi.fn(),
-      initialCardActivity: { set: vi.fn() },
+      open: vi.fn(),
+      close: vi.fn(),
+      config: vi.fn().mockReturnValue(null),
+      isOpen: vi.fn().mockReturnValue(false),
+    };
+    cardDrawerEvents = {
       cardUpdated$: cardUpdated$.asObservable() as never,
       cardDeleted$: cardDeleted$.asObservable() as never,
       cardArchived$: cardArchived$.asObservable() as never,
+      notifyCardUpdated: vi.fn(),
+      notifyCardDeleted: vi.fn(),
+      notifyCardArchived: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -91,6 +104,7 @@ describe('BoardStateFacade', () => {
         { provide: ColumnService, useValue: columnService },
         { provide: CardService, useValue: cardService },
         { provide: DrawerService, useValue: drawerService },
+        { provide: CardDrawerEventsService, useValue: cardDrawerEvents },
       ],
     });
 
@@ -98,7 +112,7 @@ describe('BoardStateFacade', () => {
   });
 
   describe('loadBoard', () => {
-    it('should set board data and call setBoardLabels on success', () => {
+    it('should set board data on success', () => {
       const mockBoard = createMockBoardDetails();
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
 
@@ -107,7 +121,6 @@ describe('BoardStateFacade', () => {
       expect(facade.board()).toEqual(mockBoard);
       expect(facade.isLoading()).toBe(false);
       expect(facade.error()).toBeNull();
-      expect(drawerService.setBoardLabels).toHaveBeenCalledWith(mockBoard.labels);
     });
 
     it('should set isLoading to true when showLoading is true', () => {
@@ -269,16 +282,39 @@ describe('BoardStateFacade', () => {
   });
 
   describe('openCardDrawer', () => {
-    it('should delegate to drawerService and fetch card detail', () => {
+    it('should call drawerService.open with card-detail config and fetch card detail', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
       const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '', archivedAt: null };
       const mockActivity = { entries: [], nextCursor: null };
+      const openConfig = {
+        type: 'card-detail',
+        card,
+        projectId: 'project-1',
+        boardId: 'board-1',
+        boardLabels: mockBoard.labels,
+        initialActivity: null,
+      };
+      drawerService.config.mockReturnValue(openConfig);
       cardService.getCardDetail.mockReturnValue(of({ ...card, activity: mockActivity }));
 
       facade.openCardDrawer(card, 'project-1', 'board-1');
 
-      expect(drawerService.openCardDrawer).toHaveBeenCalledWith(card, 'project-1', 'board-1');
+      expect(drawerService.open).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'card-detail',
+        card,
+        projectId: 'project-1',
+        boardId: 'board-1',
+        initialActivity: null,
+      }));
       expect(cardService.getCardDetail).toHaveBeenCalledWith('project-1', 'board-1', 'card-1');
-      expect(drawerService.initialCardActivity.set).toHaveBeenCalledWith(mockActivity);
+      // After detail loads, it should open again with activity
+      expect(drawerService.open).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'card-detail',
+        initialActivity: mockActivity,
+      }));
     });
   });
 
