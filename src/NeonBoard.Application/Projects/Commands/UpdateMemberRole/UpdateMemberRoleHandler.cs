@@ -5,7 +5,7 @@ using NeonBoard.Domain.Projects;
 
 namespace NeonBoard.Application.Projects.Commands.UpdateMemberRole;
 
-public class UpdateMemberRoleHandler : IRequestHandler<UpdateMemberRoleCommand>
+public class UpdateMemberRoleHandler : IRequestHandler<UpdateMemberRoleCommand, Unit>
 {
     private readonly IProjectRepository _projectRepository;
 
@@ -14,12 +14,14 @@ public class UpdateMemberRoleHandler : IRequestHandler<UpdateMemberRoleCommand>
         _projectRepository = projectRepository;
     }
 
-    public async Task Handle(UpdateMemberRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateMemberRoleCommand request, CancellationToken cancellationToken)
     {
         var project = await _projectRepository.GetWithMembersAsync(request.ProjectId, cancellationToken)
             ?? throw new NotFoundException(nameof(Project), request.ProjectId);
 
         project.UpdateMemberRole(request.UserId, request.NewRole);
         await _projectRepository.UpdateAsync(project, cancellationToken);
+
+        return Unit.Value;
     }
 }

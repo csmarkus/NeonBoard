@@ -5,7 +5,7 @@ using NeonBoard.Domain.Projects;
 
 namespace NeonBoard.Application.Projects.Commands.AcceptInvitation;
 
-public class AcceptInvitationHandler : IRequestHandler<AcceptInvitationCommand>
+public class AcceptInvitationHandler : IRequestHandler<AcceptInvitationCommand, Unit>
 {
     private readonly IProjectInvitationRepository _invitationRepository;
     private readonly IProjectRepository _projectRepository;
@@ -18,7 +18,7 @@ public class AcceptInvitationHandler : IRequestHandler<AcceptInvitationCommand>
         _projectRepository = projectRepository;
     }
 
-    public async Task Handle(AcceptInvitationCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(AcceptInvitationCommand request, CancellationToken cancellationToken)
     {
         var invitation = await _invitationRepository.GetByTokenAsync(request.Token, cancellationToken)
             ?? throw new NotFoundException("Invitation", request.Token);
@@ -35,5 +35,7 @@ public class AcceptInvitationHandler : IRequestHandler<AcceptInvitationCommand>
 
         await _invitationRepository.UpdateAsync(invitation, cancellationToken);
         await _projectRepository.UpdateAsync(project, cancellationToken);
+
+        return Unit.Value;
     }
 }

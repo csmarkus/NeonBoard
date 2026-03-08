@@ -5,7 +5,7 @@ using NeonBoard.Domain.Projects;
 
 namespace NeonBoard.Application.Projects.Commands.RevokeInvitation;
 
-public class RevokeInvitationHandler : IRequestHandler<RevokeInvitationCommand>
+public class RevokeInvitationHandler : IRequestHandler<RevokeInvitationCommand, Unit>
 {
     private readonly IProjectInvitationRepository _invitationRepository;
 
@@ -14,7 +14,7 @@ public class RevokeInvitationHandler : IRequestHandler<RevokeInvitationCommand>
         _invitationRepository = invitationRepository;
     }
 
-    public async Task Handle(RevokeInvitationCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(RevokeInvitationCommand request, CancellationToken cancellationToken)
     {
         var invitation = await _invitationRepository.GetByIdAsync(request.InvitationId, cancellationToken)
             ?? throw new NotFoundException(nameof(ProjectInvitation), request.InvitationId);
@@ -24,5 +24,7 @@ public class RevokeInvitationHandler : IRequestHandler<RevokeInvitationCommand>
 
         invitation.Revoke();
         await _invitationRepository.UpdateAsync(invitation, cancellationToken);
+
+        return Unit.Value;
     }
 }
