@@ -22,7 +22,7 @@ public class GetProjectsByUserHandlerTests
         var project1 = Project.Create("Project 1", "Desc 1", userId);
         var project2 = Project.Create("Project 2", "Desc 2", userId);
 
-        _projectRepository.GetProjectsByUserIdAsync(userId, Arg.Any<CancellationToken>())
+        _projectRepository.GetProjectsByMemberUserIdAsync(userId, Arg.Any<CancellationToken>())
             .Returns([project1, project2]);
 
         var query = new GetProjectsByUserQuery(userId);
@@ -39,7 +39,7 @@ public class GetProjectsByUserHandlerTests
     public async Task Handle_WithNoProjects_ShouldReturnEmptyList()
     {
         var userId = Guid.NewGuid();
-        _projectRepository.GetProjectsByUserIdAsync(userId, Arg.Any<CancellationToken>())
+        _projectRepository.GetProjectsByMemberUserIdAsync(userId, Arg.Any<CancellationToken>())
             .Returns([]);
 
         var query = new GetProjectsByUserQuery(userId);
