@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, inject, signal, computed, effect, untracked } from '@angular/core';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
@@ -44,7 +44,7 @@ export class BoardCanvasComponent {
       const boardId = this.boardId();
 
       if (projectId && boardId) {
-        this.facade.loadBoard(projectId, boardId, true);
+        untracked(() => this.facade.loadBoard(projectId, boardId, true));
       }
     });
   }

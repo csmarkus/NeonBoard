@@ -1,6 +1,6 @@
-import { Component, inject, signal, computed, OnInit, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy, effect, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
@@ -9,12 +9,11 @@ import { PageHeaderComponent, BreadcrumbItem } from '../../../../shared/componen
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { ModalService } from '../../../../core/services/modal.service';
-import { ProjectService } from '../../../projects/services/project.service';
 import { ProjectSettingsFacade } from '../../services/project-settings.facade';
+import { ProjectContext } from '../../services/project-context.service';
 import { ProjectGeneralSettingsSectionComponent } from '../../components/settings/project-general-settings-section/project-general-settings-section.component';
 import { DangerZoneSectionComponent } from '../../components/settings/danger-zone-section/danger-zone-section.component';
 import { MembersSectionComponent } from '../../components/settings/members-section/members-section.component';
-import { ProjectRole } from '../../models/member.model';
 
 @Component({
   selector: 'app-project-settings',
@@ -33,10 +32,9 @@ import { ProjectRole } from '../../models/member.model';
   templateUrl: './project-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
-  private route = inject(ActivatedRoute);
+export class ProjectSettingsComponent implements HasUnsavedChanges {
+  private projectContext = inject(ProjectContext);
   private router = inject(Router);
-  private projectService = inject(ProjectService);
   private modalService = inject(ModalService);
   facade = inject(ProjectSettingsFacade);
   private titleService = inject(Title);
@@ -44,9 +42,9 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
   faChevronLeft = faChevronLeft;
   private destroyRef = inject(DestroyRef);
 
-  shortId = signal('');
-  projectId = signal('');
-  currentUserRole = signal<ProjectRole | undefined>(undefined);
+  shortId = this.projectContext.shortId;
+  projectId = this.projectContext.projectId;
+  currentUserRole = this.projectContext.currentUserRole;
   isDeleting = signal(false);
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -61,26 +59,15 @@ export class ProjectSettingsComponent implements OnInit, HasUnsavedChanges {
         this.titleService.setTitle(`Settings - ${name} | NeonBoard`);
       }
     });
-  }
-
-  ngOnInit(): void {
-    const shortId = this.route.parent?.snapshot.paramMap.get('shortId') ?? '';
 
     this.facade.resetState();
 
-    if (shortId) {
-      this.shortId.set(shortId);
-
-      this.projectService.getProjectByShortId(shortId).pipe(
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe({
-        next: (project) => {
-          this.projectId.set(project.id);
-          this.currentUserRole.set(project.currentUserRole);
-          this.facade.loadProjectSettings(project.id);
-        }
-      });
-    }
+    effect(() => {
+      const projectId = this.projectContext.projectId();
+      if (projectId) {
+        this.facade.loadProjectSettings(projectId);
+      }
+    });
   }
 
   hasUnsavedChanges(): boolean {

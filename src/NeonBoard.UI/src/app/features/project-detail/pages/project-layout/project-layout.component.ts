@@ -1,5 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../../layout/sidebar/sidebar.component';
@@ -9,7 +8,7 @@ import { ArchivePanelComponent } from '../../components/board/archive-panel/arch
 import { ActivityPanelComponent } from '../../components/board/activity-panel/activity-panel.component';
 import { InviteMemberDrawerComponent } from '../../components/settings/invite-member-drawer/invite-member-drawer.component';
 import { DrawerService } from '../../services/drawer.service';
-import { ProjectService } from '../../../projects/services/project.service';
+import { ProjectContext } from '../../services/project-context.service';
 
 @Component({
   selector: 'app-project-layout',
@@ -57,23 +56,18 @@ import { ProjectService } from '../../../projects/services/project.service';
 })
 export class ProjectLayoutComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private projectService = inject(ProjectService);
+  private projectContext = inject(ProjectContext);
 
   protected drawerService = inject(DrawerService);
 
   shortId = signal<string>('');
-  projectId = signal<string>('');
-  private destroyRef = inject(DestroyRef);
+  projectId = this.projectContext.projectId;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('shortId');
     if (id) {
       this.shortId.set(id);
-      this.projectService.getProjectByShortId(id).pipe(
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe({
-        next: (project) => this.projectId.set(project.id),
-      });
+      this.projectContext.resolve(id);
     }
   }
 

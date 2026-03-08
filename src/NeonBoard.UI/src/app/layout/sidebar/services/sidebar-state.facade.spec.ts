@@ -1,30 +1,45 @@
 import { initTestEnvironment } from '../../../../test-setup';
 import { TestBed } from '@angular/core/testing';
-import { of, throwError, Subject } from 'rxjs';
+import { signal, WritableSignal } from '@angular/core';
+import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { SidebarStateFacade } from './sidebar-state.facade';
 
 initTestEnvironment();
 import { BoardService } from '../../../features/project-detail/services/board.service';
+import { ProjectContext } from '../../../features/project-detail/services/project-context.service';
 import { Board } from '../../../features/project-detail/models/board.model';
 
 describe('SidebarStateFacade', () => {
   let facade: SidebarStateFacade;
   let boardsUpdated$: Subject<void>;
+  let mockBoards: WritableSignal<Board[]>;
+  let mockProjectContext: {
+    boards: WritableSignal<Board[]>;
+    reloadBoards: ReturnType<typeof vi.fn>;
+  };
 
   let boardService: {
-    getBoardsByProject: ReturnType<typeof vi.fn>;
     boardsUpdated$: ReturnType<typeof Subject.prototype.asObservable>;
   };
   let router: {
     url: string;
   };
 
+  const sampleBoards: Board[] = [
+    { id: 'board-1', name: 'Sprint Board', projectId: 'project-1', createdAt: '', updatedAt: '', columnCount: 3 } as Board,
+    { id: 'board-2', name: 'Backlog', projectId: 'project-1', createdAt: '', updatedAt: '', columnCount: 1 } as Board,
+  ];
+
   beforeEach(() => {
     boardsUpdated$ = new Subject<void>();
+    mockBoards = signal<Board[]>([]);
+    mockProjectContext = {
+      boards: mockBoards,
+      reloadBoards: vi.fn(),
+    };
 
     boardService = {
-      getBoardsByProject: vi.fn(),
       boardsUpdated$: boardsUpdated$.asObservable(),
     };
     router = { url: '/projects/project-1' };
@@ -33,6 +48,7 @@ describe('SidebarStateFacade', () => {
       providers: [
         SidebarStateFacade,
         { provide: BoardService, useValue: boardService },
+        { provide: ProjectContext, useValue: mockProjectContext },
         { provide: Router, useValue: router },
       ],
     });
@@ -40,48 +56,27 @@ describe('SidebarStateFacade', () => {
     facade = TestBed.inject(SidebarStateFacade);
   });
 
-  const mockBoards: Board[] = [
-    { id: 'board-1', name: 'Sprint Board', projectId: 'project-1', createdAt: '', updatedAt: '', columnCount: 3 },
-    { id: 'board-2', name: 'Backlog', projectId: 'project-1', createdAt: '', updatedAt: '', columnCount: 1 },
-  ];
+  describe('boards from context', () => {
+    it('should reflect boards from ProjectContext', () => {
+      expect(facade.boards()).toEqual([]);
 
-  describe('loadBoards', () => {
-    it('should set boards and open boards menu on success', () => {
-      boardService.getBoardsByProject.mockReturnValue(of(mockBoards));
+      mockBoards.set(sampleBoards);
+      expect(facade.boards()).toEqual(sampleBoards);
+    });
 
-      facade.loadBoards('project-1');
+    it('should open boards menu when context boards become non-empty', () => {
+      mockBoards.set(sampleBoards);
+      TestBed.flushEffects();
 
-      expect(facade.boards()).toEqual(mockBoards);
       expect(facade.boardsMenuOpen()).toBe(true);
-    });
-
-    it('should set empty boards on error', () => {
-      boardService.getBoardsByProject.mockReturnValue(throwError(() => new Error('fail')));
-
-      facade.loadBoards('project-1');
-
-      expect(facade.boards()).toEqual([]);
-    });
-
-    it('should not open boards menu when no boards returned', () => {
-      boardService.getBoardsByProject.mockReturnValue(of([]));
-
-      facade.loadBoards('project-1');
-
-      expect(facade.boards()).toEqual([]);
-      expect(facade.boardsMenuOpen()).toBe(false);
     });
   });
 
-  describe('clearBoards', () => {
-    it('should reset state', () => {
-      boardService.getBoardsByProject.mockReturnValue(of(mockBoards));
-      facade.loadBoards('project-1');
+  describe('boardsUpdated$', () => {
+    it('should call projectContext.reloadBoards when boardsUpdated$ emits', () => {
+      boardsUpdated$.next();
 
-      facade.clearBoards();
-
-      expect(facade.boards()).toEqual([]);
-      expect(facade.boardsMenuOpen()).toBe(false);
+      expect(mockProjectContext.reloadBoards).toHaveBeenCalled();
     });
   });
 
@@ -111,7 +106,7 @@ describe('SidebarStateFacade', () => {
 
   describe('closeUserMenu', () => {
     it('should close user menu', () => {
-      facade.toggleUserMenu(); // open
+      facade.toggleUserMenu();
       expect(facade.userMenuOpen()).toBe(true);
 
       facade.closeUserMenu();

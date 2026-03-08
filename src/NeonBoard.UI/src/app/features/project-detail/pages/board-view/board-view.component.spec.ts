@@ -2,14 +2,13 @@ import { initTestEnvironment } from '../../../../../test-setup';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { convertToParamMap } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { BoardViewComponent } from './board-view.component';
 import { ActivatedRoute } from '@angular/router';
-import { ProjectService } from '../../../projects/services/project.service';
-import { BoardService } from '../../services/board.service';
 import { BoardStateFacade } from '../../services/board-state.facade';
+import { ProjectContext } from '../../services/project-context.service';
 import { Project } from '../../../projects/models/project.model';
+import { Board } from '../../models/board.model';
 
 initTestEnvironment();
 
@@ -22,30 +21,47 @@ const mockProject: Project = {
   updatedAt: '',
 } as Project;
 
+const mockBoards: Board[] = [
+  { id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 },
+];
+
 describe('BoardViewComponent', () => {
   let fixture: ComponentFixture<BoardViewComponent>;
   let component: BoardViewComponent;
   let mockFacade: { board: ReturnType<typeof signal> };
   let mockTitle: { setTitle: ReturnType<typeof vi.fn> };
-  let paramMap$: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
+  let mockProjectContext: {
+    project: ReturnType<typeof signal>;
+    boards: ReturnType<typeof signal>;
+    boardsLoaded: ReturnType<typeof signal>;
+    projectId: ReturnType<typeof signal>;
+    projectName: ReturnType<typeof signal>;
+    shortId: ReturnType<typeof signal>;
+    currentUserRole: ReturnType<typeof signal>;
+  };
 
   beforeEach(() => {
-    paramMap$ = new BehaviorSubject(convertToParamMap({ slug: 'sprint-board' }));
     mockFacade = { board: signal(null) };
     mockTitle = { setTitle: vi.fn() };
+    mockProjectContext = {
+      project: signal(mockProject),
+      boards: signal(mockBoards),
+      boardsLoaded: signal(true),
+      projectId: signal('p-1'),
+      projectName: signal('My Project'),
+      shortId: signal('p-short-1'),
+      currentUserRole: signal(undefined),
+    };
 
     const mockRoute = {
-      parent: { snapshot: { paramMap: convertToParamMap({ shortId: 'p-short-1' }) } },
       snapshot: { paramMap: convertToParamMap({ slug: 'sprint-board' }) },
-      paramMap: paramMap$.asObservable(),
     };
 
     TestBed.configureTestingModule({
       imports: [BoardViewComponent],
       providers: [
         { provide: ActivatedRoute, useValue: mockRoute },
-        { provide: ProjectService, useValue: { getProjectByShortId: vi.fn().mockReturnValue(of(mockProject)) } },
-        { provide: BoardService, useValue: { getBoardsByProject: vi.fn().mockReturnValue(of([{ id: 'b-1', slug: 'sprint-board', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', createdAt: '', updatedAt: '', columnCount: 0 }])) } },
+        { provide: ProjectContext, useValue: mockProjectContext },
         { provide: BoardStateFacade, useValue: mockFacade },
         { provide: Title, useValue: mockTitle },
       ],
@@ -56,29 +72,24 @@ describe('BoardViewComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('extracts shortId from parent route snapshot', () => {
-    component.ngOnInit();
+  it('reads shortId from ProjectContext', () => {
     expect(component.shortId()).toBe('p-short-1');
   });
 
-  it('loads project name from ProjectService using shortId', () => {
-    component.ngOnInit();
+  it('reads project name from ProjectContext', () => {
     expect(component.projectName()).toBe('My Project');
   });
 
-  it('resolves slug to boardId via BoardService', () => {
-    component.ngOnInit();
+  it('resolves slug to boardId from context boards', () => {
+    TestBed.flushEffects();
     expect(component.boardId()).toBe('b-1');
   });
 
-  it('extracts slug from paramMap and sets slug signal', () => {
-    component.ngOnInit();
-    paramMap$.next(convertToParamMap({ slug: 'sprint-board' }));
+  it('extracts slug from route snapshot', () => {
     expect(component.slug()).toBe('sprint-board');
   });
 
   it('sets browser title when boardName signal has a value', () => {
-    component.ngOnInit();
     mockFacade.board.set({ id: 'b-1', name: 'Sprint Board', prefix: 'SPR', projectId: 'p-1', columns: [], cards: [], labels: [], createdAt: '', updatedAt: '' });
     TestBed.flushEffects();
 
