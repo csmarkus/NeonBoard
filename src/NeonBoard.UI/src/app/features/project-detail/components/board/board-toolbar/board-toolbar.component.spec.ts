@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { BoardToolbarComponent } from './board-toolbar.component';
 import { BoardStateFacade } from '../../../services/board-state.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { Label } from '../../../models/label.model';
 
 initTestEnvironment();
@@ -36,6 +37,17 @@ describe('BoardToolbarComponent', () => {
       providers: [
         provideRouter([]),
         { provide: BoardStateFacade, useValue: mockFacade },
+        { provide: ProjectContext, useValue: {
+          canEdit: () => true,
+          isOwner: () => true,
+          currentUserRole: () => 'Owner',
+          projectId: () => 'p-1',
+          shortId: () => 'abc1234',
+          projectName: () => 'Test Project',
+          project: () => null,
+          boards: () => [],
+          boardsLoaded: () => true,
+        } },
       ],
     });
 
