@@ -2,28 +2,36 @@
   <div class="space-y-4">
     <div>
       <label for="project-name" class="block text-sm font-medium text-primary mb-1.5">Project name</label>
-      <app-input
-        inputId="project-name"
-        [ngModel]="facade.projectName()"
-        (ngModelChange)="onNameInput($event)"
-        [maxlength]="100"
-      />
-      <span class="text-xs text-muted mt-1.5">{{ facade.projectName().length }} / 100</span>
+      @if (projectContext.isOwner()) {
+        <app-input
+          inputId="project-name"
+          [ngModel]="facade.projectName()"
+          (ngModelChange)="onNameInput($event)"
+          [maxlength]="100"
+        />
+        <span class="text-xs text-muted mt-1.5">{{ facade.projectName().length }} / 100</span>
+      } @else {
+        <p class="text-sm text-primary py-2">{{ facade.projectName() }}</p>
+      }
     </div>
 
     <div>
       <label for="project-description" class="block text-sm font-medium text-primary mb-1.5">Description</label>
-      <app-input
-        inputId="project-description"
-        element="textarea"
-        [ngModel]="facade.projectDescription()"
-        (ngModelChange)="onDescriptionInput($event)"
-        [maxlength]="1000"
-        [rows]="4"
-        placeholder="What is this project about?"
-        resize="y"
-      />
-      <span class="text-xs text-muted mt-1.5">{{ facade.projectDescription().length }} / 1000</span>
+      @if (projectContext.isOwner()) {
+        <app-input
+          inputId="project-description"
+          element="textarea"
+          [ngModel]="facade.projectDescription()"
+          (ngModelChange)="onDescriptionInput($event)"
+          [maxlength]="1000"
+          [rows]="4"
+          placeholder="What is this project about?"
+          resize="y"
+        />
+        <span class="text-xs text-muted mt-1.5">{{ facade.projectDescription().length }} / 1000</span>
+      } @else {
+        <p class="text-sm text-primary py-2 whitespace-pre-wrap">{{ facade.projectDescription() || 'No description' }}</p>
+      }
     </div>
   </div>
 </app-settings-section>
