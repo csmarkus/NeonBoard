@@ -81,6 +81,8 @@ describe('BoardSettingsComponent', () => {
       projectName: signal('Test Project'),
       shortId: signal('p-short-1'),
       currentUserRole: signal(undefined),
+      canEdit: () => true,
+      isOwner: () => true,
     };
 
     const mockRoute = {

@@ -6,6 +6,7 @@ import { CardDrawerComponent } from './card-drawer.component';
 import { CardService } from '../../../services/card.service';
 import { DrawerService } from '../../../services/drawer.service';
 import { ModalService } from '../../../../../core/services/modal.service';
+import { ProjectContext } from '../../../services/project-context.service';
 import { Card } from '../../../models/card.model';
 
 initTestEnvironment();
@@ -36,6 +37,17 @@ describe('CardDrawerComponent', () => {
   let mockDrawerService: {
     boardLabels: ReturnType<typeof signal>;
   };
+  const mockProjectContext = {
+    canEdit: () => true,
+    isOwner: () => true,
+    currentUserRole: () => 'Owner',
+    projectId: () => 'p-1',
+    shortId: () => 'abc1234',
+    projectName: () => 'Test Project',
+    project: () => null,
+    boards: () => [],
+    boardsLoaded: () => true,
+  };
 
   beforeEach(() => {
     mockCardService = {
@@ -54,6 +66,7 @@ describe('CardDrawerComponent', () => {
       providers: [
         { provide: CardService, useValue: mockCardService },
         { provide: DrawerService, useValue: mockDrawerService },
+        { provide: ProjectContext, useValue: mockProjectContext },
         { provide: ModalService, useValue: { confirm: vi.fn().mockResolvedValue(true) } },
       ],
     });

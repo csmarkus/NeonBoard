@@ -51,6 +51,8 @@ describe('BoardViewComponent', () => {
       projectName: signal('My Project'),
       shortId: signal('p-short-1'),
       currentUserRole: signal(undefined),
+      canEdit: () => true,
+      isOwner: () => true,
     };
 
     const mockRoute = {
