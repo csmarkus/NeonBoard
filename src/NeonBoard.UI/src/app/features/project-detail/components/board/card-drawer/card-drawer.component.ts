@@ -11,6 +11,7 @@ import { CardActivityComponent } from '../card-activity/card-activity.component'
 import { CardService } from '../../../services/card.service';
 import { DrawerService } from '../../../services/drawer.service';
 import { ModalService } from '../../../../../core/services/modal.service';
+import { ProjectContext } from '../../../services/project-context.service';
 import { Card } from '../../../models/card.model';
 
 @Component({
@@ -33,6 +34,7 @@ export class CardDrawerComponent {
   private cardService = inject(CardService);
   protected drawerService = inject(DrawerService);
   private modalService = inject(ModalService);
+  protected projectContext = inject(ProjectContext);
 
   cardTitle = signal('');
   cardDescription = signal('');

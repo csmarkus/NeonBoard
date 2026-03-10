@@ -23,16 +23,20 @@
       <!-- Title section (auto-saves on blur/enter) -->
       <div>
         <label class="block text-sm font-medium text-secondary mb-1.5">Title</label>
-        <app-input
-          [ngModel]="cardTitle()"
-          (ngModelChange)="cardTitle.set($event)"
-          (focusout)="saveTitle()"
-          (keyup.enter)="saveTitle()"
-        />
+        @if (projectContext.canEdit()) {
+          <app-input
+            [ngModel]="cardTitle()"
+            (ngModelChange)="cardTitle.set($event)"
+            (focusout)="saveTitle()"
+            (keyup.enter)="saveTitle()"
+          />
+        } @else {
+          <p class="text-sm text-primary py-2">{{ cardTitle() }}</p>
+        }
       </div>
 
       <!-- Labels section -->
-      @if (drawerService.boardLabels().length) {
+      @if (drawerService.boardLabels().length && projectContext.canEdit()) {
         <app-card-label-picker class="block"
           [boardLabels]="drawerService.boardLabels()"
           [assignedLabelIds]="cardLabelIds()"
@@ -46,40 +50,46 @@
       <!-- Description section -->
       <div>
         <label class="block text-sm font-medium text-secondary mb-1.5">Description</label>
-        <app-input
-          element="textarea"
-          [ngModel]="cardDescription()"
-          (ngModelChange)="cardDescription.set($event)"
-          placeholder="Add more details..."
-          [rows]="5"
-        />
-        @if (descriptionChanged()) {
-          <div class="mt-2">
-            <app-button
-              variant="primary"
-              size="sm"
-              (click)="saveDescription()"
-              [disabled]="isSaving()"
-            >
-              {{ isSaving() ? 'Saving...' : 'Save description' }}
-            </app-button>
-          </div>
+        @if (projectContext.canEdit()) {
+          <app-input
+            element="textarea"
+            [ngModel]="cardDescription()"
+            (ngModelChange)="cardDescription.set($event)"
+            placeholder="Add more details..."
+            [rows]="5"
+          />
+          @if (descriptionChanged()) {
+            <div class="mt-2">
+              <app-button
+                variant="primary"
+                size="sm"
+                (click)="saveDescription()"
+                [disabled]="isSaving()"
+              >
+                {{ isSaving() ? 'Saving...' : 'Save description' }}
+              </app-button>
+            </div>
+          }
+        } @else {
+          <p class="text-sm text-primary py-2 whitespace-pre-wrap">{{ cardDescription() || 'No description' }}</p>
         }
       </div>
 
       <!-- Danger zone -->
-      <app-card-actions
-        [isArchived]="!!card()?.archivedAt"
-        [isOnHold]="!!card()?.holdAt"
-        [isArchiving]="isArchiving()"
-        [isHolding]="isHolding()"
-        [isDeleting]="isDeleting()"
-        (archive)="archiveCard()"
-        (restore)="restoreCard()"
-        (hold)="holdCard()"
-        (resume)="resumeCard()"
-        (delete)="requestDeleteCard()"
-      />
+      @if (projectContext.canEdit()) {
+        <app-card-actions
+          [isArchived]="!!card()?.archivedAt"
+          [isOnHold]="!!card()?.holdAt"
+          [isArchiving]="isArchiving()"
+          [isHolding]="isHolding()"
+          [isDeleting]="isDeleting()"
+          (archive)="archiveCard()"
+          (restore)="restoreCard()"
+          (hold)="holdCard()"
+          (resume)="resumeCard()"
+          (delete)="requestDeleteCard()"
+        />
+      }
 
       <!-- Card activity feed -->
       <app-card-activity
