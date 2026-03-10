@@ -78,6 +78,14 @@ describe('ProjectContext', () => {
       expect(context.shortId()).toBe('');
       expect(context.currentUserRole()).toBeUndefined();
     });
+
+    it('should have canEdit as false when no project', () => {
+      expect(context.canEdit()).toBe(false);
+    });
+
+    it('should have isOwner as false when no project', () => {
+      expect(context.isOwner()).toBe(false);
+    });
   });
 
   describe('resolve', () => {
@@ -127,6 +135,34 @@ describe('ProjectContext', () => {
       expect(context.project()).toEqual(mockProject2);
       expect(context.projectId()).toBe('p-2');
       expect(context.boards()).toEqual([]);
+    });
+
+    it('should set canEdit to true for Owner role', () => {
+      context.resolve('abc1234');
+      expect(context.canEdit()).toBe(true);
+    });
+
+    it('should set isOwner to true for Owner role', () => {
+      context.resolve('abc1234');
+      expect(context.isOwner()).toBe(true);
+    });
+
+    it('should set canEdit to true for Editor role', () => {
+      const editorProject = { ...mockProject, currentUserRole: 'Editor' as const };
+      projectService.getProjectByShortId.mockReturnValue(of(editorProject));
+
+      context.resolve('abc1234');
+      expect(context.canEdit()).toBe(true);
+      expect(context.isOwner()).toBe(false);
+    });
+
+    it('should set canEdit to false for Viewer role', () => {
+      const viewerProject = { ...mockProject, currentUserRole: 'Viewer' as const };
+      projectService.getProjectByShortId.mockReturnValue(of(viewerProject));
+
+      context.resolve('abc1234');
+      expect(context.canEdit()).toBe(false);
+      expect(context.isOwner()).toBe(false);
     });
   });
 

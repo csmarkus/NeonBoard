@@ -22,6 +22,11 @@ export class ProjectContext {
   readonly projectName = computed(() => this._project()?.name ?? '');
   readonly shortId = computed(() => this._project()?.shortId ?? '');
   readonly currentUserRole = computed(() => this._project()?.currentUserRole);
+  readonly canEdit = computed(() => {
+    const role = this.currentUserRole();
+    return role === 'Editor' || role === 'Owner';
+  });
+  readonly isOwner = computed(() => this.currentUserRole() === 'Owner');
 
   resolve(shortId: string): void {
     if (this._project()?.shortId === shortId) return;
