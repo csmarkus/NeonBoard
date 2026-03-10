@@ -27,9 +27,11 @@
               <p class="text-sm text-muted mt-0.5">{{ project()!.description }}</p>
             }
           </div>
-          <app-button variant="primary" size="sm" (click)="openCreateBoardDrawer()">
-            New Board
-          </app-button>
+          @if (projectContext.canEdit()) {
+            <app-button variant="primary" size="sm" (click)="openCreateBoardDrawer()">
+              New Board
+            </app-button>
+          }
         </div>
       </header>
 
@@ -43,10 +45,14 @@
                 <fa-icon [icon]="faTableColumns" class="text-3xl text-accent"></fa-icon>
               </div>
               <h3 class="text-base font-medium text-primary mb-2">No boards yet</h3>
-              <p class="text-sm text-muted mb-6">Get started by creating your first board</p>
-              <app-button variant="primary" (click)="openCreateBoardDrawer()">
-                Create First Board
-              </app-button>
+              <p class="text-sm text-muted mb-6">
+                {{ projectContext.canEdit() ? 'Get started by creating your first board' : 'No boards have been created yet' }}
+              </p>
+              @if (projectContext.canEdit()) {
+                <app-button variant="primary" (click)="openCreateBoardDrawer()">
+                  Create First Board
+                </app-button>
+              }
             </div>
           </div>
         } @else {

@@ -1,6 +1,7 @@
 import { Component, input, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BoardSettingsFacade } from '../../../services/board-settings.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { LabelListItemComponent } from '../label-list-item/label-list-item.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { SettingsSectionComponent } from '../../../../../shared/components/settings-section/settings-section.component';
@@ -14,6 +15,7 @@ import { Label, LABEL_COLORS, getColorSwatchClass as getColorSwatch } from '../.
 })
 export class LabelManagementSectionComponent {
   facade = inject(BoardSettingsFacade);
+  protected projectContext = inject(ProjectContext);
   private modalService = inject(ModalService);
 
   projectId = input.required<string>();

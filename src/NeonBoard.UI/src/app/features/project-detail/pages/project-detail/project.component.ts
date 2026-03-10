@@ -25,7 +25,7 @@ import { BoardCardComponent } from '../../components/project/board-card/board-ca
   styleUrl: './project.component.css',
 })
 export class ProjectComponent {
-  private projectContext = inject(ProjectContext);
+  protected projectContext = inject(ProjectContext);
   private drawerService = inject(DrawerService);
   private titleService = inject(Title);
   private destroyRef = inject(DestroyRef);

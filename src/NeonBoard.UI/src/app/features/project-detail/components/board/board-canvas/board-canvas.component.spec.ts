@@ -5,6 +5,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { BoardCanvasComponent } from './board-canvas.component';
 import { BoardStateFacade } from '../../../services/board-state.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { Column } from '../../../models/column.model';
 import { Card } from '../../../models/card.model';
 
@@ -66,6 +67,17 @@ describe('BoardCanvasComponent', () => {
     addCard: ReturnType<typeof vi.fn>;
     openCardDrawer: ReturnType<typeof vi.fn>;
   };
+  const mockProjectContext = {
+    canEdit: () => true,
+    isOwner: () => true,
+    currentUserRole: () => 'Owner',
+    projectId: () => 'p-1',
+    shortId: () => 'abc1234',
+    projectName: () => 'Test Project',
+    project: () => null,
+    boards: () => [],
+    boardsLoaded: () => true,
+  };
 
   beforeEach(() => {
     mockFacade = {
@@ -89,6 +101,7 @@ describe('BoardCanvasComponent', () => {
       imports: [BoardCanvasComponent],
       providers: [
         { provide: BoardStateFacade, useValue: mockFacade },
+        { provide: ProjectContext, useValue: mockProjectContext },
         provideNoopAnimations(),
       ],
     });

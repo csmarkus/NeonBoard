@@ -35,7 +35,7 @@ import { DangerZoneSectionComponent } from '../../components/settings/danger-zon
 export class BoardSettingsComponent implements HasUnsavedChanges {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private projectContext = inject(ProjectContext);
+  protected projectContext = inject(ProjectContext);
   facade = inject(BoardSettingsFacade);
   private titleService = inject(Title);
   private destroyRef = inject(DestroyRef);

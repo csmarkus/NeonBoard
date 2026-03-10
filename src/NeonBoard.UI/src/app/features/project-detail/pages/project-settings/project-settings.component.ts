@@ -33,7 +33,7 @@ import { MembersSectionComponent } from '../../components/settings/members-secti
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectSettingsComponent implements HasUnsavedChanges {
-  private projectContext = inject(ProjectContext);
+  protected projectContext = inject(ProjectContext);
   private router = inject(Router);
   private modalService = inject(ModalService);
   facade = inject(ProjectSettingsFacade);

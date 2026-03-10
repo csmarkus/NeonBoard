@@ -1,6 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProjectSettingsFacade } from '../../../services/project-settings.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SettingsSectionComponent } from '../../../../../shared/components/settings-section/settings-section.component';
 
@@ -12,6 +13,7 @@ import { SettingsSectionComponent } from '../../../../../shared/components/setti
 })
 export class ProjectGeneralSettingsSectionComponent {
   facade = inject(ProjectSettingsFacade);
+  protected projectContext = inject(ProjectContext);
 
   onNameInput(value: string): void {
     this.facade.updateProjectName(value);

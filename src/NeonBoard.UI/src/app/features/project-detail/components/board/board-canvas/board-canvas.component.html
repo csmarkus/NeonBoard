@@ -21,6 +21,7 @@
       cdkDropList
       cdkDropListOrientation="horizontal"
       [cdkDropListData]="columns()"
+      [cdkDropListDisabled]="!projectContext.canEdit()"
       (cdkDropListDropped)="dropColumn($event)"
       class="flex gap-6 min-w-max h-full items-start"
     >
@@ -31,6 +32,7 @@
             [cards]="cardsByColumn()[column.id]"
             [columnIds]="columnIds()"
             [accentClass]="getAccentClass(i)"
+            [canEdit]="projectContext.canEdit()"
             (cardDropped)="onCardDropped($event, column.id)"
             (columnRenamed)="onColumnRenamed($event)"
             (columnDeleted)="onColumnDeleted($event)"
@@ -40,14 +42,16 @@
         }
       </div>
 
-      <app-add-column-button
-        [isAdding]="isAddingColumn()"
-        [columnName]="newColumnName()"
-        (openAdd)="openAddColumn()"
-        (cancelAdd)="cancelAddColumn()"
-        (addColumn)="addColumn($event)"
-        (nameChange)="onColumnNameChange($event)"
-      ></app-add-column-button>
+      @if (projectContext.canEdit()) {
+        <app-add-column-button
+          [isAdding]="isAddingColumn()"
+          [columnName]="newColumnName()"
+          (openAdd)="openAddColumn()"
+          (cancelAdd)="cancelAddColumn()"
+          (addColumn)="addColumn($event)"
+          (nameChange)="onColumnNameChange($event)"
+        ></app-add-column-button>
+      }
     </div>
   </main>
 }

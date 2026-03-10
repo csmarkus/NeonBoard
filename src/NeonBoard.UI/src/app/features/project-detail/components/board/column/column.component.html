@@ -1,4 +1,4 @@
-<div cdkDrag class="flex flex-col w-72 shrink-0 max-h-[calc(100vh-12rem)]">
+<div cdkDrag [cdkDragDisabled]="!canEdit()" class="flex flex-col w-72 shrink-0 max-h-[calc(100vh-12rem)]">
   <!-- Column drag placeholder -->
   <div *cdkDragPlaceholder class="w-72 h-full min-h-[200px] bg-accent/15 border-2 border-dashed border-accent/40 rounded-lg"></div>
 
@@ -23,15 +23,17 @@
 
     <span class="text-sm text-muted tabular-nums">{{ cards().length }}</span>
 
-    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-      <button
-        #menuTrigger
-        (click)="toggleMenu()"
-        class="p-1 hover:bg-surface rounded transition-colors"
-      >
-        <fa-icon [icon]="faGripVertical" class="text-sm text-muted"></fa-icon>
-      </button>
-    </div>
+    @if (canEdit()) {
+      <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          #menuTrigger
+          (click)="toggleMenu()"
+          class="p-1 hover:bg-surface rounded transition-colors"
+        >
+          <fa-icon [icon]="faGripVertical" class="text-sm text-muted"></fa-icon>
+        </button>
+      </div>
+    }
 
     <!-- Column menu dropdown -->
     @if (menuOpen()) {
@@ -58,18 +60,19 @@
     [id]="column().id"
     [cdkDropListData]="cards()"
     [cdkDropListConnectedTo]="columnIds()"
+    [cdkDropListDisabled]="!canEdit()"
     (cdkDropListDropped)="onCardDrop($event)"
     class="flex flex-col gap-2 rounded-lg transition-colors overflow-y-auto flex-1 min-h-24"
   >
     @for (card of cards(); track card.id) {
-      <div cdkDrag [cdkDragData]="card" (pointerdown)="onCardPointerdown($event)">
+      <div cdkDrag [cdkDragData]="card" [cdkDragDisabled]="!canEdit()" (pointerdown)="onCardPointerdown($event)">
         <app-card [card]="card" (cardClick)="selectCard(card)"></app-card>
         <div *cdkDragPlaceholder class="card-drag-placeholder" [style.height.px]="draggedCardHeight()"></div>
       </div>
     }
 
     <!-- Inline add card form -->
-    @if (addingCard()) {
+    @if (addingCard() && canEdit()) {
       <div #addCardForm class="relative z-20 bg-surface border border-subtle rounded-lg overflow-hidden shrink-0">
         <textarea
           #addCardTextarea
@@ -103,10 +106,12 @@
   </div>
 
   <!-- Add card button -->
-  <button
-    (click)="openAddCard()"
-    class="mt-2 py-2 w-full text-sm text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150 shrink-0"
-  >
-    + Add card
-  </button>
+  @if (canEdit()) {
+    <button
+      (click)="openAddCard()"
+      class="mt-2 py-2 w-full text-sm text-muted rounded-lg hover:bg-surface hover:text-secondary transition-colors duration-150 shrink-0"
+    >
+      + Add card
+    </button>
+  }
 </div>
