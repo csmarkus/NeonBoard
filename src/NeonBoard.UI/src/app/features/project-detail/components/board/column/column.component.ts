@@ -29,6 +29,7 @@ export class ColumnComponent {
   cards = input.required<Card[]>();
   columnIds = input.required<string[]>();
   accentClass = input.required<string>();
+  canEdit = input(true);
 
   cardDropped = output<CdkDragDrop<Card[]>>();
   columnRenamed = output<{ columnId: string; newName: string }>();

@@ -3,6 +3,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { BoardStateFacade } from '../../../services/board-state.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { ColumnComponent } from '../column/column.component';
 import { AddColumnButtonComponent } from '../add-column-button/add-column-button.component';
 import { Column } from '../../../models/column.model';
@@ -20,6 +21,7 @@ import { Card } from '../../../models/card.model';
 })
 export class BoardCanvasComponent {
   private facade = inject(BoardStateFacade);
+  protected projectContext = inject(ProjectContext);
 
   faTriangleExclamation = faTriangleExclamation;
 
