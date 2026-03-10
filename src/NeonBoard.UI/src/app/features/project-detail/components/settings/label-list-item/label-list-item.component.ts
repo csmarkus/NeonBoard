@@ -14,6 +14,7 @@ export class LabelListItemComponent {
   label = input.required<Label>();
   isEditing = input.required<boolean>();
   isSaving = input.required<boolean>();
+  canEdit = input(true);
 
   edit = output<Label>();
   save = output<{ labelId: string; name: string; color: string }>();

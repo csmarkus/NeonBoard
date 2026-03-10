@@ -1,6 +1,7 @@
 import { Component, input, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BoardSettingsFacade } from '../../../services/board-settings.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SettingsSectionComponent } from '../../../../../shared/components/settings-section/settings-section.component';
 
@@ -11,6 +12,7 @@ import { SettingsSectionComponent } from '../../../../../shared/components/setti
 })
 export class GeneralSettingsSectionComponent {
   facade = inject(BoardSettingsFacade);
+  protected projectContext = inject(ProjectContext);
 
   projectId = input.required<string>();
   boardId = input.required<string>();
