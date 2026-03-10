@@ -84,12 +84,14 @@
       <span>Activity</span>
     </button>
 
-    <a
-      [routerLink]="['/p', shortId(), 'b', slug(), 'settings']"
-      class="flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors"
-      aria-label="Board settings">
-      <fa-icon [icon]="faGear" class="text-sm"></fa-icon>
-      <span>Settings</span>
-    </a>
+    @if (projectContext.canEdit()) {
+      <a
+        [routerLink]="['/p', shortId(), 'b', slug(), 'settings']"
+        class="flex items-center gap-1.5 text-sm text-muted hover:text-primary transition-colors"
+        aria-label="Board settings">
+        <fa-icon [icon]="faGear" class="text-sm"></fa-icon>
+        <span>Settings</span>
+      </a>
+    }
   </div>
 </div>

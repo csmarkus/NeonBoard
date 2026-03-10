@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGear, faXmark, faBoxArchive, faClockRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import { BoardStateFacade } from '../../../services/board-state.facade';
+import { ProjectContext } from '../../../services/project-context.service';
 import { getLabelColorClasses } from '../../../models/label.model';
 
 @Component({
@@ -16,6 +17,7 @@ import { getLabelColorClasses } from '../../../models/label.model';
 })
 export class BoardToolbarComponent {
   private facade = inject(BoardStateFacade);
+  protected projectContext = inject(ProjectContext);
 
   shortId = input.required<string>();
   slug = input.required<string>();
