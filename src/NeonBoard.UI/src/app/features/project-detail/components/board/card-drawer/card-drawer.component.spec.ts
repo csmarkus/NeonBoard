@@ -18,7 +18,7 @@ const baseCard: Card = {
   title: 'Original Title',
   description: 'Original Desc',
   columnId: 'col-1',
-  position: 0,
+  position: 'a0',
   labels: [],
   createdAt: '',
   updatedAt: '',
@@ -52,7 +52,7 @@ describe('CardDrawerComponent', () => {
   beforeEach(() => {
     mockCardService = {
       updateCard: vi.fn().mockReturnValue(of(undefined)),
-      addCard: vi.fn().mockReturnValue(of({ id: 'card-new', cardNumber: 2, displayId: 'TST-2', title: 'New', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' })),
+      addCard: vi.fn().mockReturnValue(of({ id: 'card-new', cardNumber: 2, displayId: 'TST-2', title: 'New', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '' })),
       deleteCard: vi.fn().mockReturnValue(of(undefined)),
       addCardLabel: vi.fn().mockReturnValue(of(undefined)),
       removeCardLabel: vi.fn().mockReturnValue(of(undefined)),

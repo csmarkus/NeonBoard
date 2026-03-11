@@ -20,13 +20,13 @@ function createMockBoardDetails(overrides: Partial<BoardDetails> = {}): BoardDet
     createdAt: '2024-01-01',
     updatedAt: '2024-01-01',
     columns: [
-      { id: 'col-1', name: 'To Do', position: 0, boardId: 'board-1' },
-      { id: 'col-2', name: 'Done', position: 1, boardId: 'board-1' },
+      { id: 'col-1', name: 'To Do', position: 'a0', boardId: 'board-1' },
+      { id: 'col-2', name: 'Done', position: 'a1', boardId: 'board-1' },
     ],
     cards: [
-      { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
-      { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
-      { id: 'card-3', cardNumber: 3, displayId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-2', position: 0, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+      { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 'a1', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+      { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+      { id: 'card-3', cardNumber: 3, displayId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-2', position: 'a0', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
     ],
     labels: [{ id: 'label-1', name: 'Bug', color: 'red' }],
     ...overrides,
@@ -44,6 +44,7 @@ describe('BoardStateFacade', () => {
   };
   let columnService: {
     reorderColumns: ReturnType<typeof vi.fn>;
+    moveColumn: ReturnType<typeof vi.fn>;
     addColumn: ReturnType<typeof vi.fn>;
     renameColumn: ReturnType<typeof vi.fn>;
     deleteColumn: ReturnType<typeof vi.fn>;
@@ -70,6 +71,7 @@ describe('BoardStateFacade', () => {
     boardService = { getBoardDetails: vi.fn() };
     columnService = {
       reorderColumns: vi.fn(),
+      moveColumn: vi.fn(),
       addColumn: vi.fn(),
       renameColumn: vi.fn(),
       deleteColumn: vi.fn(),
@@ -203,7 +205,7 @@ describe('BoardStateFacade', () => {
     it('should call columnService and reload board on success', () => {
       const mockBoard = createMockBoardDetails();
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
-      columnService.addColumn.mockReturnValue(of({ id: 'col-3', name: 'New', position: 2, boardId: 'board-1' }));
+      columnService.addColumn.mockReturnValue(of({ id: 'col-3', name: 'New', position: 'a2', boardId: 'board-1' }));
 
       facade.addColumn('project-1', 'board-1', 'New');
 
@@ -242,11 +244,11 @@ describe('BoardStateFacade', () => {
     it('should call cardService.moveCard', () => {
       cardService.moveCard.mockReturnValue(of(undefined));
 
-      facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 0);
+      facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
 
       expect(cardService.moveCard).toHaveBeenCalledWith('project-1', 'board-1', 'card-1', {
         targetColumnId: 'col-2',
-        targetPosition: 0,
+        newPosition: 'a0',
       });
     });
   });
@@ -270,7 +272,7 @@ describe('BoardStateFacade', () => {
 
   describe('openCardDrawer', () => {
     it('should delegate to drawerService and fetch card detail', () => {
-      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '', archivedAt: null };
+      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '', archivedAt: null };
       const mockActivity = { entries: [], nextCursor: null };
       cardService.getCardDetail.mockReturnValue(of({ ...card, activity: mockActivity }));
 
@@ -291,7 +293,7 @@ describe('BoardStateFacade', () => {
       const result = facade.cardsByColumn();
 
       expect(Object.keys(result)).toEqual(['col-1', 'col-2']);
-      // col-1 cards sorted by position: card-2 (pos 0) before card-1 (pos 1)
+      // col-1 cards sorted by position: card-2 (pos a0) before card-1 (pos a1)
       expect(result['col-1'].map(c => c.id)).toEqual(['card-2', 'card-1']);
       expect(result['col-2'].map(c => c.id)).toEqual(['card-3']);
     });
@@ -394,8 +396,8 @@ describe('BoardStateFacade', () => {
     it('should show only cards that have a selected label', () => {
       const mockBoard = createMockBoardDetails({
         cards: [
-          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '', archivedAt: null },
-          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 'a0', labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 'a1', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
         ],
       });
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
@@ -409,7 +411,7 @@ describe('BoardStateFacade', () => {
     it('should return an empty array for a column where no cards match', () => {
       const mockBoard = createMockBoardDetails({
         cards: [
-          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
         ],
       });
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));
@@ -423,9 +425,9 @@ describe('BoardStateFacade', () => {
     it('should match cards with any of the selected labels (OR logic)', () => {
       const mockBoard = createMockBoardDetails({
         cards: [
-          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '', archivedAt: null },
-          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 1, labels: [{ id: 'label-2', name: 'Feature', color: 'blue' }], createdAt: '', updatedAt: '', archivedAt: null },
-          { id: 'card-3', cardNumber: 3, displayId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-1', position: 2, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 'a0', labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 'a1', labels: [{ id: 'label-2', name: 'Feature', color: 'blue' }], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-3', cardNumber: 3, displayId: 'TST-3', title: 'Card 3', description: '', columnId: 'col-1', position: 'a2', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
         ],
         labels: [
           { id: 'label-1', name: 'Bug', color: 'red' },
@@ -444,8 +446,8 @@ describe('BoardStateFacade', () => {
     it('should show all cards again after clearing the filter', () => {
       const mockBoard = createMockBoardDetails({
         cards: [
-          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 0, labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '', archivedAt: null },
-          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 1, labels: [], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Card 1', description: '', columnId: 'col-1', position: 'a0', labels: [{ id: 'label-1', name: 'Bug', color: 'red' }], createdAt: '', updatedAt: '', archivedAt: null },
+          { id: 'card-2', cardNumber: 2, displayId: 'TST-2', title: 'Card 2', description: '', columnId: 'col-1', position: 'a1', labels: [], createdAt: '', updatedAt: '', archivedAt: null },
         ],
       });
       boardService.getBoardDetails.mockReturnValue(of(mockBoard));

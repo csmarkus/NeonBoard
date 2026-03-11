@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Column, AddColumnRequest, RenameColumnRequest, ReorderColumnsRequest } from '../models/column.model';
+import { Column, AddColumnRequest, RenameColumnRequest, ReorderColumnsRequest, MoveColumnRequest } from '../models/column.model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,5 +25,12 @@ export class ColumnService {
 
   reorderColumns(projectId: string, boardId: string, request: ReorderColumnsRequest): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/projects/${projectId}/boards/${boardId}/columns/reorder`, request);
+  }
+
+  moveColumn(projectId: string, boardId: string, columnId: string, request: MoveColumnRequest): Observable<void> {
+    return this.http.patch<void>(
+      `${this.apiUrl}/projects/${projectId}/boards/${boardId}/columns/${columnId}/move`,
+      request
+    );
   }
 }

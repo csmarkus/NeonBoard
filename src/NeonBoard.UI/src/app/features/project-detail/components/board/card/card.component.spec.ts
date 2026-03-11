@@ -12,7 +12,7 @@ const baseCard: Card = {
   title: 'Test Card',
   description: '',
   columnId: 'col-1',
-  position: 0,
+  position: 'a0',
   labels: [],
   createdAt: '',
   updatedAt: '',

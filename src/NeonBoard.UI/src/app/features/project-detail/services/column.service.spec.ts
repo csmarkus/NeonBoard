@@ -25,7 +25,7 @@ describe('ColumnService', () => {
   });
 
   it('addColumn → POST /projects/p-1/boards/b-1/columns', () => {
-    const mockColumn = { id: 'col-1', name: 'To Do', position: 0, boardId: 'b-1' };
+    const mockColumn = { id: 'col-1', name: 'To Do', position: 'a0', boardId: 'b-1' };
 
     service.addColumn('p-1', 'b-1', { name: 'To Do' }).subscribe(col => {
       expect(col).toEqual(mockColumn);

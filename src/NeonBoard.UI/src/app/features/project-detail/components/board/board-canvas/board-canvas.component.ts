@@ -8,6 +8,7 @@ import { ColumnComponent } from '../column/column.component';
 import { AddColumnButtonComponent } from '../add-column-button/add-column-button.component';
 import { Column } from '../../../models/column.model';
 import { Card } from '../../../models/card.model';
+import { getPositionBetween } from '../../../../../core/utils/fractional-index';
 
 @Component({
   selector: 'app-board-canvas',
@@ -62,8 +63,12 @@ export class BoardCanvasComponent {
     const columns = [...this.columns()];
     moveItemInArray(columns, event.previousIndex, event.currentIndex);
 
-    const columnIds = columns.map(c => c.id);
-    this.facade.reorderColumns(this.projectId(), this.boardId(), columnIds);
+    const column = columns[event.currentIndex];
+    const before = event.currentIndex > 0 ? columns[event.currentIndex - 1].position : null;
+    const after = event.currentIndex < columns.length - 1 ? columns[event.currentIndex + 1].position : null;
+    const newPosition = getPositionBetween(before, after);
+
+    this.facade.moveColumn(this.projectId(), this.boardId(), column.id, newPosition);
   }
 
   onCardDropped(event: CdkDragDrop<Card[]>, targetColumnId: string): void {
@@ -78,15 +83,14 @@ export class BoardCanvasComponent {
       );
     }
 
-    const card = event.container.data[event.currentIndex];
+    const cards = event.container.data;
+    const index = event.currentIndex;
+    const before = index > 0 ? cards[index - 1].position : null;
+    const after = index < cards.length - 1 ? cards[index + 1].position : null;
+    const newPosition = getPositionBetween(before, after);
+    const card = cards[index];
 
-    this.facade.moveCard(
-      this.projectId(),
-      this.boardId(),
-      card.id,
-      targetColumnId,
-      event.currentIndex
-    );
+    this.facade.moveCard(this.projectId(), this.boardId(), card.id, targetColumnId, newPosition);
   }
 
   openAddColumn(): void {

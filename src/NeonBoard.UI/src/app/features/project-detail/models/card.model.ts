@@ -8,7 +8,7 @@ export interface Card {
   title: string;
   description: string;
   columnId: string;
-  position: number;
+  position: string;
   labels: Label[];
   createdAt: string;
   updatedAt: string;
@@ -33,5 +33,5 @@ export interface UpdateCardRequest {
 
 export interface MoveCardRequest {
   targetColumnId: string;
-  targetPosition: number;
+  newPosition: string;
 }

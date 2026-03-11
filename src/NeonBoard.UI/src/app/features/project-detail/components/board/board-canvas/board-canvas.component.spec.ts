@@ -64,6 +64,7 @@ describe('BoardCanvasComponent', () => {
     renameColumn: ReturnType<typeof vi.fn>;
     deleteColumn: ReturnType<typeof vi.fn>;
     moveCard: ReturnType<typeof vi.fn>;
+    moveColumn: ReturnType<typeof vi.fn>;
     addCard: ReturnType<typeof vi.fn>;
     openCardDrawer: ReturnType<typeof vi.fn>;
   };
@@ -93,6 +94,7 @@ describe('BoardCanvasComponent', () => {
       renameColumn: vi.fn(),
       deleteColumn: vi.fn(),
       moveCard: vi.fn(),
+      moveColumn: vi.fn(),
       addCard: vi.fn(),
       openCardDrawer: vi.fn(),
     };
@@ -177,25 +179,25 @@ describe('BoardCanvasComponent', () => {
       expect(mockFacade.deleteColumn).toHaveBeenCalledWith('p-1', 'b-1', 'col-1');
     });
 
-    it('dropColumn calls facade.reorderColumns with the reordered column ID array', () => {
-      const col1: Column = { id: 'col-1', name: 'To Do', position: 0, boardId: 'b-1' };
-      const col2: Column = { id: 'col-2', name: 'Done', position: 1, boardId: 'b-1' };
+    it('dropColumn calls facade.moveColumn with the column id and new fractional position', () => {
+      const col1: Column = { id: 'col-1', name: 'To Do', position: 'a0', boardId: 'b-1' };
+      const col2: Column = { id: 'col-2', name: 'Done', position: 'a1', boardId: 'b-1' };
       mockFacade.columns.set([col1, col2]);
 
       const event = mockColumnDrop(0, 1);
       component.dropColumn(event);
 
-      expect(mockFacade.reorderColumns).toHaveBeenCalledWith('p-1', 'b-1', ['col-2', 'col-1']);
+      expect(mockFacade.moveColumn).toHaveBeenCalledWith('p-1', 'b-1', 'col-1', expect.any(String));
     });
 
     it('dropColumn does nothing when previousIndex equals currentIndex', () => {
-      const col1: Column = { id: 'col-1', name: 'To Do', position: 0, boardId: 'b-1' };
+      const col1: Column = { id: 'col-1', name: 'To Do', position: 'a0', boardId: 'b-1' };
       mockFacade.columns.set([col1]);
 
       const event = mockColumnDrop(0, 0);
       component.dropColumn(event);
 
-      expect(mockFacade.reorderColumns).not.toHaveBeenCalled();
+      expect(mockFacade.moveColumn).not.toHaveBeenCalled();
     });
   });
 
@@ -213,21 +215,21 @@ describe('BoardCanvasComponent', () => {
     });
 
     it('onCardSelected calls facade.openCardDrawer with card, projectId, boardId', () => {
-      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '' };
 
       component.onCardSelected(card);
 
       expect(mockFacade.openCardDrawer).toHaveBeenCalledWith(card, 'p-1', 'b-1');
     });
 
-    it('onCardDropped calls facade.moveCard with card id, target column id, target position', () => {
-      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+    it('onCardDropped calls facade.moveCard with card id, target column id, and fractional position', () => {
+      const card: Card = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'Test', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '' };
       const containerData = [card];
       const event = mockCardDrop(card, 0, 0, containerData);
 
       component.onCardDropped(event, 'col-2');
 
-      expect(mockFacade.moveCard).toHaveBeenCalledWith('p-1', 'b-1', 'card-1', 'col-2', 0);
+      expect(mockFacade.moveCard).toHaveBeenCalledWith('p-1', 'b-1', 'card-1', 'col-2', expect.any(String));
     });
 
   });

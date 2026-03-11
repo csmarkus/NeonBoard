@@ -1,7 +1,7 @@
 export interface Column {
   id: string;
   name: string;
-  position: number;
+  position: string;
   boardId: string;
 }
 
@@ -15,4 +15,8 @@ export interface RenameColumnRequest {
 
 export interface ReorderColumnsRequest {
   columnIds: string[];
+}
+
+export interface MoveColumnRequest {
+  newPosition: string;
 }

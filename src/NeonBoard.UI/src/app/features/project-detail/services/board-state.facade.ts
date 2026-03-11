@@ -65,7 +65,7 @@ export class BoardStateFacade {
     });
 
     Object.keys(result).forEach(columnId => {
-      result[columnId].sort((a, b) => a.position - b.position);
+      result[columnId].sort((a, b) => a.position.localeCompare(b.position));
     });
 
     return result;
@@ -196,11 +196,19 @@ export class BoardStateFacade {
     });
   }
 
-  moveCard(projectId: string, boardId: string, cardId: string, targetColumnId: string, targetPosition: number): void {
+  moveCard(projectId: string, boardId: string, cardId: string, targetColumnId: string, newPosition: string): void {
     this.cardService.moveCard(projectId, boardId, cardId, {
       targetColumnId,
-      targetPosition
+      newPosition
     }).subscribe({
+      error: () => {
+        this.loadBoard(projectId, boardId, false);
+      }
+    });
+  }
+
+  moveColumn(projectId: string, boardId: string, columnId: string, newPosition: string): void {
+    this.columnService.moveColumn(projectId, boardId, columnId, { newPosition }).subscribe({
       error: () => {
         this.loadBoard(projectId, boardId, false);
       }

@@ -25,7 +25,7 @@ describe('CardService', () => {
   });
 
   it('addCard → POST /projects/p-1/boards/b-1/cards', () => {
-    const mockCard = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'New Card', description: '', columnId: 'col-1', position: 0, labels: [], createdAt: '', updatedAt: '' };
+    const mockCard = { id: 'card-1', cardNumber: 1, displayId: 'TST-1', title: 'New Card', description: '', columnId: 'col-1', position: 'a0', labels: [], createdAt: '', updatedAt: '' };
 
     service.addCard('p-1', 'b-1', { columnId: 'col-1', title: 'New Card', description: '' }).subscribe(card => {
       expect(card).toEqual(mockCard);
@@ -47,11 +47,11 @@ describe('CardService', () => {
   });
 
   it('moveCard → PATCH /projects/p-1/boards/b-1/cards/card-1/move', () => {
-    service.moveCard('p-1', 'b-1', 'card-1', { targetColumnId: 'col-2', targetPosition: 0 }).subscribe();
+    service.moveCard('p-1', 'b-1', 'card-1', { targetColumnId: 'col-2', newPosition: 'a0' }).subscribe();
 
     const req = httpMock.expectOne(`${API_URL}/projects/p-1/boards/b-1/cards/card-1/move`);
     expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toEqual({ targetColumnId: 'col-2', targetPosition: 0 });
+    expect(req.request.body).toEqual({ targetColumnId: 'col-2', newPosition: 'a0' });
     req.flush(null);
   });
 
