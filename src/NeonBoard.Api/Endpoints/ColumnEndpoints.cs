@@ -4,6 +4,7 @@ using NeonBoard.Api.Models;
 using NeonBoard.Application.Columns.Commands.AddColumn;
 using NeonBoard.Application.Columns.Commands.RenameColumn;
 using NeonBoard.Application.Columns.Commands.DeleteColumn;
+using NeonBoard.Application.Columns.Commands.MoveColumn;
 using NeonBoard.Application.Columns.Commands.ReorderColumns;
 using NeonBoard.Application.Columns.DTOs;
 
@@ -25,6 +26,11 @@ public static class ColumnEndpoints
 
         group.MapPut("/{columnId:guid}", RenameColumn)
             .WithName("RenameColumn")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem();
+
+        group.MapPatch("/{columnId:guid}/move", MoveColumn)
+            .WithName("MoveColumn")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem();
 
@@ -72,6 +78,19 @@ public static class ColumnEndpoints
         CancellationToken ct)
     {
         var command = new DeleteColumnCommand(projectId, boardId, columnId);
+        await mediator.Send(command, ct);
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> MoveColumn(
+        Guid projectId,
+        Guid boardId,
+        Guid columnId,
+        MoveColumnRequest request,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new MoveColumnCommand(projectId, boardId, columnId, request.NewPosition);
         await mediator.Send(command, ct);
         return Results.NoContent();
     }
