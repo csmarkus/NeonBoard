@@ -75,6 +75,7 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             {
                 position.Property(p => p.Value)
                     .HasColumnName("Position")
+                    .HasMaxLength(50)
                     .IsRequired();
             });
 
@@ -118,6 +119,7 @@ public class BoardConfiguration : IEntityTypeConfiguration<Board>
             {
                 position.Property(p => p.Value)
                     .HasColumnName("Position")
+                    .HasMaxLength(50)
                     .IsRequired();
             });
 
