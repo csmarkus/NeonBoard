@@ -71,7 +71,7 @@ public class CardEndpointsTests : IClassFixture<NeonBoardWebApplicationFactory>
 
         var request = new HttpRequestMessage(HttpMethod.Patch,
             $"/api/projects/{projectId}/boards/{boardId}/cards/{card.Id}/move");
-        request.Content = JsonContent.Create(new { TargetColumnId = targetColumn.Id, TargetPosition = 0 });
+        request.Content = JsonContent.Create(new { TargetColumnId = targetColumn.Id, NewPosition = "a0" });
 
         var response = await _client.SendAsync(request);
 
