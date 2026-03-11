@@ -9,7 +9,7 @@ public static class DomainMessages
     public const string BoardProjectIdEmpty = "Project ID cannot be empty.";
     public const string BoardColumnCountMismatch = "Column count mismatch. All columns must be included in the reorder.";
     public const string BoardCannotDeleteColumnWithCards = "Cannot delete column with cards. Specify a target column to move cards to.";
-    public const string BoardTargetPositionNegative = "Target position cannot be negative.";
+
     public const string BoardPrefixEmpty = "Board prefix cannot be empty.";
     public const string BoardPrefixInvalid = "Board prefix must be 2-5 uppercase letters (A-Z).";
     public const string BoardPrefixCannotBeGenerated = "Board prefix cannot be generated from the board name. The name must contain at least one letter.";
@@ -58,7 +58,7 @@ public static class DomainMessages
 
     #region Position
 
-    public const string PositionNegative = "Position cannot be negative.";
+    public const string PositionEmpty = "Position value cannot be empty.";
 
     #endregion
 
