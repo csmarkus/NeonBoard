@@ -394,6 +394,7 @@ export class BoardStateFacade {
     this.boardHub.onEvent<{ actingUserId: string }>('ColumnAdded', refetchIfNotSelf);
     this.boardHub.onEvent<{ actingUserId: string }>('ColumnDeleted', refetchIfNotSelf);
     this.boardHub.onEvent<{ actingUserId: string }>('ColumnMoved', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('ColumnsReordered', refetchIfNotSelf);
     this.boardHub.onEvent<{ actingUserId: string }>('LabelCreated', refetchIfNotSelf);
     this.boardHub.onEvent<{ actingUserId: string }>('LabelUpdated', refetchIfNotSelf);
     this.boardHub.onEvent<{ actingUserId: string }>('LabelRemoved', refetchIfNotSelf);
