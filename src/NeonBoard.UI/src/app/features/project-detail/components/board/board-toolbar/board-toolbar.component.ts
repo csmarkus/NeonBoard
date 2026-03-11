@@ -2,13 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGear, faXmark, faBoxArchive, faClockRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { ConnectionStatusComponent } from '../../../../../shared/components/connection-status/connection-status.component';
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { ProjectContext } from '../../../services/project-context.service';
 import { getLabelColorClasses } from '../../../models/label.model';
 
 @Component({
   selector: 'app-board-toolbar',
-  imports: [RouterLink, FontAwesomeModule],
+  imports: [RouterLink, FontAwesomeModule, ConnectionStatusComponent],
   templateUrl: './board-toolbar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

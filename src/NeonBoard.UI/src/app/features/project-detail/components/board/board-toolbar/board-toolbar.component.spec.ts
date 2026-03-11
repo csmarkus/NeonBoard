@@ -5,6 +5,7 @@ import { signal } from '@angular/core';
 import { BoardToolbarComponent } from './board-toolbar.component';
 import { BoardStateFacade } from '../../../services/board-state.facade';
 import { ProjectContext } from '../../../services/project-context.service';
+import { SignalRService, ConnectionState } from '../../../../../core/services/signalr.service';
 import { Label } from '../../../models/label.model';
 
 initTestEnvironment();
@@ -37,6 +38,7 @@ describe('BoardToolbarComponent', () => {
       providers: [
         provideRouter([]),
         { provide: BoardStateFacade, useValue: mockFacade },
+        { provide: SignalRService, useValue: { connectionState: signal<ConnectionState>('connected') } },
         { provide: ProjectContext, useValue: {
           canEdit: () => true,
           isOwner: () => true,
