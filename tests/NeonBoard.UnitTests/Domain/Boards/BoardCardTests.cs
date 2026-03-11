@@ -20,7 +20,7 @@ public class BoardCardTests
         card.ColumnId.Should().Be(columnId);
         card.Content.Title.Should().Be("My Card");
         card.Content.Description.Should().Be("Description");
-        card.Position.Value.Should().Be(0);
+        card.Position.Value.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -33,9 +33,14 @@ public class BoardCardTests
         board.AddCard(columnId, "Card 2", "");
         board.AddCard(columnId, "Card 3", "");
 
-        board.Cards[0].Position.Value.Should().Be(0);
-        board.Cards[1].Position.Value.Should().Be(1);
-        board.Cards[2].Position.Value.Should().Be(2);
+        board.Cards[0].Position.Value.Should().NotBeNullOrEmpty();
+        board.Cards[1].Position.Value.Should().NotBeNullOrEmpty();
+        board.Cards[2].Position.Value.Should().NotBeNullOrEmpty();
+        // Each subsequent card should sort after the previous one
+        string.Compare(board.Cards[0].Position.Value, board.Cards[1].Position.Value, StringComparison.Ordinal)
+            .Should().BeLessThan(0);
+        string.Compare(board.Cards[1].Position.Value, board.Cards[2].Position.Value, StringComparison.Ordinal)
+            .Should().BeLessThan(0);
     }
 
     [Fact]
@@ -113,15 +118,16 @@ public class BoardCardTests
             .Build();
         var cardId = board.Cards[0].Id;
         var targetColumnId = board.Columns[1].Id;
+        var newPos = FractionalIndex.GenerateKeyBetween(null, null);
 
-        board.MoveCard(cardId, targetColumnId, 0);
+        board.MoveCard(cardId, targetColumnId, newPos);
 
         board.Cards[0].ColumnId.Should().Be(targetColumnId);
-        board.Cards[0].Position.Value.Should().Be(0);
+        board.Cards[0].Position.Value.Should().Be(newPos);
     }
 
     [Fact]
-    public void MoveCard_ShouldResequenceSourceAndTargetColumns()
+    public void MoveCard_ShouldNotChangeOtherCardPositions()
     {
         var board = new BoardBuilder()
             .WithColumns("To Do", "Done")
@@ -130,18 +136,19 @@ public class BoardCardTests
             .WithCard("Done", "Card 3")
             .Build();
         var cardToMove = board.Cards[0]; // Card 1
+        var card2 = board.Cards[1]; // Card 2
+        var card2OriginalPosition = card2.Position.Value;
         var targetColumnId = board.Columns[1].Id;
+        var newPos = FractionalIndex.GenerateKeyBetween(null, null);
 
-        board.MoveCard(cardToMove.Id, targetColumnId, 0);
+        board.MoveCard(cardToMove.Id, targetColumnId, newPos);
 
-        // Remaining card in "To Do" should be resequenced to position 0
-        var toDoCards = board.Cards.Where(c => c.ColumnId == board.Columns[0].Id).ToList();
-        toDoCards.Should().HaveCount(1);
-        toDoCards[0].Position.Value.Should().Be(0);
+        // Card 2's position should NOT change (fractional indexing benefit)
+        card2.Position.Value.Should().Be(card2OriginalPosition);
     }
 
     [Fact]
-    public void MoveCard_WithNegativePosition_ShouldThrow()
+    public void MoveCard_WithEmptyPosition_ShouldThrow()
     {
         var board = new BoardBuilder()
             .WithColumn("To Do")
@@ -150,10 +157,10 @@ public class BoardCardTests
         var cardId = board.Cards[0].Id;
         var columnId = board.Columns[0].Id;
 
-        var act = () => board.MoveCard(cardId, columnId, -1);
+        var act = () => board.MoveCard(cardId, columnId, "");
 
         act.Should().Throw<DomainException>()
-            .WithMessage(DomainMessages.BoardTargetPositionNegative);
+            .WithMessage(DomainMessages.PositionEmpty);
     }
 
     [Fact]
@@ -166,8 +173,9 @@ public class BoardCardTests
         var cardId = board.Cards[0].Id;
         var sourceColumnId = board.Columns[0].Id;
         var targetColumnId = board.Columns[1].Id;
+        var newPos = FractionalIndex.GenerateKeyBetween(null, null);
 
-        board.MoveCard(cardId, targetColumnId, 0);
+        board.MoveCard(cardId, targetColumnId, newPos);
 
         var domainEvent = board.GetDomainEvents().Should().ContainSingle()
             .Which.Should().BeOfType<CardMovedEvent>().Subject;
@@ -175,6 +183,7 @@ public class BoardCardTests
         domainEvent.CardId.Should().Be(cardId);
         domainEvent.SourceColumnId.Should().Be(sourceColumnId);
         domainEvent.TargetColumnId.Should().Be(targetColumnId);
+        domainEvent.NewPosition.Should().Be(newPos);
     }
 
     [Fact]
@@ -192,7 +201,7 @@ public class BoardCardTests
     }
 
     [Fact]
-    public void DeleteCard_ShouldResequenceRemainingCards()
+    public void DeleteCard_ShouldNotChangeRemainingCardPositions()
     {
         var board = new BoardBuilder()
             .WithColumn("To Do")
@@ -200,13 +209,16 @@ public class BoardCardTests
             .WithCard("To Do", "Card 2")
             .WithCard("To Do", "Card 3")
             .Build();
+        var card1Position = board.Cards[0].Position.Value;
+        var card3Position = board.Cards[2].Position.Value;
         var middleCardId = board.Cards[1].Id;
 
         board.DeleteCard(middleCardId);
 
         board.Cards.Should().HaveCount(2);
-        board.Cards.OrderBy(c => c.Position.Value).First().Position.Value.Should().Be(0);
-        board.Cards.OrderBy(c => c.Position.Value).Last().Position.Value.Should().Be(1);
+        // Remaining cards' positions should be UNCHANGED
+        board.Cards.First(c => c.Content.Title == "Card 1").Position.Value.Should().Be(card1Position);
+        board.Cards.First(c => c.Content.Title == "Card 3").Position.Value.Should().Be(card3Position);
     }
 
     [Fact]
@@ -237,7 +249,7 @@ public class BoardCardTests
     }
 
     [Fact]
-    public void MoveCard_ToFirstPositionInSameColumn_ShouldPlaceCardAtPositionZero()
+    public void MoveCard_ToFirstPositionInSameColumn_ShouldPlaceCardBeforeOthers()
     {
         var board = new BoardBuilder()
             .WithColumn("To Do")
@@ -247,20 +259,20 @@ public class BoardCardTests
             .Build();
         var columnId = board.Columns[0].Id;
         var cardC = board.Cards.Single(c => c.Content.Title == "Card C");
+        var cardA = board.Cards.Single(c => c.Content.Title == "Card A");
 
-        board.MoveCard(cardC.Id, columnId, 0);
+        // Generate a position before Card A
+        var newPos = FractionalIndex.GenerateKeyBetween(null, cardA.Position.Value);
+        board.MoveCard(cardC.Id, columnId, newPos);
 
-        var orderedCards = board.Cards.OrderBy(c => c.Position.Value).ToList();
+        var orderedCards = board.Cards.OrderBy(c => c.Position.Value, StringComparer.Ordinal).ToList();
         orderedCards[0].Content.Title.Should().Be("Card C");
-        orderedCards[0].Position.Value.Should().Be(0);
         orderedCards[1].Content.Title.Should().Be("Card A");
-        orderedCards[1].Position.Value.Should().Be(1);
         orderedCards[2].Content.Title.Should().Be("Card B");
-        orderedCards[2].Position.Value.Should().Be(2);
     }
 
     [Fact]
-    public void MoveCard_ToFirstPositionInDifferentColumn_ShouldPlaceCardAtPositionZero()
+    public void MoveCard_ToFirstPositionInDifferentColumn_ShouldPlaceCardBeforeOthers()
     {
         var board = new BoardBuilder()
             .WithColumns("To Do", "Done")
@@ -270,15 +282,17 @@ public class BoardCardTests
             .Build();
         var targetColumnId = board.Columns[1].Id;
         var cardA = board.Cards.Single(c => c.Content.Title == "Card A");
+        var cardB = board.Cards.Single(c => c.Content.Title == "Card B");
 
-        board.MoveCard(cardA.Id, targetColumnId, 0);
+        // Generate a position before Card B
+        var newPos = FractionalIndex.GenerateKeyBetween(null, cardB.Position.Value);
+        board.MoveCard(cardA.Id, targetColumnId, newPos);
 
         var doneCards = board.Cards.Where(c => c.ColumnId == targetColumnId)
-            .OrderBy(c => c.Position.Value).ToList();
+            .OrderBy(c => c.Position.Value, StringComparer.Ordinal).ToList();
         doneCards[0].Content.Title.Should().Be("Card A");
-        doneCards[0].Position.Value.Should().Be(0);
-        doneCards[1].Position.Value.Should().Be(1);
-        doneCards[2].Position.Value.Should().Be(2);
+        doneCards[1].Content.Title.Should().Be("Card B");
+        doneCards[2].Content.Title.Should().Be("Card C");
     }
 
     [Fact]
@@ -333,7 +347,7 @@ public class BoardCardTests
     }
 
     [Fact]
-    public void ArchiveCard_ShouldResequenceRemainingActiveCards()
+    public void ArchiveCard_ShouldNotChangeOtherCardPositions()
     {
         var board = new BoardBuilder()
             .WithColumn("To Do")
@@ -341,14 +355,17 @@ public class BoardCardTests
             .WithCard("To Do", "Card 2")
             .WithCard("To Do", "Card 3")
             .Build();
+        var card1Position = board.Cards[0].Position.Value;
+        var card3Position = board.Cards[2].Position.Value;
         var card2Id = board.Cards[1].Id;
 
         board.ArchiveCard(card2Id);
 
-        var activeCards = board.Cards.Where(c => !c.IsArchived).OrderBy(c => c.Position.Value).ToList();
+        var activeCards = board.Cards.Where(c => !c.IsArchived).ToList();
         activeCards.Should().HaveCount(2);
-        activeCards[0].Position.Value.Should().Be(0);
-        activeCards[1].Position.Value.Should().Be(1);
+        // Positions should be UNCHANGED (no resequencing with fractional indexing)
+        activeCards.First(c => c.Content.Title == "Card 1").Position.Value.Should().Be(card1Position);
+        activeCards.First(c => c.Content.Title == "Card 3").Position.Value.Should().Be(card3Position);
     }
 
     [Fact]
@@ -401,6 +418,7 @@ public class BoardCardTests
             .WithCard("To Do", "Card 2")
             .Build();
         var card1Id = board.Cards[0].Id;
+        var card2 = board.Cards[1];
         var columnId = board.Cards[0].ColumnId;
         board.ArchiveCard(card1Id);
         board.ClearDomainEvents();
@@ -410,8 +428,9 @@ public class BoardCardTests
         var card1 = board.Cards.First(c => c.Id == card1Id);
         card1.IsArchived.Should().BeFalse();
         card1.ColumnId.Should().Be(columnId);
-        // Card 2 was resequenced to position 0 after archive; restored card goes to end (position 1)
-        card1.Position.Value.Should().Be(1);
+        // Restored card should sort after Card 2
+        string.Compare(card1.Position.Value, card2.Position.Value, StringComparison.Ordinal)
+            .Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -452,14 +471,16 @@ public class BoardCardTests
             .WithCard("To Do", "Card 2")
             .Build();
         var columnId = board.Columns[0].Id;
+        var card2Position = board.Cards[1].Position.Value;
         board.ArchiveCard(board.Cards[0].Id);
         board.ClearDomainEvents();
 
         board.AddCard(columnId, "Card 3", "");
 
         var newCard = board.Cards.OrderByDescending(c => c.CreatedAt).First();
-        // Only 1 active card in column (Card 2 at pos 0), new card goes to position 1
-        newCard.Position.Value.Should().Be(1);
+        // New card should sort after Card 2 (the only active card)
+        string.Compare(newCard.Position.Value, card2Position, StringComparison.Ordinal)
+            .Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -487,7 +508,7 @@ public class BoardCardTests
     }
 
     [Fact]
-    public void HoldCard_ShouldNotResequenceCards()
+    public void HoldCard_ShouldNotChangeCardPositions()
     {
         var board = new BoardBuilder().WithColumn("To Do").Build();
         var columnId = board.Columns[0].Id;
@@ -495,12 +516,16 @@ public class BoardCardTests
         var card2Id = board.AddCard(columnId, "Card 2", "");
         var card3Id = board.AddCard(columnId, "Card 3", "");
 
+        var card1Pos = board.Cards.First(c => c.Id == card1Id).Position.Value;
+        var card2Pos = board.Cards.First(c => c.Id == card2Id).Position.Value;
+        var card3Pos = board.Cards.First(c => c.Id == card3Id).Position.Value;
+
         board.HoldCard(card2Id);
 
-        var cards = board.Cards.OrderBy(c => c.Position.Value).ToList();
-        cards[0].Position.Value.Should().Be(0);
-        cards[1].Position.Value.Should().Be(1);
-        cards[2].Position.Value.Should().Be(2);
+        var cards = board.Cards.OrderBy(c => c.Position.Value, StringComparer.Ordinal).ToList();
+        cards[0].Position.Value.Should().Be(card1Pos);
+        cards[1].Position.Value.Should().Be(card2Pos);
+        cards[2].Position.Value.Should().Be(card3Pos);
     }
 
     [Fact]

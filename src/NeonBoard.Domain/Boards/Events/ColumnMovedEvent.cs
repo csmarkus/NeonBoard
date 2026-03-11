@@ -2,8 +2,8 @@ using NeonBoard.Domain.Common;
 
 namespace NeonBoard.Domain.Boards.Events;
 
-public record ColumnAddedEvent(
+public record ColumnMovedEvent(
     Guid BoardId,
     Guid ColumnId,
-    string Name,
-    string Position) : IDomainEvent;
+    string NewPosition,
+    string ColumnName) : IDomainEvent;

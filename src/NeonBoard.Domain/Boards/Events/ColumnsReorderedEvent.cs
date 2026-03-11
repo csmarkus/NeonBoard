@@ -4,4 +4,4 @@ namespace NeonBoard.Domain.Boards.Events;
 
 public record ColumnsReorderedEvent(
     Guid BoardId,
-    Dictionary<Guid, int> NewPositions) : IDomainEvent;
+    Dictionary<Guid, string> NewPositions) : IDomainEvent;

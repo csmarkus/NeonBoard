@@ -94,18 +94,16 @@ public sealed class Board : Entity, IAggregateRoot
 
     public Guid AddColumn(string name)
     {
-        var position = Position.Create(_columns.Count);
+        var lastColumn = _columns
+            .OrderByDescending(c => c.Position.Value, StringComparer.Ordinal)
+            .FirstOrDefault();
+        var position = Position.Between(lastColumn?.Position, null);
         var column = Column.CreateInternal(name, position);
 
         _columns.Add(column);
         UpdatedAt = DateTime.UtcNow;
 
-        AddDomainEvent(new ColumnAddedEvent(
-            Id,
-            column.Id,
-            column.Name,
-            column.Position.Value));
-
+        AddDomainEvent(new ColumnAddedEvent(Id, column.Id, column.Name, column.Position.Value));
         return column.Id;
     }
 
@@ -130,17 +128,27 @@ public sealed class Board : Entity, IAggregateRoot
                 throw new DomainException(DomainMessages.ColumnNotFound(columnId));
         }
 
-        var newPositions = new Dictionary<Guid, int>();
+        var keys = FractionalIndex.GenerateNKeysBetween(null, null, columnIdsInOrder.Count);
+        var newPositions = new Dictionary<Guid, string>();
+
         for (int i = 0; i < columnIdsInOrder.Count; i++)
         {
             var column = _columns.First(c => c.Id == columnIdsInOrder[i]);
-            column.UpdatePosition(Position.Create(i));
-            newPositions[columnIdsInOrder[i]] = i;
+            column.UpdatePosition(Position.Create(keys[i]));
+            newPositions[columnIdsInOrder[i]] = keys[i];
         }
 
         UpdatedAt = DateTime.UtcNow;
-
         AddDomainEvent(new ColumnsReorderedEvent(Id, newPositions));
+    }
+
+    public void MoveColumn(Guid columnId, string newPosition)
+    {
+        var column = FindColumn(columnId);
+        column.UpdatePosition(Position.Create(newPosition));
+        UpdatedAt = DateTime.UtcNow;
+
+        AddDomainEvent(new ColumnMovedEvent(Id, columnId, newPosition, column.Name));
     }
 
     public void DeleteColumn(Guid columnId, Guid? moveCardsToColumnId = null)
@@ -153,15 +161,17 @@ public sealed class Board : Entity, IAggregateRoot
             if (moveCardsToColumnId.HasValue)
             {
                 var targetColumn = FindColumn(moveCardsToColumnId.Value);
-                var targetColumnCardCount = GetCardsInColumn(moveCardsToColumnId.Value).Count;
+                var lastCardInTarget = GetCardsInColumn(moveCardsToColumnId.Value)
+                    .OrderByDescending(c => c.Position.Value, StringComparer.Ordinal)
+                    .FirstOrDefault();
 
+                string? prevKey = lastCardInTarget?.Position.Value;
                 foreach (var card in cardsInColumn)
                 {
-                    card.Move(moveCardsToColumnId.Value, Position.Create(targetColumnCardCount));
-                    targetColumnCardCount++;
+                    var newKey = FractionalIndex.GenerateKeyBetween(prevKey, null);
+                    card.Move(moveCardsToColumnId.Value, Position.Create(newKey));
+                    prevKey = newKey;
                 }
-
-                ResequenceCardsInColumn(moveCardsToColumnId.Value);
             }
             else
             {
@@ -170,9 +180,7 @@ public sealed class Board : Entity, IAggregateRoot
         }
 
         _columns.Remove(column);
-        ResequenceColumns();
         UpdatedAt = DateTime.UtcNow;
-
         AddDomainEvent(new ColumnDeletedEvent(Id, columnId, moveCardsToColumnId, column.Name));
     }
 
@@ -184,8 +192,11 @@ public sealed class Board : Entity, IAggregateRoot
     {
         var column = FindColumn(columnId);
         var content = CardContent.Create(title, description);
-        var cardsInColumn = GetCardsInColumn(columnId);
-        var position = Position.Create(cardsInColumn.Count);
+
+        var lastCard = GetCardsInColumn(columnId)
+            .OrderByDescending(c => c.Position.Value, StringComparer.Ordinal)
+            .FirstOrDefault();
+        var position = Position.Between(lastCard?.Position, null);
 
         var cardNumber = NextCardNumber;
         NextCardNumber++;
@@ -195,14 +206,9 @@ public sealed class Board : Entity, IAggregateRoot
         UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new CardCreatedEvent(
-            Id,
-            card.Id,
-            columnId,
-            title,
-            position.Value,
-            cardNumber,
-            column.Name,
-            Prefix.Value));
+            Id, card.Id, columnId, title,
+            position.Value, cardNumber,
+            column.Name, Prefix.Value));
 
         return card.Id;
     }
@@ -224,50 +230,28 @@ public sealed class Board : Entity, IAggregateRoot
             Prefix.Value));
     }
 
-    public void MoveCard(Guid cardId, Guid targetColumnId, int targetPosition)
+    public void MoveCard(Guid cardId, Guid targetColumnId, string newPosition)
     {
         var card = FindCard(cardId);
         FindColumn(targetColumnId);
 
-        if (targetPosition < 0)
-            throw new DomainException(DomainMessages.BoardTargetPositionNegative);
+        if (string.IsNullOrWhiteSpace(newPosition))
+            throw new DomainException(DomainMessages.PositionEmpty);
 
         var sourceColumnId = card.ColumnId;
         var sourceColumn = _columns.First(c => c.Id == sourceColumnId);
         var targetColumn = _columns.First(c => c.Id == targetColumnId);
 
-        card.Move(targetColumnId, Position.Create(int.MaxValue));
-
-        if (sourceColumnId != targetColumnId)
-        {
-            ResequenceCardsInColumn(sourceColumnId);
-        }
-
-        var cardsInTarget = GetCardsInColumn(targetColumnId)
-            .Where(c => c.Id != cardId)
-            .OrderBy(c => c.Position.Value)
-            .ToList();
-
-        var insertAt = Math.Min(targetPosition, cardsInTarget.Count);
-        cardsInTarget.Insert(insertAt, card);
-
-        for (var i = 0; i < cardsInTarget.Count; i++)
-        {
-            cardsInTarget[i].Move(targetColumnId, Position.Create(i));
-        }
+        card.Move(targetColumnId, Position.Create(newPosition));
 
         UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new CardMovedEvent(
-            Id,
-            cardId,
-            sourceColumnId,
-            targetColumnId,
-            targetPosition,
-            card.Content.Title,
-            card.CardNumber,
-            sourceColumn.Name,
-            targetColumn.Name,
+            Id, cardId,
+            sourceColumnId, targetColumnId,
+            newPosition,
+            card.Content.Title, card.CardNumber,
+            sourceColumn.Name, targetColumn.Name,
             Prefix.Value));
     }
 
@@ -279,7 +263,6 @@ public sealed class Board : Entity, IAggregateRoot
         var cardNumber = card.CardNumber;
 
         _cards.Remove(card);
-        ResequenceCardsInColumn(columnId);
         UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new CardDeletedEvent(Id, cardId, columnId, cardTitle, cardNumber, Prefix.Value));
@@ -291,7 +274,6 @@ public sealed class Board : Entity, IAggregateRoot
         var columnId = card.ColumnId;
 
         card.Archive();
-        ResequenceCardsInColumn(columnId);
         UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new CardArchivedEvent(Id, cardId, columnId,
@@ -303,8 +285,10 @@ public sealed class Board : Entity, IAggregateRoot
         var card = FindCard(cardId);
         var columnId = card.ColumnId;
 
-        var activeCardsInColumn = GetCardsInColumn(columnId);
-        var restorePosition = Position.Create(activeCardsInColumn.Count);
+        var lastCard = GetCardsInColumn(columnId)
+            .OrderByDescending(c => c.Position.Value, StringComparer.Ordinal)
+            .FirstOrDefault();
+        var restorePosition = Position.Between(lastCard?.Position, null);
 
         card.Restore();
         card.Move(columnId, restorePosition);
@@ -435,28 +419,6 @@ public sealed class Board : Entity, IAggregateRoot
     private List<Card> GetCardsInColumn(Guid columnId)
     {
         return _cards.Where(c => c.ColumnId == columnId && !c.IsArchived).ToList();
-    }
-
-    private void ResequenceCardsInColumn(Guid columnId)
-    {
-        var cardsInColumn = GetCardsInColumn(columnId)
-            .OrderBy(c => c.Position.Value)
-            .ToList();
-
-        for (int i = 0; i < cardsInColumn.Count; i++)
-        {
-            cardsInColumn[i].Move(columnId, Position.Create(i));
-        }
-    }
-
-    private void ResequenceColumns()
-    {
-        var orderedColumns = _columns.OrderBy(c => c.Position.Value).ToList();
-
-        for (int i = 0; i < orderedColumns.Count; i++)
-        {
-            orderedColumns[i].UpdatePosition(Position.Create(i));
-        }
     }
 
     private static void ValidateName(string name)

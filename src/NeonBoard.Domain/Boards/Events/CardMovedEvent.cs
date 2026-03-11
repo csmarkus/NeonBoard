@@ -7,7 +7,7 @@ public record CardMovedEvent(
     Guid CardId,
     Guid SourceColumnId,
     Guid TargetColumnId,
-    int TargetPosition,
+    string NewPosition,
     string CardTitle,
     int CardNumber,
     string SourceColumnName,

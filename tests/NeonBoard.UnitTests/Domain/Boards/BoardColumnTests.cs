@@ -16,9 +16,12 @@ public class BoardColumnTests
 
         board.Columns.Should().HaveCount(2);
         board.Columns[0].Name.Should().Be("To Do");
-        board.Columns[0].Position.Value.Should().Be(0);
+        board.Columns[0].Position.Value.Should().NotBeNullOrEmpty();
         board.Columns[1].Name.Should().Be("In Progress");
-        board.Columns[1].Position.Value.Should().Be(1);
+        board.Columns[1].Position.Value.Should().NotBeNullOrEmpty();
+        // Second column should sort after first
+        string.Compare(board.Columns[0].Position.Value, board.Columns[1].Position.Value, StringComparison.Ordinal)
+            .Should().BeLessThan(0);
     }
 
     [Fact]
@@ -33,7 +36,7 @@ public class BoardColumnTests
 
         domainEvent.BoardId.Should().Be(board.Id);
         domainEvent.Name.Should().Be("To Do");
-        domainEvent.Position.Should().Be(0);
+        domainEvent.Position.Should().NotBeNullOrEmpty();
     }
 
     [Theory]
@@ -111,16 +114,19 @@ public class BoardColumnTests
 
         var reorderedIds = new List<Guid>
         {
-            board.Columns[2].Id, // Done -> 0
-            board.Columns[0].Id, // To Do -> 1
-            board.Columns[1].Id  // In Progress -> 2
+            board.Columns[2].Id, // Done -> first
+            board.Columns[0].Id, // To Do -> second
+            board.Columns[1].Id  // In Progress -> third
         };
 
         board.ReorderColumns(reorderedIds);
 
-        board.Columns.First(c => c.Name == "Done").Position.Value.Should().Be(0);
-        board.Columns.First(c => c.Name == "To Do").Position.Value.Should().Be(1);
-        board.Columns.First(c => c.Name == "In Progress").Position.Value.Should().Be(2);
+        var donePos = board.Columns.First(c => c.Name == "Done").Position.Value;
+        var toDoPos = board.Columns.First(c => c.Name == "To Do").Position.Value;
+        var inProgressPos = board.Columns.First(c => c.Name == "In Progress").Position.Value;
+
+        string.Compare(donePos, toDoPos, StringComparison.Ordinal).Should().BeLessThan(0);
+        string.Compare(toDoPos, inProgressPos, StringComparison.Ordinal).Should().BeLessThan(0);
     }
 
     [Fact]
@@ -179,18 +185,21 @@ public class BoardColumnTests
     }
 
     [Fact]
-    public void DeleteColumn_ShouldResequenceRemainingColumns()
+    public void DeleteColumn_ShouldNotChangeRemainingColumnPositions()
     {
         var board = new BoardBuilder()
             .WithColumns("To Do", "In Progress", "Done")
             .Build();
+        var toDoPos = board.Columns.First(c => c.Name == "To Do").Position.Value;
+        var donePos = board.Columns.First(c => c.Name == "Done").Position.Value;
         var middleColumnId = board.Columns[1].Id;
 
         board.DeleteColumn(middleColumnId);
 
         board.Columns.Should().HaveCount(2);
-        board.Columns.First(c => c.Name == "To Do").Position.Value.Should().Be(0);
-        board.Columns.First(c => c.Name == "Done").Position.Value.Should().Be(1);
+        // Remaining columns' positions should be UNCHANGED (no resequencing)
+        board.Columns.First(c => c.Name == "To Do").Position.Value.Should().Be(toDoPos);
+        board.Columns.First(c => c.Name == "Done").Position.Value.Should().Be(donePos);
     }
 
     [Fact]
@@ -236,5 +245,39 @@ public class BoardColumnTests
 
         board.GetDomainEvents().Should().ContainSingle()
             .Which.Should().BeOfType<ColumnDeletedEvent>();
+    }
+
+    [Fact]
+    public void MoveColumn_ShouldUpdatePosition()
+    {
+        var board = new BoardBuilder()
+            .WithColumns("To Do", "In Progress", "Done")
+            .Build();
+        var columnId = board.Columns[0].Id;
+        var newPosition = FractionalIndex.GenerateKeyBetween(
+            board.Columns[1].Position.Value,
+            board.Columns[2].Position.Value);
+
+        board.MoveColumn(columnId, newPosition);
+
+        board.Columns.First(c => c.Id == columnId).Position.Value.Should().Be(newPosition);
+    }
+
+    [Fact]
+    public void MoveColumn_ShouldRaiseColumnMovedEvent()
+    {
+        var board = new BoardBuilder()
+            .WithColumns("To Do", "Done")
+            .Build();
+        var columnId = board.Columns[0].Id;
+        var newPosition = FractionalIndex.GenerateKeyBetween(board.Columns[1].Position.Value, null);
+        board.ClearDomainEvents();
+
+        board.MoveColumn(columnId, newPosition);
+
+        var evt = board.GetDomainEvents().OfType<ColumnMovedEvent>().Single();
+        evt.ColumnId.Should().Be(columnId);
+        evt.NewPosition.Should().Be(newPosition);
+        evt.ColumnName.Should().Be("To Do");
     }
 }
