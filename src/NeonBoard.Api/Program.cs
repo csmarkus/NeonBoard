@@ -95,6 +95,7 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+        builder.Services.AddScoped<IBoardNotificationService, BoardNotificationService>();
 
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
