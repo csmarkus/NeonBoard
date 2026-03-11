@@ -62,8 +62,36 @@ public class Program
                 ValidateAudience = true,
                 ValidateLifetime = true
             };
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                    {
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
         });
         builder.Services.AddAuthorization();
+
+        var redisConnectionString = builder.Configuration.GetConnectionString("redis");
+        if (!string.IsNullOrEmpty(redisConnectionString))
+        {
+            builder.Services.AddSignalR()
+                .AddStackExchangeRedis(redisConnectionString, options =>
+                {
+                    options.Configuration.ChannelPrefix =
+                        StackExchange.Redis.RedisChannel.Literal("NeonBoard");
+                });
+        }
+        else
+        {
+            builder.Services.AddSignalR();
+        }
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -188,6 +216,8 @@ public class Program
         app.UseAuthentication();
         app.UseRateLimiter();
         app.UseAuthorization();
+
+        app.MapHub<NeonBoard.Api.Hubs.BoardHub>("/hubs/board");
 
         app.UseSerilogRequestLogging();
 
