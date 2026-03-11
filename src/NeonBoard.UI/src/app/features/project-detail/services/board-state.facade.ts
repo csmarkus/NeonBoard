@@ -3,6 +3,7 @@ import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
 import { DrawerService } from './drawer.service';
+import { BoardHubService } from './board-hub.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 import { Column } from '../models/column.model';
@@ -18,6 +19,7 @@ export class BoardStateFacade {
   private columnService = inject(ColumnService);
   private cardService = inject(CardService);
   private drawerService = inject(DrawerService);
+  private boardHub = inject(BoardHubService);
   private toastService = inject(ToastService);
 
   private _board = signal<BoardDetails | null>(null);
@@ -113,6 +115,7 @@ export class BoardStateFacade {
     this._currentProjectId.set(projectId);
     this._currentBoardId.set(boardId);
     if (boardChanged) {
+      this.boardHub.leaveBoard();
       this._selectedLabelIds.set(new Set());
       this._showArchivePanel.set(false);
       this._archivedCards.set([]);
@@ -121,6 +124,10 @@ export class BoardStateFacade {
       this._activityEntries.set([]);
       this._activityNextCursor.set(null);
       this._isLoadingActivity.set(false);
+
+      this.boardHub.joinBoard(boardId).then(() => {
+        this.subscribeToBoardEvents();
+      });
     }
 
     if (showLoading) {
@@ -359,6 +366,68 @@ export class BoardStateFacade {
       error: () => {
         this._isLoadingArchive.set(false);
       }
+    });
+  }
+
+  private subscribeToBoardEvents(): void {
+    this.boardHub.offAllEvents();
+
+    const isSelf = (data: { actingUserId?: string }): boolean =>
+      data.actingUserId === this.boardHub.currentUserId();
+
+    const refetchIfNotSelf = (data: { actingUserId?: string }): void => {
+      if (!isSelf(data)) {
+        this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
+      }
+    };
+
+    this.boardHub.onEvent<{ actingUserId: string }>('CardCreated', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardMoved', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardDeleted', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardUpdated', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardArchived', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardRestored', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardHeld', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardResumed', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardLabelAdded', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('CardLabelRemoved', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('ColumnAdded', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('ColumnDeleted', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('ColumnMoved', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('LabelCreated', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('LabelUpdated', refetchIfNotSelf);
+    this.boardHub.onEvent<{ actingUserId: string }>('LabelRemoved', refetchIfNotSelf);
+
+    this.boardHub.onEvent<{ columnId: string; newName: string; actingUserId: string }>('ColumnRenamed', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return {
+          ...board,
+          columns: board.columns.map(col =>
+            col.id === data.columnId ? { ...col, name: data.newName } : col
+          )
+        };
+      });
+    });
+
+    this.boardHub.onEvent<{ boardId: string; newName: string; actingUserId: string }>('BoardRenamed', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return { ...board, name: data.newName };
+      });
+    });
+
+    this.boardHub.onEvent<{ boardId: string; actingUserId: string }>('BoardDeleted', (data) => {
+      if (!isSelf(data)) {
+        this._board.set(null);
+        this._error.set('This board has been deleted.');
+      }
+    });
+
+    this.boardHub.onEvent('Reconnected', () => {
+      this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
     });
   }
 }

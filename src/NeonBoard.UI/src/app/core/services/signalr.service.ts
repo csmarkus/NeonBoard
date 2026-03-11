@@ -65,10 +65,11 @@ export class SignalRService {
     }
   }
 
-  async invoke(method: string, ...args: unknown[]): Promise<void> {
+  async invoke<T = void>(method: string, ...args: unknown[]): Promise<T | undefined> {
     if (this.connection?.state === HubConnectionState.Connected) {
-      await this.connection.invoke(method, ...args);
+      return await this.connection.invoke<T>(method, ...args);
     }
+    return undefined;
   }
 
   on<T>(eventName: string, callback: (data: T) => void): void {

@@ -25,7 +25,7 @@ public class BoardHub : Hub
         _boardRepository = boardRepository;
     }
 
-    public async Task JoinBoard(Guid boardId)
+    public async Task<Guid> JoinBoard(Guid boardId)
     {
         var userId = await _currentUserService.GetUserIdAsync();
         if (userId == null)
@@ -44,6 +44,8 @@ public class BoardHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, $"project:{board.ProjectId}");
 
         Connections[Context.ConnectionId] = new ConnectionInfo(userId.Value, boardId, board.ProjectId);
+
+        return userId.Value;
     }
 
     public async Task LeaveBoard(Guid boardId)

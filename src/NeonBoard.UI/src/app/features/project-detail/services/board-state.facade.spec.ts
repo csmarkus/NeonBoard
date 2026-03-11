@@ -8,6 +8,7 @@ import { BoardService } from './board.service';
 import { ColumnService } from './column.service';
 import { CardService } from './card.service';
 import { DrawerService } from './drawer.service';
+import { BoardHubService } from './board-hub.service';
 import { BoardDetails } from '../models/board.model';
 import { Card } from '../models/card.model';
 
@@ -62,6 +63,14 @@ describe('BoardStateFacade', () => {
     cardDeleted$: Subject<void>;
     cardArchived$: Subject<void>;
   };
+  let boardHubService: {
+    joinBoard: ReturnType<typeof vi.fn>;
+    leaveBoard: ReturnType<typeof vi.fn>;
+    onEvent: ReturnType<typeof vi.fn>;
+    offAllEvents: ReturnType<typeof vi.fn>;
+    currentUserId: ReturnType<typeof vi.fn>;
+    connectionState: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     cardUpdated$ = new Subject<void>();
@@ -85,6 +94,14 @@ describe('BoardStateFacade', () => {
       cardDeleted$: cardDeleted$.asObservable() as never,
       cardArchived$: cardArchived$.asObservable() as never,
     };
+    boardHubService = {
+      joinBoard: vi.fn().mockResolvedValue(undefined),
+      leaveBoard: vi.fn().mockResolvedValue(undefined),
+      onEvent: vi.fn(),
+      offAllEvents: vi.fn(),
+      currentUserId: vi.fn().mockReturnValue(null),
+      connectionState: vi.fn().mockReturnValue('disconnected'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -93,6 +110,7 @@ describe('BoardStateFacade', () => {
         { provide: ColumnService, useValue: columnService },
         { provide: CardService, useValue: cardService },
         { provide: DrawerService, useValue: drawerService },
+        { provide: BoardHubService, useValue: boardHubService },
       ],
     });
 

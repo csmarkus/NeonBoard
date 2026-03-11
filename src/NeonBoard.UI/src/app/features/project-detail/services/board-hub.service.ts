@@ -9,14 +9,18 @@ export class BoardHubService {
   private currentBoardId = signal<string | null>(null);
   private currentProjectId = signal<string | null>(null);
   private eventCallbacks = new Map<string, ((data: unknown) => void)[]>();
+  private _currentUserId = signal<string | null>(null);
 
   readonly connectionState = this.signalR.connectionState;
+  readonly currentUserId = this._currentUserId.asReadonly();
 
   private reconnectHandler = (): void => {
     const boardId = this.currentBoardId();
     const projectId = this.currentProjectId();
     if (boardId) {
-      this.signalR.invoke('JoinBoard', boardId).catch(console.error);
+      this.signalR.invoke<string>('JoinBoard', boardId)
+        .then(userId => { if (userId) this._currentUserId.set(userId); })
+        .catch(console.error);
     } else if (projectId) {
       this.signalR.invoke('JoinProject', projectId).catch(console.error);
     }
@@ -29,7 +33,10 @@ export class BoardHubService {
     this.currentBoardId.set(boardId);
 
     try {
-      await this.signalR.invoke('JoinBoard', boardId);
+      const userId = await this.signalR.invoke<string>('JoinBoard', boardId);
+      if (userId) {
+        this._currentUserId.set(userId);
+      }
     } catch (err) {
       console.error('Failed to join board:', err);
     }
