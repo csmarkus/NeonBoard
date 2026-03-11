@@ -23,8 +23,8 @@ public class MoveCardValidator : AbstractValidator<MoveCardCommand>
             .NotEmpty()
             .WithMessage(ValidationMessages.TargetColumnIdRequired);
 
-        RuleFor(x => x.TargetPosition)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage(ValidationMessages.TargetPositionNonNegative);
+        RuleFor(x => x.NewPosition)
+            .NotEmpty()
+            .WithMessage("Position is required.");
     }
 }

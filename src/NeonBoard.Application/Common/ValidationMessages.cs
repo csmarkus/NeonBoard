@@ -36,7 +36,7 @@ public static class ValidationMessages
     public const string CardTitleTooLong = "Card title cannot exceed 200 characters.";
     public const string CardDescriptionTooLong = "Card description cannot exceed 5000 characters.";
     public const string TargetColumnIdRequired = "Target column ID is required.";
-    public const string TargetPositionNonNegative = "Target position must be greater than or equal to 0.";
+    public const string PositionRequired = "Position is required.";
 
     #endregion
 

@@ -7,4 +7,4 @@ public record MoveCardCommand(
     Guid BoardId,
     Guid CardId,
     Guid TargetColumnId,
-    int TargetPosition) : IRequest<Unit>;
+    string NewPosition) : IRequest<Unit>;

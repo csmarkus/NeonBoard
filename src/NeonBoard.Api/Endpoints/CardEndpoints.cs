@@ -174,7 +174,7 @@ public static class CardEndpoints
             boardId,
             cardId,
             request.TargetColumnId,
-            request.TargetPosition);
+            request.NewPosition);
         await mediator.Send(command, ct);
         return Results.NoContent();
     }

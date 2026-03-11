@@ -11,7 +11,7 @@ public class CardTests
     public void CreateInternal_ShouldSetCardNumber()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
 
         var card = Card.CreateInternal(Guid.NewGuid(), content, position, 42);
 
@@ -22,7 +22,7 @@ public class CardTests
     public void CreateInternal_WithZeroCardNumber_ShouldThrowDomainException()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
 
         var act = () => Card.CreateInternal(Guid.NewGuid(), content, position, 0);
 
@@ -33,7 +33,7 @@ public class CardTests
     public void CreateInternal_WithNegativeCardNumber_ShouldThrowDomainException()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
 
         var act = () => Card.CreateInternal(Guid.NewGuid(), content, position, -1);
 
@@ -44,7 +44,7 @@ public class CardTests
     public void Archive_ShouldSetArchivedAt()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
         var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
 
         card.Archive();
@@ -58,7 +58,7 @@ public class CardTests
     public void Restore_ShouldClearArchivedAt()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
         var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
         card.Archive();
 
@@ -72,7 +72,7 @@ public class CardTests
     public void IsArchived_WhenNotArchived_ShouldBeFalse()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
         var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
 
         card.IsArchived.Should().BeFalse();
@@ -83,7 +83,7 @@ public class CardTests
     public void Archive_WhenAlreadyArchived_ShouldThrowDomainException()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
         var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
         card.Archive();
 
@@ -97,7 +97,7 @@ public class CardTests
     public void Restore_WhenNotArchived_ShouldThrowDomainException()
     {
         var content = CardContent.Create("Test Card", "Description");
-        var position = Position.Create(0);
+        var position = Position.Initial();
         var card = Card.CreateInternal(Guid.NewGuid(), content, position, 1);
 
         var act = () => card.Restore();

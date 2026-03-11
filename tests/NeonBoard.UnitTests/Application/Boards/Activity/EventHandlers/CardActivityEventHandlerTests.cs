@@ -2,6 +2,7 @@ using NeonBoard.Application.Boards.Activity.EventHandlers;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards.Activity;
 using NeonBoard.Domain.Boards.Events;
+using NeonBoard.Domain.Common;
 using NSubstitute;
 
 namespace NeonBoard.UnitTests.Application.Boards.Activity.EventHandlers;
@@ -26,7 +27,8 @@ public class CardActivityEventHandlerTests
         var boardId = Guid.NewGuid();
         var cardId = Guid.NewGuid();
         var columnId = Guid.NewGuid();
-        var evt = new CardCreatedEvent(boardId, cardId, columnId, "Fix login bug", 0, 42, "To Do", "SPR");
+        var position = FractionalIndex.GenerateKeyBetween(null, null);
+        var evt = new CardCreatedEvent(boardId, cardId, columnId, "Fix login bug", position, 42, "To Do", "SPR");
 
         await _handler.Handle(evt, CancellationToken.None);
 
@@ -75,8 +77,9 @@ public class CardActivityEventHandlerTests
         var cardId = Guid.NewGuid();
         var sourceColumnId = Guid.NewGuid();
         var targetColumnId = Guid.NewGuid();
+        var newPosition = FractionalIndex.GenerateKeyBetween(null, null);
         var evt = new CardMovedEvent(
-            boardId, cardId, sourceColumnId, targetColumnId, 0,
+            boardId, cardId, sourceColumnId, targetColumnId, newPosition,
             "Fix login bug", 3, "To Do", "In Progress", "SPR");
 
         await _handler.Handle(evt, CancellationToken.None);
@@ -176,7 +179,8 @@ public class CardActivityEventHandlerTests
         var boardId = Guid.NewGuid();
         var cardId = Guid.NewGuid();
         var columnId = Guid.NewGuid();
-        var evt = new CardCreatedEvent(boardId, cardId, columnId, "Fix login bug", 0, 42, "To Do", "SPR");
+        var position = FractionalIndex.GenerateKeyBetween(null, null);
+        var evt = new CardCreatedEvent(boardId, cardId, columnId, "Fix login bug", position, 42, "To Do", "SPR");
 
         await _handler.Handle(evt, CancellationToken.None);
 

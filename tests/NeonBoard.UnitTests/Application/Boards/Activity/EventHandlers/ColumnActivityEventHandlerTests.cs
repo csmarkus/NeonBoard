@@ -2,6 +2,7 @@ using NeonBoard.Application.Boards.Activity.EventHandlers;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards.Activity;
 using NeonBoard.Domain.Boards.Events;
+using NeonBoard.Domain.Common;
 using NSubstitute;
 
 namespace NeonBoard.UnitTests.Application.Boards.Activity.EventHandlers;
@@ -25,7 +26,8 @@ public class ColumnActivityEventHandlerTests
     {
         var boardId = Guid.NewGuid();
         var columnId = Guid.NewGuid();
-        var evt = new ColumnAddedEvent(boardId, columnId, "To Do", 0);
+        var position = FractionalIndex.GenerateKeyBetween(null, null);
+        var evt = new ColumnAddedEvent(boardId, columnId, "To Do", position);
 
         await _handler.Handle(evt, CancellationToken.None);
 
@@ -66,10 +68,11 @@ public class ColumnActivityEventHandlerTests
     public async Task Handle_ColumnsReorderedEvent_ShouldPersistActivityEntry()
     {
         var boardId = Guid.NewGuid();
-        var positions = new Dictionary<Guid, int>
+        var keys = FractionalIndex.GenerateNKeysBetween(null, null, 2);
+        var positions = new Dictionary<Guid, string>
         {
-            [Guid.NewGuid()] = 0,
-            [Guid.NewGuid()] = 1
+            [Guid.NewGuid()] = keys[0],
+            [Guid.NewGuid()] = keys[1]
         };
         var evt = new ColumnsReorderedEvent(boardId, positions);
 
@@ -93,7 +96,8 @@ public class ColumnActivityEventHandlerTests
         _currentUserService.GetUserIdAsync(Arg.Any<CancellationToken>()).Returns((Guid?)null);
         var boardId = Guid.NewGuid();
         var columnId = Guid.NewGuid();
-        var evt = new ColumnAddedEvent(boardId, columnId, "To Do", 0);
+        var position = FractionalIndex.GenerateKeyBetween(null, null);
+        var evt = new ColumnAddedEvent(boardId, columnId, "To Do", position);
 
         await _handler.Handle(evt, CancellationToken.None);
 

@@ -2,6 +2,7 @@ using NeonBoard.Application.Cards.Commands.MoveCard;
 using NeonBoard.Application.Common.Exceptions;
 using NeonBoard.Application.Common.Interfaces;
 using NeonBoard.Domain.Boards;
+using NeonBoard.Domain.Common;
 using NeonBoard.UnitTests.Builders;
 using NSubstitute;
 
@@ -33,7 +34,8 @@ public class MoveCardHandlerTests
         _boardRepository.GetBoardWithDetailsAsync(board.Id, Arg.Any<CancellationToken>())
             .Returns(board);
 
-        var command = new MoveCardCommand(projectId, board.Id, cardId, targetColumnId, 0);
+        var newPosition = FractionalIndex.GenerateKeyBetween(null, null);
+        var command = new MoveCardCommand(projectId, board.Id, cardId, targetColumnId, newPosition);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -47,7 +49,8 @@ public class MoveCardHandlerTests
         _boardRepository.GetBoardWithDetailsAsync(boardId, Arg.Any<CancellationToken>())
             .Returns((Board?)null);
 
-        var command = new MoveCardCommand(Guid.NewGuid(), boardId, Guid.NewGuid(), Guid.NewGuid(), 0);
+        var newPosition = FractionalIndex.GenerateKeyBetween(null, null);
+        var command = new MoveCardCommand(Guid.NewGuid(), boardId, Guid.NewGuid(), Guid.NewGuid(), newPosition);
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
@@ -67,7 +70,8 @@ public class MoveCardHandlerTests
             .Returns(board);
 
         var differentProjectId = Guid.NewGuid();
-        var command = new MoveCardCommand(differentProjectId, board.Id, board.Cards[0].Id, board.Columns[0].Id, 0);
+        var newPosition = FractionalIndex.GenerateKeyBetween(null, null);
+        var command = new MoveCardCommand(differentProjectId, board.Id, board.Cards[0].Id, board.Columns[0].Id, newPosition);
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 

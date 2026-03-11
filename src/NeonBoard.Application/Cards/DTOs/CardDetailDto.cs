@@ -10,7 +10,7 @@ public record CardDetailDto(
     string Title,
     string Description,
     Guid ColumnId,
-    int Position,
+    string Position,
     List<LabelDto> Labels,
     DateTime CreatedAt,
     DateTime UpdatedAt,
