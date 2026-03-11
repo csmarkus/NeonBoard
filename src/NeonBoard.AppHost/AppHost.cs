@@ -6,8 +6,11 @@ var postgres = builder.AddPostgres("postgres")
 
 var neonboardDb = postgres.AddDatabase("neonboarddb");
 
+var redis = builder.AddRedis("redis");
+
 var api = builder.AddProject<Projects.NeonBoard_Api>("neonboard-api")
     .WithReference(neonboardDb)
+    .WithReference(redis)
     .WaitFor(postgres);
 
 builder.AddNpmApp("neonboard-ui", "../NeonBoard.UI", "start")
