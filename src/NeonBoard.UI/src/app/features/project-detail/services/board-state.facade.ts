@@ -110,6 +110,10 @@ export class BoardStateFacade {
     });
   }
 
+  private get isConnected(): boolean {
+    return this.boardHub.connectionState() === 'connected';
+  }
+
   loadBoard(projectId: string, boardId: string, showLoading = true): void {
     const boardChanged = this._currentBoardId() !== boardId;
     this._currentProjectId.set(projectId);
@@ -162,79 +166,130 @@ export class BoardStateFacade {
       columns: reorderedColumns
     });
 
-    this.columnService.reorderColumns(projectId, boardId, { columnIds }).subscribe({
-      error: () => {
+    if (this.isConnected) {
+      this.boardHub.reorderColumns(columnIds).catch(() => {
         this.loadBoard(projectId, boardId, false);
-      }
-    });
+      });
+    } else {
+      this.columnService.reorderColumns(projectId, boardId, { columnIds }).subscribe({
+        error: () => {
+          this.loadBoard(projectId, boardId, false);
+        }
+      });
+    }
   }
 
   addColumn(projectId: string, boardId: string, name: string): void {
-    this.columnService.addColumn(projectId, boardId, { name }).subscribe({
-      next: () => {
+    if (this.isConnected) {
+      this.boardHub.addColumn(name).then(() => {
         this.loadBoard(projectId, boardId, false);
-      },
-      error: () => {
+      }).catch(() => {
         this.toastService.error('Failed to add column');
-      }
-    });
+      });
+    } else {
+      this.columnService.addColumn(projectId, boardId, { name }).subscribe({
+        next: () => {
+          this.loadBoard(projectId, boardId, false);
+        },
+        error: () => {
+          this.toastService.error('Failed to add column');
+        }
+      });
+    }
   }
 
   renameColumn(projectId: string, boardId: string, columnId: string, newName: string): void {
-    this.columnService.renameColumn(projectId, boardId, columnId, { newName }).subscribe({
-      next: () => {
+    if (this.isConnected) {
+      this.boardHub.renameColumn(columnId, newName).then(() => {
         this.loadBoard(projectId, boardId, false);
-      },
-      error: () => {
+      }).catch(() => {
         this.toastService.error('Failed to rename column');
-      }
-    });
+      });
+    } else {
+      this.columnService.renameColumn(projectId, boardId, columnId, { newName }).subscribe({
+        next: () => {
+          this.loadBoard(projectId, boardId, false);
+        },
+        error: () => {
+          this.toastService.error('Failed to rename column');
+        }
+      });
+    }
   }
 
   deleteColumn(projectId: string, boardId: string, columnId: string): void {
-    this.columnService.deleteColumn(projectId, boardId, columnId).subscribe({
-      next: () => {
+    if (this.isConnected) {
+      this.boardHub.deleteColumn(columnId).then(() => {
         this.loadBoard(projectId, boardId, false);
-      },
-      error: (err) => {
-        const errorMessage = err.error?.title || err.error?.detail || 'Failed to delete column';
+      }).catch((err) => {
+        const errorMessage = err?.message || 'Failed to delete column';
         this.toastService.error(errorMessage);
-      }
-    });
+      });
+    } else {
+      this.columnService.deleteColumn(projectId, boardId, columnId).subscribe({
+        next: () => {
+          this.loadBoard(projectId, boardId, false);
+        },
+        error: (err) => {
+          const errorMessage = err.error?.title || err.error?.detail || 'Failed to delete column';
+          this.toastService.error(errorMessage);
+        }
+      });
+    }
   }
 
   moveCard(projectId: string, boardId: string, cardId: string, targetColumnId: string, newPosition: string): void {
-    this.cardService.moveCard(projectId, boardId, cardId, {
-      targetColumnId,
-      newPosition
-    }).subscribe({
-      error: () => {
+    if (this.isConnected) {
+      this.boardHub.moveCard(cardId, targetColumnId, newPosition).catch(() => {
         this.loadBoard(projectId, boardId, false);
-      }
-    });
+      });
+    } else {
+      this.cardService.moveCard(projectId, boardId, cardId, {
+        targetColumnId,
+        newPosition
+      }).subscribe({
+        error: () => {
+          this.loadBoard(projectId, boardId, false);
+        }
+      });
+    }
   }
 
   moveColumn(projectId: string, boardId: string, columnId: string, newPosition: string): void {
-    this.columnService.moveColumn(projectId, boardId, columnId, { newPosition }).subscribe({
-      error: () => {
+    if (this.isConnected) {
+      this.boardHub.moveColumn(columnId, newPosition).catch(() => {
         this.loadBoard(projectId, boardId, false);
-      }
-    });
+      });
+    } else {
+      this.columnService.moveColumn(projectId, boardId, columnId, { newPosition }).subscribe({
+        error: () => {
+          this.loadBoard(projectId, boardId, false);
+        }
+      });
+    }
   }
 
   addCard(projectId: string, boardId: string, columnId: string, title: string): void {
-    this.cardService.addCard(projectId, boardId, {
-      columnId,
-      title,
-      description: ''
-    }).subscribe({
-      next: () => {
+    if (this.isConnected) {
+      this.boardHub.addCard(columnId, title, '').then(() => {
         this.loadBoard(projectId, boardId, false);
-      },
-      error: () => {
+      }).catch(() => {
         this.toastService.error('Failed to add card');
-      }
-    });
+      });
+    } else {
+      this.cardService.addCard(projectId, boardId, {
+        columnId,
+        title,
+        description: ''
+      }).subscribe({
+        next: () => {
+          this.loadBoard(projectId, boardId, false);
+        },
+        error: () => {
+          this.toastService.error('Failed to add card');
+        }
+      });
+    }
   }
 
   openCardDrawer(card: Card, projectId: string, boardId: string): void {
@@ -381,23 +436,135 @@ export class BoardStateFacade {
       }
     };
 
+    // --- Card events with in-place patching ---
+
+    this.boardHub.onEvent<{
+      cardId: string; sourceColumnId: string; targetColumnId: string;
+      newPosition: string; actingUserId: string;
+    }>('CardMoved', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return {
+          ...board,
+          cards: board.cards.map(c =>
+            c.id === data.cardId
+              ? { ...c, columnId: data.targetColumnId, position: data.newPosition }
+              : c
+          )
+        };
+      });
+    });
+
+    this.boardHub.onEvent<{ cardId: string; title: string; description: string; actingUserId: string }>(
+      'CardUpdated', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            cards: board.cards.map(c =>
+              c.id === data.cardId ? { ...c, title: data.title, description: data.description } : c
+            )
+          };
+        });
+      }
+    );
+
+    this.boardHub.onEvent<{ cardId: string; actingUserId: string }>('CardDeleted', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return { ...board, cards: board.cards.filter(c => c.id !== data.cardId) };
+      });
+    });
+
+    this.boardHub.onEvent<{ cardId: string; actingUserId: string }>('CardArchived', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return { ...board, cards: board.cards.filter(c => c.id !== data.cardId) };
+      });
+    });
+
+    this.boardHub.onEvent<{ cardId: string; actingUserId: string }>('CardHeld', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return {
+          ...board,
+          cards: board.cards.map(c =>
+            c.id === data.cardId ? { ...c, holdAt: new Date().toISOString() } : c
+          )
+        };
+      });
+    });
+
+    this.boardHub.onEvent<{ cardId: string; actingUserId: string }>('CardResumed', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return {
+          ...board,
+          cards: board.cards.map(c =>
+            c.id === data.cardId ? { ...c, holdAt: null } : c
+          )
+        };
+      });
+    });
+
+    this.boardHub.onEvent<{
+      cardId: string; labelId: string; labelName: string; labelColor: string; actingUserId: string;
+    }>('CardLabelAdded', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return {
+          ...board,
+          cards: board.cards.map(c =>
+            c.id === data.cardId
+              ? { ...c, labels: [...c.labels, { id: data.labelId, name: data.labelName, color: data.labelColor }] }
+              : c
+          )
+        };
+      });
+    });
+
+    this.boardHub.onEvent<{ cardId: string; labelId: string; actingUserId: string }>(
+      'CardLabelRemoved', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            cards: board.cards.map(c =>
+              c.id === data.cardId
+                ? { ...c, labels: c.labels.filter(l => l.id !== data.labelId) }
+                : c
+            )
+          };
+        });
+      }
+    );
+
+    // Cards created/restored need full object data — refetch
     this.boardHub.onEvent<{ actingUserId: string }>('CardCreated', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardMoved', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardDeleted', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardUpdated', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardArchived', refetchIfNotSelf);
     this.boardHub.onEvent<{ actingUserId: string }>('CardRestored', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardHeld', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardResumed', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardLabelAdded', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('CardLabelRemoved', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('ColumnAdded', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('ColumnDeleted', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('ColumnMoved', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('ColumnsReordered', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('LabelCreated', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('LabelUpdated', refetchIfNotSelf);
-    this.boardHub.onEvent<{ actingUserId: string }>('LabelRemoved', refetchIfNotSelf);
+
+    // --- Column events with in-place patching ---
+
+    this.boardHub.onEvent<{ columnId: string; name: string; position: string; actingUserId: string }>(
+      'ColumnAdded', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            columns: [...board.columns, { id: data.columnId, name: data.name, position: data.position, boardId: board.id }]
+          };
+        });
+      }
+    );
 
     this.boardHub.onEvent<{ columnId: string; newName: string; actingUserId: string }>('ColumnRenamed', (data) => {
       if (isSelf(data)) return;
@@ -411,6 +578,94 @@ export class BoardStateFacade {
         };
       });
     });
+
+    this.boardHub.onEvent<{ columnId: string; newPosition: string; actingUserId: string }>(
+      'ColumnMoved', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            columns: board.columns.map(col =>
+              col.id === data.columnId ? { ...col, position: data.newPosition } : col
+            )
+          };
+        });
+      }
+    );
+
+    this.boardHub.onEvent<{ newPositions: Record<string, string>; actingUserId: string }>(
+      'ColumnsReordered', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            columns: board.columns.map(col =>
+              data.newPositions[col.id] !== undefined
+                ? { ...col, position: data.newPositions[col.id] }
+                : col
+            )
+          };
+        });
+      }
+    );
+
+    // Column deletion can move cards between columns — refetch
+    this.boardHub.onEvent<{ actingUserId: string }>('ColumnDeleted', refetchIfNotSelf);
+
+    // --- Label events with in-place patching ---
+
+    this.boardHub.onEvent<{ labelId: string; name: string; color: string; actingUserId: string }>(
+      'LabelCreated', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            labels: [...board.labels, { id: data.labelId, name: data.name, color: data.color }]
+          };
+        });
+      }
+    );
+
+    this.boardHub.onEvent<{ labelId: string; name: string; color: string; actingUserId: string }>(
+      'LabelUpdated', (data) => {
+        if (isSelf(data)) return;
+        this._board.update(board => {
+          if (!board) return board;
+          return {
+            ...board,
+            labels: board.labels.map(l =>
+              l.id === data.labelId ? { ...l, name: data.name, color: data.color } : l
+            ),
+            cards: board.cards.map(c => ({
+              ...c,
+              labels: c.labels.map(l =>
+                l.id === data.labelId ? { ...l, name: data.name, color: data.color } : l
+              )
+            }))
+          };
+        });
+      }
+    );
+
+    this.boardHub.onEvent<{ labelId: string; actingUserId: string }>('LabelRemoved', (data) => {
+      if (isSelf(data)) return;
+      this._board.update(board => {
+        if (!board) return board;
+        return {
+          ...board,
+          labels: board.labels.filter(l => l.id !== data.labelId),
+          cards: board.cards.map(c => ({
+            ...c,
+            labels: c.labels.filter(l => l.id !== data.labelId)
+          }))
+        };
+      });
+    });
+
+    // --- Board-level events ---
 
     this.boardHub.onEvent<{ boardId: string; newName: string; actingUserId: string }>('BoardRenamed', (data) => {
       if (isSelf(data)) return;
@@ -427,6 +682,7 @@ export class BoardStateFacade {
       }
     });
 
+    // Full refetch on reconnect to sync any missed events
     this.boardHub.onEvent('Reconnected', () => {
       this.loadBoard(this._currentProjectId(), this._currentBoardId(), false);
     });

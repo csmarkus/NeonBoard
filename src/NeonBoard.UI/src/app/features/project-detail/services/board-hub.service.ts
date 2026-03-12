@@ -99,6 +99,34 @@ export class BoardHubService {
     this.eventCallbacks.clear();
   }
 
+  async moveCard(cardId: string, targetColumnId: string, newPosition: string): Promise<void> {
+    await this.signalR.invoke('MoveCard', cardId, targetColumnId, newPosition);
+  }
+
+  async addCard(columnId: string, title: string, description: string): Promise<void> {
+    await this.signalR.invoke('AddCard', columnId, title, description);
+  }
+
+  async addColumn(name: string): Promise<void> {
+    await this.signalR.invoke('AddColumn', name);
+  }
+
+  async renameColumn(columnId: string, newName: string): Promise<void> {
+    await this.signalR.invoke('RenameColumn', columnId, newName);
+  }
+
+  async moveColumn(columnId: string, newPosition: string): Promise<void> {
+    await this.signalR.invoke('MoveColumn', columnId, newPosition);
+  }
+
+  async deleteColumn(columnId: string): Promise<void> {
+    await this.signalR.invoke('DeleteColumn', columnId);
+  }
+
+  async reorderColumns(columnIds: string[]): Promise<void> {
+    await this.signalR.invoke('ReorderColumns', columnIds);
+  }
+
   private triggerEvent(type: string, data: unknown): void {
     const callbacks = this.eventCallbacks.get(type);
     if (callbacks) {

@@ -18,6 +18,7 @@ export class SignalRService {
   private auth = inject(AuthService);
   private connection: HubConnection | null = null;
   private reconnectedCallbacks: (() => void)[] = [];
+  private pendingHandlers: { eventName: string; callback: (...args: unknown[]) => void }[] = [];
 
   readonly connectionState = signal<ConnectionState>('disconnected');
 
@@ -51,6 +52,12 @@ export class SignalRService {
       this.connectionState.set('connecting');
       await this.connection.start();
       this.connectionState.set('connected');
+
+      // Register any handlers that were queued before connection was ready
+      for (const { eventName, callback } of this.pendingHandlers) {
+        this.connection.on(eventName, callback);
+      }
+      this.pendingHandlers = [];
     } catch (err) {
       this.connectionState.set('disconnected');
       console.error('SignalR connection failed:', err);
@@ -73,7 +80,11 @@ export class SignalRService {
   }
 
   on<T>(eventName: string, callback: (data: T) => void): void {
-    this.connection?.on(eventName, callback);
+    if (this.connection) {
+      this.connection.on(eventName, callback);
+    } else {
+      this.pendingHandlers.push({ eventName, callback: callback as (...args: unknown[]) => void });
+    }
   }
 
   off(eventName: string): void {

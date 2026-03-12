@@ -9,6 +9,7 @@ import { ColumnService } from './column.service';
 import { CardService } from './card.service';
 import { DrawerService } from './drawer.service';
 import { BoardHubService } from './board-hub.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { BoardDetails } from '../models/board.model';
 import { Card } from '../models/card.model';
 
@@ -63,6 +64,10 @@ describe('BoardStateFacade', () => {
     cardDeleted$: Subject<void>;
     cardArchived$: Subject<void>;
   };
+  let toastService: {
+    error: ReturnType<typeof vi.fn>;
+    success: ReturnType<typeof vi.fn>;
+  };
   let boardHubService: {
     joinBoard: ReturnType<typeof vi.fn>;
     leaveBoard: ReturnType<typeof vi.fn>;
@@ -70,6 +75,13 @@ describe('BoardStateFacade', () => {
     offAllEvents: ReturnType<typeof vi.fn>;
     currentUserId: ReturnType<typeof vi.fn>;
     connectionState: ReturnType<typeof vi.fn>;
+    moveCard: ReturnType<typeof vi.fn>;
+    addCard: ReturnType<typeof vi.fn>;
+    addColumn: ReturnType<typeof vi.fn>;
+    renameColumn: ReturnType<typeof vi.fn>;
+    moveColumn: ReturnType<typeof vi.fn>;
+    deleteColumn: ReturnType<typeof vi.fn>;
+    reorderColumns: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -86,6 +98,7 @@ describe('BoardStateFacade', () => {
       deleteColumn: vi.fn(),
     };
     cardService = { moveCard: vi.fn(), addCard: vi.fn(), getCardDetail: vi.fn() };
+    toastService = { error: vi.fn(), success: vi.fn() };
     drawerService = {
       setBoardLabels: vi.fn(),
       openCardDrawer: vi.fn(),
@@ -101,6 +114,13 @@ describe('BoardStateFacade', () => {
       offAllEvents: vi.fn(),
       currentUserId: vi.fn().mockReturnValue(null),
       connectionState: vi.fn().mockReturnValue('disconnected'),
+      moveCard: vi.fn().mockResolvedValue(undefined),
+      addCard: vi.fn().mockResolvedValue(undefined),
+      addColumn: vi.fn().mockResolvedValue(undefined),
+      renameColumn: vi.fn().mockResolvedValue(undefined),
+      moveColumn: vi.fn().mockResolvedValue(undefined),
+      deleteColumn: vi.fn().mockResolvedValue(undefined),
+      reorderColumns: vi.fn().mockResolvedValue(undefined),
     };
 
     TestBed.configureTestingModule({
@@ -111,6 +131,7 @@ describe('BoardStateFacade', () => {
         { provide: CardService, useValue: cardService },
         { provide: DrawerService, useValue: drawerService },
         { provide: BoardHubService, useValue: boardHubService },
+        { provide: ToastService, useValue: toastService },
       ],
     });
 
@@ -475,6 +496,185 @@ describe('BoardStateFacade', () => {
       facade.clearLabelFilter();
 
       expect(facade.filteredCardsByColumn()['col-1'].map(c => c.id)).toEqual(['card-1', 'card-2']);
+    });
+  });
+
+  describe('hub-first write operations', () => {
+    beforeEach(() => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+    });
+
+    describe('when connected via hub', () => {
+      beforeEach(() => {
+        boardHubService.connectionState.mockReturnValue('connected');
+      });
+
+      it('moveCard should use hub instead of HTTP', () => {
+        facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
+
+        expect(boardHubService.moveCard).toHaveBeenCalledWith('card-1', 'col-2', 'a0');
+        expect(cardService.moveCard).not.toHaveBeenCalled();
+      });
+
+      it('addCard should use hub instead of HTTP', () => {
+        facade.addCard('project-1', 'board-1', 'col-1', 'New Card');
+
+        expect(boardHubService.addCard).toHaveBeenCalledWith('col-1', 'New Card', '');
+        expect(cardService.addCard).not.toHaveBeenCalled();
+      });
+
+      it('addColumn should use hub instead of HTTP', () => {
+        facade.addColumn('project-1', 'board-1', 'New Column');
+
+        expect(boardHubService.addColumn).toHaveBeenCalledWith('New Column');
+        expect(columnService.addColumn).not.toHaveBeenCalled();
+      });
+
+      it('renameColumn should use hub instead of HTTP', () => {
+        facade.renameColumn('project-1', 'board-1', 'col-1', 'Renamed');
+
+        expect(boardHubService.renameColumn).toHaveBeenCalledWith('col-1', 'Renamed');
+        expect(columnService.renameColumn).not.toHaveBeenCalled();
+      });
+
+      it('moveColumn should use hub instead of HTTP', () => {
+        facade.moveColumn('project-1', 'board-1', 'col-1', 'a2');
+
+        expect(boardHubService.moveColumn).toHaveBeenCalledWith('col-1', 'a2');
+        expect(columnService.moveColumn).not.toHaveBeenCalled();
+      });
+
+      it('deleteColumn should use hub instead of HTTP', () => {
+        facade.deleteColumn('project-1', 'board-1', 'col-1');
+
+        expect(boardHubService.deleteColumn).toHaveBeenCalledWith('col-1');
+        expect(columnService.deleteColumn).not.toHaveBeenCalled();
+      });
+
+      it('reorderColumns should use hub instead of HTTP', async () => {
+        facade.loadBoard('project-1', 'board-1');
+
+        facade.reorderColumns('project-1', 'board-1', ['col-2', 'col-1']);
+
+        expect(boardHubService.reorderColumns).toHaveBeenCalledWith(['col-2', 'col-1']);
+        expect(columnService.reorderColumns).not.toHaveBeenCalled();
+      });
+
+      it('moveCard should reload board on hub error', async () => {
+        boardHubService.moveCard.mockRejectedValue(new Error('fail'));
+
+        facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
+        await vi.waitFor(() => {
+          expect(boardService.getBoardDetails).toHaveBeenCalledWith('project-1', 'board-1');
+        });
+      });
+
+      it('addCard should show toast on hub error', async () => {
+        boardHubService.addCard.mockRejectedValue(new Error('fail'));
+
+        facade.addCard('project-1', 'board-1', 'col-1', 'New Card');
+        await vi.waitFor(() => {
+          expect(toastService.error).toHaveBeenCalledWith('Failed to add card');
+        });
+      });
+
+      it('addColumn should show toast on hub error', async () => {
+        boardHubService.addColumn.mockRejectedValue(new Error('fail'));
+
+        facade.addColumn('project-1', 'board-1', 'New Column');
+        await vi.waitFor(() => {
+          expect(toastService.error).toHaveBeenCalledWith('Failed to add column');
+        });
+      });
+
+      it('deleteColumn should show toast with error message on hub error', async () => {
+        boardHubService.deleteColumn.mockRejectedValue(new Error('Cannot delete the last column'));
+
+        facade.deleteColumn('project-1', 'board-1', 'col-1');
+        await vi.waitFor(() => {
+          expect(toastService.error).toHaveBeenCalledWith('Cannot delete the last column');
+        });
+      });
+    });
+
+    describe('when disconnected (HTTP fallback)', () => {
+      beforeEach(() => {
+        boardHubService.connectionState.mockReturnValue('disconnected');
+      });
+
+      it('moveCard should fall back to HTTP', () => {
+        cardService.moveCard.mockReturnValue(of(undefined));
+
+        facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
+
+        expect(cardService.moveCard).toHaveBeenCalledWith('project-1', 'board-1', 'card-1', {
+          targetColumnId: 'col-2',
+          newPosition: 'a0',
+        });
+        expect(boardHubService.moveCard).not.toHaveBeenCalled();
+      });
+
+      it('addCard should fall back to HTTP', () => {
+        cardService.addCard.mockReturnValue(of({ id: 'card-new' }));
+
+        facade.addCard('project-1', 'board-1', 'col-1', 'New Card');
+
+        expect(cardService.addCard).toHaveBeenCalledWith('project-1', 'board-1', {
+          columnId: 'col-1',
+          title: 'New Card',
+          description: '',
+        });
+        expect(boardHubService.addCard).not.toHaveBeenCalled();
+      });
+
+      it('addColumn should fall back to HTTP', () => {
+        columnService.addColumn.mockReturnValue(of({ id: 'col-3' }));
+
+        facade.addColumn('project-1', 'board-1', 'New Column');
+
+        expect(columnService.addColumn).toHaveBeenCalledWith('project-1', 'board-1', { name: 'New Column' });
+        expect(boardHubService.addColumn).not.toHaveBeenCalled();
+      });
+
+      it('renameColumn should fall back to HTTP', () => {
+        columnService.renameColumn.mockReturnValue(of(undefined));
+
+        facade.renameColumn('project-1', 'board-1', 'col-1', 'Renamed');
+
+        expect(columnService.renameColumn).toHaveBeenCalledWith('project-1', 'board-1', 'col-1', { newName: 'Renamed' });
+        expect(boardHubService.renameColumn).not.toHaveBeenCalled();
+      });
+
+      it('deleteColumn should fall back to HTTP', () => {
+        columnService.deleteColumn.mockReturnValue(of(undefined));
+
+        facade.deleteColumn('project-1', 'board-1', 'col-1');
+
+        expect(columnService.deleteColumn).toHaveBeenCalledWith('project-1', 'board-1', 'col-1');
+        expect(boardHubService.deleteColumn).not.toHaveBeenCalled();
+      });
+
+      it('moveColumn should fall back to HTTP', () => {
+        columnService.moveColumn.mockReturnValue(of(undefined));
+
+        facade.moveColumn('project-1', 'board-1', 'col-1', 'a2');
+
+        expect(columnService.moveColumn).toHaveBeenCalledWith('project-1', 'board-1', 'col-1', { newPosition: 'a2' });
+        expect(boardHubService.moveColumn).not.toHaveBeenCalled();
+      });
+
+      it('reorderColumns should fall back to HTTP', () => {
+        facade.loadBoard('project-1', 'board-1');
+        columnService.reorderColumns.mockReturnValue(of(undefined));
+
+        facade.reorderColumns('project-1', 'board-1', ['col-2', 'col-1']);
+
+        expect(columnService.reorderColumns).toHaveBeenCalledWith('project-1', 'board-1', {
+          columnIds: ['col-2', 'col-1'],
+        });
+        expect(boardHubService.reorderColumns).not.toHaveBeenCalled();
+      });
     });
   });
 });
