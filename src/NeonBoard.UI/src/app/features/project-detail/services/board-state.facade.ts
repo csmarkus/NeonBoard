@@ -67,7 +67,7 @@ export class BoardStateFacade {
     });
 
     Object.keys(result).forEach(columnId => {
-      result[columnId].sort((a, b) => a.position.localeCompare(b.position));
+      result[columnId].sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0));
     });
 
     return result;
@@ -239,6 +239,17 @@ export class BoardStateFacade {
   }
 
   moveCard(projectId: string, boardId: string, cardId: string, targetColumnId: string, newPosition: string): void {
+    // Optimistic update: patch card position in signal so self-events don't revert CDK visual move
+    this._board.update(board => {
+      if (!board) return board;
+      return {
+        ...board,
+        cards: board.cards.map(c =>
+          c.id === cardId ? { ...c, columnId: targetColumnId, position: newPosition } : c
+        )
+      };
+    });
+
     if (this.isConnected) {
       this.boardHub.moveCard(cardId, targetColumnId, newPosition).catch(() => {
         this.loadBoard(projectId, boardId, false);
@@ -256,6 +267,15 @@ export class BoardStateFacade {
   }
 
   moveColumn(projectId: string, boardId: string, columnId: string, newPosition: string): void {
+    // Optimistic update: patch column position and sort by position so self-events don't revert CDK visual move
+    this._board.update(board => {
+      if (!board) return board;
+      const updatedColumns = board.columns
+        .map(col => col.id === columnId ? { ...col, position: newPosition } : col)
+        .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0));
+      return { ...board, columns: updatedColumns };
+    });
+
     if (this.isConnected) {
       this.boardHub.moveColumn(columnId, newPosition).catch(() => {
         this.loadBoard(projectId, boardId, false);
@@ -586,9 +606,9 @@ export class BoardStateFacade {
           if (!board) return board;
           return {
             ...board,
-            columns: board.columns.map(col =>
-              col.id === data.columnId ? { ...col, position: data.newPosition } : col
-            )
+            columns: board.columns
+              .map(col => col.id === data.columnId ? { ...col, position: data.newPosition } : col)
+              .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0))
           };
         });
       }
@@ -601,11 +621,13 @@ export class BoardStateFacade {
           if (!board) return board;
           return {
             ...board,
-            columns: board.columns.map(col =>
-              data.newPositions[col.id] !== undefined
-                ? { ...col, position: data.newPositions[col.id] }
-                : col
-            )
+            columns: board.columns
+              .map(col =>
+                data.newPositions[col.id] !== undefined
+                  ? { ...col, position: data.newPositions[col.id] }
+                  : col
+              )
+              .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0))
           };
         });
       }

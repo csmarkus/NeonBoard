@@ -281,6 +281,10 @@ describe('BoardStateFacade', () => {
 
   describe('moveCard', () => {
     it('should call cardService.moveCard', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
       cardService.moveCard.mockReturnValue(of(undefined));
 
       facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
@@ -289,6 +293,20 @@ describe('BoardStateFacade', () => {
         targetColumnId: 'col-2',
         newPosition: 'a0',
       });
+    });
+
+    it('should optimistically update card position and columnId', () => {
+      const mockBoard = createMockBoardDetails();
+      boardService.getBoardDetails.mockReturnValue(of(mockBoard));
+      facade.loadBoard('project-1', 'board-1');
+
+      cardService.moveCard.mockReturnValue(of(undefined));
+
+      facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a5');
+
+      const movedCard = facade.board()!.cards.find(c => c.id === 'card-1');
+      expect(movedCard!.columnId).toBe('col-2');
+      expect(movedCard!.position).toBe('a5');
     });
   });
 
@@ -511,6 +529,8 @@ describe('BoardStateFacade', () => {
       });
 
       it('moveCard should use hub instead of HTTP', () => {
+        facade.loadBoard('project-1', 'board-1');
+
         facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
 
         expect(boardHubService.moveCard).toHaveBeenCalledWith('card-1', 'col-2', 'a0');
@@ -539,6 +559,8 @@ describe('BoardStateFacade', () => {
       });
 
       it('moveColumn should use hub instead of HTTP', () => {
+        facade.loadBoard('project-1', 'board-1');
+
         facade.moveColumn('project-1', 'board-1', 'col-1', 'a2');
 
         expect(boardHubService.moveColumn).toHaveBeenCalledWith('col-1', 'a2');
@@ -562,11 +584,13 @@ describe('BoardStateFacade', () => {
       });
 
       it('moveCard should reload board on hub error', async () => {
+        facade.loadBoard('project-1', 'board-1');
         boardHubService.moveCard.mockRejectedValue(new Error('fail'));
 
         facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
         await vi.waitFor(() => {
-          expect(boardService.getBoardDetails).toHaveBeenCalledWith('project-1', 'board-1');
+          // Called once for initial load, once for reload after error
+          expect(boardService.getBoardDetails).toHaveBeenCalledTimes(2);
         });
       });
 
@@ -596,6 +620,30 @@ describe('BoardStateFacade', () => {
           expect(toastService.error).toHaveBeenCalledWith('Cannot delete the last column');
         });
       });
+
+      it('moveCard should optimistically update card position in signal', () => {
+        facade.loadBoard('project-1', 'board-1');
+
+        facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a5');
+
+        const movedCard = facade.board()!.cards.find(c => c.id === 'card-1');
+        expect(movedCard!.columnId).toBe('col-2');
+        expect(movedCard!.position).toBe('a5');
+      });
+
+      it('moveColumn should optimistically update column position and sort', () => {
+        facade.loadBoard('project-1', 'board-1');
+
+        // col-1 has position 'a0', col-2 has position 'a1'
+        // Move col-1 to after col-2 (new position 'a2' sorts after 'a1')
+        facade.moveColumn('project-1', 'board-1', 'col-1', 'a2');
+
+        // After optimistic update, columns should be sorted by position: col-2 ('a1') then col-1 ('a2')
+        const columns = facade.columns();
+        expect(columns[0].id).toBe('col-2');
+        expect(columns[1].id).toBe('col-1');
+        expect(columns[1].position).toBe('a2');
+      });
     });
 
     describe('when disconnected (HTTP fallback)', () => {
@@ -604,6 +652,7 @@ describe('BoardStateFacade', () => {
       });
 
       it('moveCard should fall back to HTTP', () => {
+        facade.loadBoard('project-1', 'board-1');
         cardService.moveCard.mockReturnValue(of(undefined));
 
         facade.moveCard('project-1', 'board-1', 'card-1', 'col-2', 'a0');
@@ -656,6 +705,7 @@ describe('BoardStateFacade', () => {
       });
 
       it('moveColumn should fall back to HTTP', () => {
+        facade.loadBoard('project-1', 'board-1');
         columnService.moveColumn.mockReturnValue(of(undefined));
 
         facade.moveColumn('project-1', 'board-1', 'col-1', 'a2');
